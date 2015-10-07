@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="xxlarge_text">40sp</dimen>
+    <dimen name="progressBarText">22sp</dimen>
+    <dimen name="xlarge_text">25sp</dimen>
+    <dimen name="large_text">20sp</dimen>
+    <dimen name="xmedium_text">18sp</dimen>
+    <dimen name="store_name">17sp</dimen>
+    <dimen name="medium_text">15sp</dimen>
+    <dimen name="small_text">12sp</dimen>
+    <dimen name="xsmall_text">10sp</dimen>
+    <dimen name="xxsmall_text">8sp</dimen>
+    <dimen name="map_icon_size">60dp</dimen>
+    <dimen name="usage_margin">4dp</dimen>
+    <dimen name="usage_icon">18dp</dimen>
+    <dimen name="usage_icon_mr">10dp</dimen>
+    <dimen name="margin10">10dp</dimen>
+</resources>

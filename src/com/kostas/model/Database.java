@@ -1,0 +1,174 @@
+
+package com.kostas.model;
+
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
+import android.util.Log;
+import com.kostas.dbObjects.Interval;
+import com.kostas.dbObjects.Running;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Database extends SQLiteOpenHelper {
+
+    private static final String DATABASE_NAME = "interval_runner.db";
+    private static final int DATABASE_VERSION = 1;
+    // this is also considered as invalid id by the server
+    public static final long INVALID_ID = -1;
+    private Context mContext;
+
+    public Database(Context ctx) {
+        super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
+        mContext = ctx;
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+
+        db.execSQL(ContentDescriptor.Running.createTable());
+        db.execSQL(ContentDescriptor.Interval.createTable());
+
+
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        Log.w("Database", "Upgrading database from version " + oldVersion + " to " + newVersion
+                + ", which will destroy all old data");
+            db.execSQL("drop table if exists " + ContentDescriptor.Running.TABLE_NAME);
+        db.execSQL("drop table if exists " + ContentDescriptor.Interval.TABLE_NAME);
+
+            onCreate(db); // run onCreate to get new database
+    }
+    
+    
+    public void addRunning(Running running) {
+        ContentResolver resolver = mContext.getContentResolver();
+        Uri uri = resolver.insert(ContentDescriptor.Running.CONTENT_URI, Running.asContentValues(running));
+
+        int runId = Integer.valueOf(uri.getLastPathSegment());
+
+        for (Interval interval : running.getIntervals())
+        {
+            interval.setRunning_id(runId);
+            interval.setInterval_id(-1);
+            addInterval(interval);
+        }
+
+    }
+
+
+    public void deleteRunning(Long id){
+        ContentResolver resolver = mContext.getContentResolver();
+        resolver.delete(ContentDescriptor.Running.CONTENT_URI, ContentDescriptor.Running.Cols.ID + "=" + String.valueOf(id), null);
+        resolver.delete(ContentDescriptor.Interval.CONTENT_URI,ContentDescriptor.Interval.Cols.RUNNING_ID + "=" + String.valueOf(id), null);
+
+    }
+
+    public void addInterval(Interval interval) {
+        ContentResolver resolver = mContext.getContentResolver();
+        resolver.insert(ContentDescriptor.Interval.CONTENT_URI, Interval.asContentValues(interval));
+    }
+
+
+    public void deleteInterval(Long id){
+        ContentResolver resolver = mContext.getContentResolver();
+        resolver.delete(ContentDescriptor.Interval.CONTENT_URI, ContentDescriptor.Interval.Cols.ID + "=" + String.valueOf(id), null);
+    }
+
+
+    public int countRuns(){
+        String[] proj = {ContentDescriptor.Running.Cols.ID};
+        Cursor c = mContext.getContentResolver().query(ContentDescriptor.Running.CONTENT_URI, proj, null, null, null);
+        int toRet = c.getCount();
+        c.close();
+        c=null;
+        return toRet;
+    }
+
+    public List<Running> fetchRunsFromDb() {
+
+        String[] FROM = {
+                // ! beware. I mark the position of the fields
+                ContentDescriptor.Running.Cols.DESCRIPTION,
+                ContentDescriptor.Running.Cols.DATE,
+                ContentDescriptor.Running.Cols.ID,
+                ContentDescriptor.Running.Cols.TIME,
+                ContentDescriptor.Running.Cols.DISTANCE
+
+        };
+        int sDescPosition = 0;
+        int sDatePosition = 1;
+        int sIdPosition = 2;
+        int sTimePosition = 3;
+        int sDistPosition = 4;
+
+
+        Cursor c = mContext.getContentResolver().query(ContentDescriptor.Running.CONTENT_URI, FROM,
+                null,
+                null, null);
+
+        List<Running> St = new ArrayList<Running>();
+
+        if (c.getCount() > 0) {
+
+            while (c.moveToNext()) {
+
+
+
+                St.add(new Running(c.getLong(sIdPosition),
+                        c.getString(sDescPosition),
+                        c.getLong(sTimePosition),
+                        c.getString(sDatePosition),
+                        c.getFloat(sDistPosition)
+                      ));
+            }
+        }
+        c.close();
+        c = null;
+
+        return St;
+
+    }
+
+    public List<Interval> fetchIntervalsForRun(long id) {
+
+        String[] FROM = {
+                // ! beware. I mark the position of the fields
+                ContentDescriptor.Interval.Cols.LATLONLIST,
+                ContentDescriptor.Interval.Cols.MILLISECONDS
+
+        };
+
+        int sLatPosition = 0;
+        int sMillisPosition = 1;
+
+
+        Cursor c = mContext.getContentResolver().query(ContentDescriptor.Interval.CONTENT_URI, FROM,
+                ContentDescriptor.Interval.Cols.RUNNING_ID+" = "+String.valueOf(id),
+                null, null);
+
+        List<Interval> St = new ArrayList<Interval>();
+
+        if (c.getCount() > 0) {
+
+            while (c.moveToNext()) {
+                St.add(new Interval(c.getString(sLatPosition), c.getLong(sMillisPosition)));
+            }
+        }
+        c.close();
+        c = null;
+
+        return St;
+
+    }
+
+
+
+}

@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res/com.kostas.onlineHelp"
+              android:background="@color/drawer_black"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical" >
+
+
+
+    <ViewFlipper android:id="@+id/flipper" android:layout_width="fill_parent" android:layout_height="fill_parent">
+
+        <LinearLayout android:layout_width="fill_parent" android:layout_height="fill_parent"
+                android:orientation="vertical">
+
+
+        <LinearLayout
+
+                android:id="@+id/prepareInterval"
+                android:layout_weight="5"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:orientation="vertical"
+                android:background="@color/drawer_black"
+                >
+
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
+
+                <!--<LinearLayout-->
+                        <!--android:layout_alignParentTop="true"-->
+                        <!--android:background="@color/runner_red"-->
+                        <!--android:visibility="invisible"-->
+                        <!--android:id="@+id/noGps"-->
+                        <!--android:layout_width="fill_parent"-->
+
+                        <!--android:layout_height="48dp">-->
+
+                <!--<TextView  android:text="Please enable location services" android:layout_width="fill_parent" android:layout_height="wrap_content" android:textColor="@color/white_back"-->
+                           <!--android:layout_gravity="center_vertical|center_horizontal" android:gravity="center" android:textStyle="bold" />-->
+            <!--</LinearLayout>-->
+
+
+                <com.kostas.onlineHelp.NumberPickerKostas
+                        android:layout_marginTop="8dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginRight="20dp"
+                        android:layout_alignParentTop="true"
+                    app:minValue="50"
+                    app:maxValue="5000"
+                    app:step="50"
+                    app:textName="Distance"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/intervalDistancePicker"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                        android:layout_marginBottom="8dp"
+                    android:layout_height="48dp">
+            </com.kostas.onlineHelp.NumberPickerKostas>
+
+                <com.kostas.onlineHelp.NumberPickerKostas
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginRight="20dp"
+                        android:layout_below="@+id/intervalDistancePicker"
+                    app:minValue="10"
+                    app:maxValue="300"
+                    app:step="5"
+                    app:textName="Seconds"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/intervalTimePicker"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                        android:layout_marginBottom="8dp"
+                    android:layout_height="48dp">
+            </com.kostas.onlineHelp.NumberPickerKostas>
+
+                <com.kostas.onlineHelp.NumberPickerKostas
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginRight="20dp"
+                        android:layout_below="@+id/intervalTimePicker"
+                        app:minValue="1"
+                        app:maxValue="99"
+                        app:step="1"
+                        app:textName="Rounds"
+                        android:layout_centerHorizontal="true"
+                        android:id="@+id/intervalRoundsPicker"
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp">
+                </com.kostas.onlineHelp.NumberPickerKostas>
+
+                <TextView
+                        android:layout_above="@+id/buttonSetIntervalValues"
+                    android:id="@+id/myAddressText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:textColor="@color/white_back"
+                    android:maxLines="1" />
+
+                <Button
+                        android:layout_margin="15dp"
+
+                        android:layout_width="128dp"
+                        android:layout_height="48dp"
+                        android:drawableStart="@drawable/arrow_right_v2"
+                        android:paddingLeft="10dp"
+                        android:text="Start"
+                        android:textStyle="bold"
+                        android:textColor="@color/white_back"
+                        android:layout_alignParentBottom="true"
+                        android:background="@drawable/plus_minus_selector"
+                        android:id="@+id/buttonSetIntervalValues"
+                        android:layout_centerHorizontal="true"/>
+
+                <!--<ImageButton android:textColor="@color/white_back"-->
+                        <!--android:layout_alignParentBottom="true"-->
+                        <!--android:layout_marginTop="10dp"-->
+                        <!--android:src="@drawable/set_button"-->
+                        <!--android:id="@+id/buttonSetIntervalValues"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:text="Set"-->
+                        <!--android:layout_height="wrap_content" />-->
+
+
+
+
+            </RelativeLayout>
+
+
+
+
+
+        </LinearLayout>
+
+            <fragment
+                    android:id="@+id/mapFrgKostas"
+                    android:name="com.google.android.gms.maps.SupportMapFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="2"
+                    />
+
+
+        </LinearLayout>
+
+        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                     xmlns:tools="http://schemas.android.com/tools"
+                     android:layout_width="match_parent"
+                     android:layout_height="match_parent"
+                >
+
+            <ListView android:id="@+id/completedIntervals"
+                      android:layout_width="fill_parent"
+                      android:layout_height="164dp"
+                      android:visibility="invisible"/>
+
+            <com.kostas.onlineHelp.ProgressWheel
+                    android:id="@+id/timerProgressWheel"
+                    android:layout_width="170dp"
+                    android:layout_height="170dp"
+                    android:visibility="invisible"
+                    app:textSize="@dimen/medium_text"
+                    android:layout_gravity="center_horizontal|center_vertical"
+
+                    app:textColor="@color/interval_green"
+                    app:rimColor="@color/interval_green"
+                    app:barColor="@color/interval_red"
+                    app:contourColor="@color/circle_grey"
+                    app:barWidth="16dp"
+                    app:rimWidth="20dp"
+                    />
+
+            <com.kostas.onlineHelp.ProgressWheel
+                    android:id="@+id/distanceProgressWheel"
+                    android:layout_width="170dp"
+                    android:layout_height="170dp"
+                    android:visibility="invisible"
+                    app:textSize="@dimen/medium_text"
+                    android:layout_gravity="center_horizontal|center_vertical"
+
+
+                    app:textColor="@color/interval_green"
+                    app:rimColor="@color/white_back"
+                    app:barColor="@color/interval_green"
+                    app:contourColor="@color/circle_grey"
+                    app:barWidth="16dp"
+                    app:rimWidth="20dp"
+                    />
+
+
+            <ImageButton
+                    android:layout_margin="15dp"
+                    android:layout_width="170dp"
+                    android:layout_height="170dp"
+                    android:src="@drawable/replay"
+                    android:background="@drawable/circle_green"
+                    android:id="@+id/buttonStart"
+                    android:layout_gravity="center_horizontal|center_vertical" />
+
+            <ImageButton
+                    android:layout_margin="15dp"
+                    android:layout_width="70dp"
+                    android:visibility="invisible"
+                    android:layout_height="70dp"
+                    android:src="@drawable/stop_32"
+                    android:background="@drawable/circle_red"
+                    android:id="@+id/buttonStop"
+                    android:layout_gravity="center_horizontal|bottom" />
+
+            <ImageButton
+                    android:layout_margin="15dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:src="@drawable/return_32"
+                    android:background="@drawable/circle_red"
+                    android:id="@+id/buttonBack"
+                    android:layout_gravity="center_horizontal|bottom" />
+
+
+            <LinearLayout android:visibility="invisible" android:id="@+id/layoutBottomButtons" android:layout_gravity="center_horizontal|bottom" android:layout_width="fill_parent" android:layout_height="84dp" android:background="@color/circle_grey" android:paddingTop=".5dp">
+
+
+                <RelativeLayout  android:id="@+id/buttonDismissInterval" android:background="@drawable/bottom_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="fill_parent">
+                    <ImageView  android:layout_centerVertical="true" android:layout_centerHorizontal="true"    android:layout_width="wrap_content" android:layout_height="wrap_content"  android:src="@drawable/dismiss_64"/>
+                </RelativeLayout>
+                <RelativeLayout  android:id="@+id/buttonSaveRunWithIntervals" android:background="@drawable/bottom_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="fill_parent">
+
+                    <ImageView  android:layout_centerHorizontal="true" android:layout_centerVertical="true"  android:layout_width="wrap_content" android:layout_height="wrap_content"  android:src="@drawable/save_64"/>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+
+            <!--<RelativeLayout android:id="@+id/layoutBottomButtons" android:visibility="invisible" android:layout_gravity="center_horizontal|bottom" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="24dp">-->
+
+
+                <!--<ImageButton android:layout_alignParentLeft="true" android:layout_marginLeft="48dp"   android:id="@+id/buttonDismissInterval"  android:layout_width="wrap_content" android:layout_height="wrap_content"  android:background="@drawable/dismiss_selector"/>-->
+                <!--<ImageButton android:layout_alignParentRight="true" android:layout_marginRight="48dp"  android:id="@+id/buttonSaveRunWithIntervals"  android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/save_selector"/>-->
+
+
+            <!--</RelativeLayout>-->
+
+        </FrameLayout>
+
+    </ViewFlipper>
+
+</LinearLayout>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res/com.kostas.onlineHelp"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+    <LinearLayout
+            android:id="@+id/headerLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="85dp"
+            android:orientation="vertical">
+
+        <RelativeLayout
+                android:layout_marginLeft="14dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+            <com.kostas.onlineHelp.CircularImageView
+                    android:layout_marginTop="10dp"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:id="@+id/profile_icon"
+                    app:border="true"
+                    app:border_color="@color/drawer_grey"
+                    app:border_width="0dp"
+                    app:shadow="false"/>
+
+            <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="80dp"
+                    android:layout_marginTop="16dp">
+
+                <TextView
+                        android:id="@+id/drawerTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="@dimen/large_text"/>
+
+                <TextView
+                        android:id="@+id/accountNum"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/white"
+                        android:layout_below="@+id/drawerTitle"
+                        android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+            </RelativeLayout>
+
+            <ImageView
+                    android:id="@+id/drawer_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    android:paddingRight="16dp"
+                    android:paddingBottom="22dp"/>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/itemLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:orientation="horizontal"
+            >
+
+        <!--background selector here-->
+        <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="54dp"
+               >
+
+            <TextView
+                    android:id="@+id/drawer_itemName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_marginLeft="15dp"
+                    android:layout_centerVertical="true"
+                    android:textColor="@color/nav_drawer_colors"
+                   />
+
+
+            <TextView
+                    android:id="@+id/item_right_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="16dp"
+                    android:textColor="@color/drawer_counter"
+                    android:textStyle="bold"
+                    android:textAlignment="center"
+                    android:textSize="@dimen/medium_text"
+                    android:gravity="center"/>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

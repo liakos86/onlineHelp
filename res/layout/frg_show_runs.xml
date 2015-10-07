@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:background="@color/drawer_black"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <ViewFlipper
+            android:id="@+id/viewFlipper"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            >
+
+        <ExpandableListView
+                android:id="@+id/listExpRunning"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:groupIndicator="@drawable/group_indicator"
+                />
+
+
+        <!--<ListView-->
+
+            <!--android:id="@+id/listRunning"-->
+            <!--android:layout_width="fill_parent"-->
+            <!--android:layout_height="fill_parent"-->
+            <!--/>-->
+
+        <RelativeLayout  android:layout_width="fill_parent" android:layout_height="fill_parent">
+
+        <ListView
+
+                android:id="@+id/listIntervals"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/intervalsButtons"
+                android:layout_alignParentTop="true"
+                />
+
+            <!--<RelativeLayout android:id="@+id/intervalsButtons" android:layout_alignParentBottom="true" android:layout_width="fill_parent" android:layout_height="84dp" android:background="@drawable/bottom_buttons">-->
+
+
+
+                <!--<ImageButton android:focusable="false" android:layout_centerVertical="true" android:layout_alignParentLeft="true" android:layout_marginLeft="48dp"  android:id="@+id/buttonCloseIntervals"  android:layout_width="wrap_content" android:layout_height="wrap_content"  android:background="@drawable/return_64_selector"/>-->
+                <!--<ImageButton android:focusable="false" android:layout_centerVertical="true" android:layout_alignParentRight="true" android:layout_marginRight="48dp" android:id="@+id/buttonShowMap"  android:layout_width="wrap_content" android:layout_height="wrap_content"  android:background="@drawable/map_64_selector"/>-->
+
+
+            <!--</RelativeLayout>-->
+
+            <LinearLayout android:id="@+id/intervalsButtons" android:layout_alignParentBottom="true" android:layout_width="fill_parent" android:layout_height="84dp" android:background="@color/circle_grey" android:paddingTop=".5dp">
+
+
+                <RelativeLayout  android:id="@+id/buttonCloseIntervals" android:background="@drawable/bottom_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="fill_parent">
+                <ImageView  android:layout_centerVertical="true" android:layout_centerHorizontal="true"    android:layout_width="wrap_content" android:layout_height="wrap_content"  android:src="@drawable/return_64"/>
+                </RelativeLayout>
+            <RelativeLayout  android:id="@+id/buttonShowMap" android:background="@drawable/bottom_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="fill_parent">
+
+            <ImageView  android:layout_centerHorizontal="true" android:layout_centerVertical="true"  android:layout_width="wrap_content" android:layout_height="wrap_content"  android:src="@drawable/map_64"/>
+
+            </RelativeLayout>
+
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+
+        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                 xmlns:tools="http://schemas.android.com/tools"
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent"
+            >
+    <fragment
+            android:id="@+id/mapListKostas"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            />
+
+            <ImageButton
+                    android:layout_margin="15dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:src="@drawable/close"
+                    android:background="@drawable/circle_red"
+                    android:focusable="false"
+                    android:id="@+id/buttonCloseMap"
+                    android:layout_gravity="left|bottom" />
+
+
+        </FrameLayout>
+    </ViewFlipper>
+
+
+</LinearLayout>

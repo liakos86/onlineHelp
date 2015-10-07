@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- the theme applied to the application or activity -->
+    <style name="CustomActionBarTheme"
+           parent="@android:style/Theme.Holo.Light">
+        <item name="android:actionBarStyle">@style/MyActionBar</item>
+
+        <!-- Support library compatibility -->
+        <!--<item name="actionBarStyle">@style/MyActionBar</item>-->
+    </style>
+
+    <!-- ActionBar styles -->
+    <style name="MyActionBar"
+     parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
+        <item name="android:background">@drawable/ab_solid_background</item>
+        <!--<item name="android:backgroundStacked">@drawable/ab_stacked_solid_vodafone</item>-->
+        <!--<item name="android:backgroundSplit">@drawable/ab_bottom_solid_vodafone</item>-->
+        <!--<item name="android:progressBarStyle">@style/ProgressBar.Vodafone</item>-->
+        <item name="android:icon">@android:color/transparent</item>
+        <item name="android:displayOptions">showHome|homeAsUp|showTitle</item>
+        <item name="android:titleTextStyle">@style/MyActionBar.Text</item>
+
+        <!-- Support library compatibility -->
+        <!--<item name="background">@drawable/ab_stacked_solid_bar</item>-->
+    </style>
+
+    <style name="MyActionBar.Text" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+
+        <item name="android:textColor">@color/white_back</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+</resources>
