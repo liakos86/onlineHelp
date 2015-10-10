@@ -3,7 +3,7 @@
     <string-array name="drawer_titles">
         <item>New interval</item>
         <item>My Diary</item>
-        <item>Settings</item>
+        <item>My Plans</item>
         <item>Exit</item>
     </string-array>
 
