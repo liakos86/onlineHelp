@@ -40,6 +40,8 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
                     .findViewById(R.id.distanceIntervalText);
             holder.time =  (TextView) convertView
                     .findViewById(R.id.timeIntervalText);
+            holder.fastest = (TextView) convertView
+                    .findViewById(R.id.fastestIntervalText);
             convertView.setTag(holder);
         } else {
             holder = (intervalViewHolder) convertView.getTag();
@@ -51,6 +53,7 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
             convertView.setBackgroundColor(mContext.getResources().getColor(R.color.white_back));
             holder.distance.setTextColor(mContext.getResources().getColor(R.color.drawer_black));
             holder.time.setTextColor(mContext.getResources().getColor(R.color.drawer_black));
+            holder.fastest.setVisibility(View.VISIBLE);
 
         }
         else {
@@ -63,6 +66,7 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
             }
             holder.distance.setTextColor(mContext.getResources().getColor(R.color.white_back));
             holder.time.setTextColor(mContext.getResources().getColor(R.color.white_back));
+            holder.fastest.setVisibility(View.GONE);
 
         }
 
@@ -79,7 +83,7 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
 
         String timeText = hours+"hr " + mins+"min "+secs+"sec";
 
-        holder.time.setText(timeText+"   Speed avg: "+  String.format("%1$,.2f", ((float) ((data.get(position).getDistance()/intervalTime)  *3600)))+"km/h");
+        holder.time.setText(timeText+"   Speed avg: "+  String.format("%1$,.2f", ((double) ((data.get(position).getDistance()/intervalTime)  *3600)))+"km/h");
 
         return convertView;
 
@@ -90,4 +94,5 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
  class intervalViewHolder{
     TextView distance;
     TextView time;
+     TextView fastest;
 }

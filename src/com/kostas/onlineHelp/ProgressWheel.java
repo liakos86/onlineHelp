@@ -319,7 +319,8 @@ public class ProgressWheel extends View {
             Paint blackPaint = new Paint();
             blackPaint.setColor(0xFF000000);
             blackPaint.setTextSize((int) 3*textSize / 5);
-            Typeface tf = Typeface.create("Helvetica", Typeface.BOLD);
+//            Typeface tf = Typeface.create("Helvetica", Typeface.BOLD);
+            Typeface tf=Typeface.createFromAsset(getContext().getAssets(),"fonts/roboto_boldItalic.ttf");
 
             textPaint.setTypeface(tf);
             blackPaint.setTypeface(tf);
@@ -328,11 +329,11 @@ public class ProgressWheel extends View {
                 float horizontalTextOffset = textPaint.measureText(s) / 2;
 
 
-                if (s.contains("of"))
-
-                    canvas.drawText(s, getWidth() / 2 - 2*(horizontalTextOffset/3),
-                            getHeight() / 2 + 5*verticalTextOffset, blackPaint);
-                else
+//                if (s.contains("of"))
+//
+//                    canvas.drawText(s, getWidth() / 2 - 2*(horizontalTextOffset/3),
+//                            getHeight() / 2 + 5*verticalTextOffset, blackPaint);
+//                else
                     canvas.drawText(s, getWidth() / 2 - (5*horizontalTextOffset/6),
                             getHeight() / 2 - 3*verticalTextOffset/5, textPaint);
             }

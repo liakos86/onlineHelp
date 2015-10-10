@@ -33,6 +33,12 @@ public class Interval implements Serializable{
         this.latLonList = latLonList;
     }
 
+    public Interval (String latLonList, long milliseconds, float distance){
+        this.milliseconds = milliseconds;
+        this.latLonList = latLonList;
+        this.distance = distance;
+    }
+
     public Interval (long interval_id, String latLonList, long milliseconds){
         this.interval_id = interval_id;
         this.milliseconds = milliseconds;

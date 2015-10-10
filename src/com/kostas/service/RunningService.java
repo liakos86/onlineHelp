@@ -12,10 +12,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
-import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.os.Handler;
-import android.os.SystemClock;
+import android.os.*;
 import android.util.Log;
 import android.widget.Toast;
 import com.google.android.gms.location.FusedLocationProviderApi;
@@ -36,6 +33,7 @@ public class RunningService extends IntentService implements LocationListener{
     public static final String INTERVAL_DISTANCE = "intervalDistance";
     public static final String INTERVAL_TIME = "intervalTime";
     public static final String INTERVAL_ROUNDS = "intervalRounds";
+    public static final String INTERVAL_COMPLETED = "intervalCompleted";
     public static final String LATLONLIST = "latLonList";
     public static final String TOTAL_DIST = "totalDist";
     public static final String TOTAL_TIME = "totalTime";
@@ -55,6 +53,7 @@ public class RunningService extends IntentService implements LocationListener{
     public String latLonList;
     public float intervalDistance, currentDistance;
     private long mStartTime, totalTime,  intervalTime;
+    private int intervalRounds;
     public Location lastLocation;
     SharedPreferences app_preferences;
     boolean firstChange;
@@ -125,9 +124,11 @@ public class RunningService extends IntentService implements LocationListener{
                 intervals = new ArrayList<Interval>();
                 intervalDistance = intent.getFloatExtra(INTERVAL_DISTANCE, 0);
                 intervalTime = intent.getLongExtra(INTERVAL_TIME, 0);
+                intervalRounds = intent.getIntExtra(INTERVAL_ROUNDS, 0 );
                 SharedPreferences.Editor editor = app_preferences.edit();
                 editor.putFloat(INTERVAL_DISTANCE, intervalDistance);
                 editor.putLong(INTERVAL_TIME, intervalTime);
+                editor.putInt(INTERVAL_ROUNDS, intervalRounds);
                 mStartTime = SystemClock.uptimeMillis();
                 editor.putLong(MSTART_TIME, mStartTime);
                 editor.commit();
@@ -150,6 +151,7 @@ public class RunningService extends IntentService implements LocationListener{
 
             intervalDistance = app_preferences.getFloat(INTERVAL_DISTANCE, 0);
             intervalTime = app_preferences.getLong(INTERVAL_TIME, 0);
+            intervalRounds = app_preferences.getInt(INTERVAL_ROUNDS, 0);
 
             if (app_preferences.getBoolean(IS_RUNNING, false)) {
 
@@ -181,19 +183,19 @@ public class RunningService extends IntentService implements LocationListener{
     private void  startReceiving(){
         locationManager = (LocationManager) getApplication().getSystemService(Context.LOCATION_SERVICE);
 
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+//        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
 
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 8, this);
 
             mHandler.removeCallbacks(mUpdateTimeTask);
             mHandler.postDelayed(mUpdateTimeTask, 200);
 
-        }else{
-
-            finishInterval(true);
-
-
-        }
+//        }else{
+//
+//            finishInterval();
+//
+//
+//        }
     }
 
 
@@ -234,7 +236,10 @@ public class RunningService extends IntentService implements LocationListener{
 
         if (!firstChange && (latLonList==null || latLonList.equals("")||latLonList.equals(" "))){
             firstChange = true;
-            latLonList="";
+
+            //todo this results in accounting the first point we get
+            latLonList = String.valueOf(location.getLatitude()) + "," + String.valueOf(location.getLongitude());
+//            latLonList="";
             lastLocation = location;
             return;
         }
@@ -253,7 +258,7 @@ public class RunningService extends IntentService implements LocationListener{
             }
 
             if (currentDistance >= intervalDistance){
-                finishInterval(false);
+                finishInterval();
             }else if (currentDistance > 0){
                 refreshInterval();
             }
@@ -313,37 +318,55 @@ public class RunningService extends IntentService implements LocationListener{
     }
 
 
-    private void finishInterval(boolean dueToGps) {
+    private void finishInterval() {
 
         locationManager.removeUpdates(this);
 
-        if (dueToGps){
 
-        }else{
-
-           play(getApplication(), R.raw.interval_finish);
-        }
+        //user might complete several intervals when app killed
+        SharedPreferences.Editor editor = app_preferences.edit();
 
 
-        intervals.add(new Interval(latLonList, totalTime));
+
+
+        intervals.add(new Interval(latLonList, totalTime, intervalDistance));
         Intent intent = new Intent(NOTIFICATION);
         intent.putExtra(INTERVAL_TIME, totalTime);
         intent.putExtra(LATLONLIST, latLonList);
-        sendBroadcast(intent);
+
         mHandler.removeCallbacks(mUpdateTimeTask);
         totalTime = 0;
         currentDistance = 0;
         latLonList = "";
         firstChange = false;
-        startCountDownForNextInterval(intervalTime);
-        //user might complete several intervals when app killed
-        SharedPreferences.Editor editor = app_preferences.edit();
+
+        if (intervalRounds>0 && intervals.size()>=intervalRounds){
+
+            editor.putBoolean(INTERVAL_COMPLETED, true);
+            intent.putExtra(INTERVAL_COMPLETED, true);
+            play(getApplication(), R.raw.interval_completed);
+        }else{
+            play(getApplication(), R.raw.interval_finish);
+            startCountDownForNextInterval(intervalTime);
+        }
+
+
+
+
+
+
+
         editor.putBoolean(IS_RUNNING, false);
+
         Gson gson = new Gson();
         Type listOfObjects = new TypeToken<List<Interval>>(){}.getType();
         String json = gson.toJson(intervals, listOfObjects);
         editor.putString(INTERVALS, json);
         editor.commit();
+
+
+
+        sendBroadcast(intent);
     }
 
     private void refreshInterval(){
@@ -401,6 +424,11 @@ public class RunningService extends IntentService implements LocationListener{
         });
 
         mp.start();
+
+
+        Vibrator v = (Vibrator) c.getSystemService(Context.VIBRATOR_SERVICE);
+        v.vibrate(2000);
+
     }
 
     public void stop() {

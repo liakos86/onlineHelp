@@ -77,7 +77,7 @@
                         android:layout_marginLeft="20dp"
                         android:layout_marginRight="20dp"
                         android:layout_below="@+id/intervalTimePicker"
-                        app:minValue="1"
+                        app:minValue="0"
                         app:maxValue="99"
                         app:step="1"
                         app:textName="Rounds"
@@ -89,7 +89,7 @@
                 </com.kostas.onlineHelp.NumberPickerKostas>
 
                 <TextView
-                        android:layout_above="@+id/buttonSetIntervalValues"
+                        android:layout_above="@+id/setButtons"
                     android:id="@+id/myAddressText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -97,20 +97,39 @@
                         android:textColor="@color/white_back"
                     android:maxLines="1" />
 
-                <Button
-                        android:layout_margin="15dp"
 
-                        android:layout_width="128dp"
-                        android:layout_height="48dp"
+                <LinearLayout android:id="@+id/setButtons" android:layout_width="match_parent"  android:layout_alignParentBottom="true"
+                                android:layout_height="wrap_content" android:layout_margin="20dp">
+
+                <Button
+                        android:layout_marginRight="8dp"
+                        android:layout_weight="2"
+                        android:layout_width="0dp"
+                        android:layout_height="54dp"
                         android:drawableStart="@drawable/arrow_right_v2"
-                        android:paddingLeft="10dp"
+                        android:paddingLeft="20dp"
                         android:text="Start"
                         android:textStyle="bold"
+                        android:textSize="@dimen/xmedium_text"
                         android:textColor="@color/white_back"
-                        android:layout_alignParentBottom="true"
                         android:background="@drawable/plus_minus_selector"
                         android:id="@+id/buttonSetIntervalValues"
-                        android:layout_centerHorizontal="true"/>
+                       />
+
+                    <Button
+                            android:layout_weight="1"
+                            android:layout_width="0dp"
+                            android:layout_height="54dp"
+                            android:text="Save Plan"
+                            android:textStyle="bold"
+                            android:textColor="@color/white_back"
+                            android:textSize="@dimen/xmedium_text"
+
+                            android:background="@drawable/plus_minus_selector"
+                            android:id="@+id/buttonSavePlan"
+                            />
+
+                </LinearLayout>
 
                 <!--<ImageButton android:textColor="@color/white_back"-->
                         <!--android:layout_alignParentBottom="true"-->
@@ -159,7 +178,7 @@
                     android:layout_width="170dp"
                     android:layout_height="170dp"
                     android:visibility="invisible"
-                    app:textSize="@dimen/medium_text"
+                    app:textSize="@dimen/large_text"
                     android:layout_gravity="center_horizontal|center_vertical"
 
                     app:textColor="@color/interval_green"
@@ -175,7 +194,7 @@
                     android:layout_width="170dp"
                     android:layout_height="170dp"
                     android:visibility="invisible"
-                    app:textSize="@dimen/medium_text"
+                    app:textSize="@dimen/xmedium_text"
                     android:layout_gravity="center_horizontal|center_vertical"
 
 

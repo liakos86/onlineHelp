@@ -120,37 +120,38 @@ public class NumberPickerKostas extends LinearLayout {
 
 		
 		this.setLayoutParams( new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT ) );
-		LayoutParams elementParams = new LayoutParams( ELEMENT_WIDTH, LayoutParams.MATCH_PARENT );
-        elementParams.leftMargin = 8;
-        elementParams.rightMargin = 2;
-        LayoutParams elementTextParams = new LayoutParams( ELEMENT_WIDTH*2, LayoutParams.MATCH_PARENT );
+		LayoutParams elementButtonParams = new LayoutParams( 0, LayoutParams.MATCH_PARENT , 1);
+        elementButtonParams.leftMargin = 8;
+        elementButtonParams.rightMargin = 2;
+        LayoutParams elementTextParams = new LayoutParams( 0, LayoutParams.MATCH_PARENT , 2);
 //        elementButtonParams.topMargin = ELEMENT_HEIGHT/4;
 		
 		// init the individual elements
 		initDecrementButton( context );
-		initValueEditText( context );
+
         initDescriptionText( context, attributes.getString(R.styleable.NumberPickerKostas_textName) );
 		initIncrementButton( context );
+
+        initValueEditText( context );
 		
 		// Can be configured to be vertical or horizontal
 		// Thanks for the help, LinearLayout!	
-		if( getOrientation() == VERTICAL ){
-//            addView( increment);
+//		if( getOrientation() == VERTICAL ){
+////            addView( increment);
+//
+//            addView( descriptionText, elementTextParams);
+//            addView( valueText, elementTextParams );
+//			addView( increment, elementParams );
+//
+//			addView( decrement, elementParams );
+//		} else {
 
             addView( descriptionText, elementTextParams);
             addView( valueText, elementTextParams );
-			addView( increment, elementParams );
 
-			addView( decrement, elementParams );
-		} else {
-
-            addView( descriptionText, elementTextParams);
-            addView( valueText, elementTextParams );
-			addView( decrement, elementParams );
-
-//            addView( increment);
-			addView( increment, elementParams );
-		}
+			addView( decrement, elementButtonParams );
+			addView( increment, elementButtonParams );
+//		}
 	}
 	
 	private void initIncrementButton( Context context){
@@ -220,6 +221,7 @@ public class NumberPickerKostas extends LinearLayout {
 		valueText.setTextSize( TEXT_SIZE );
         valueText.setFocusable(false);
         valueText.setTypeface(Typeface.DEFAULT_BOLD);
+//        valueText.setText("NO");
 
         valueText.setTextColor(getResources().getColor(R.color.interval_green));
         valueText.setGravity(Gravity.CENTER);
@@ -257,7 +259,9 @@ public class NumberPickerKostas extends LinearLayout {
 			}
 		});
 		valueText.setGravity( Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL );
-		valueText.setText( value.toString() );
+		valueText.setText( value==0? "NO" : value.toString() );
+        if (value==0) disableButtonColor(true);
+
 		valueText.setInputType( InputType.TYPE_CLASS_NUMBER );
 	}
 	
@@ -307,15 +311,28 @@ public class NumberPickerKostas extends LinearLayout {
 	
 	public void increment(){
 		if( value < maxValue ){
+
+
+
+            if (value<minValue+step){
+                disableButtonColor(false);
+            }
+
 			value += step;
 			valueText.setText( value.toString() );
+
 		}
 	}
 
 	public void decrement(){
 		if( value > minValue ){
 			value -= step;
-			valueText.setText( value.toString() );
+
+
+
+                valueText.setText(value==0? "NO" : value.toString());
+                if (value==0) disableButtonColor(true);
+
 		}
 	}
 	
@@ -327,7 +344,7 @@ public class NumberPickerKostas extends LinearLayout {
 		if( value > maxValue ) value = maxValue;
 		if( value >= minValue ){
 			this.value = value;
-			valueText.setText( this.value.toString() );
+			valueText.setText(this.value.toString());
 		}
 	}
 
@@ -354,5 +371,19 @@ public class NumberPickerKostas extends LinearLayout {
 
     public void setStep(int step) {
         this.step = step;
+    }
+
+    private void disableButtonColor(boolean disable){
+        if (disable){
+            descriptionText.setBackgroundDrawable(getResources().getDrawable(R.drawable.descr_picker_inactive));
+            increment.setBackgroundDrawable(getResources().getDrawable(R.drawable.plus_minus_inactive));
+            decrement.setBackgroundDrawable(getResources().getDrawable(R.drawable.plus_minus_inactive));
+            valueText.setTextColor(getResources().getColor(R.color.circle_grey));
+        }else{
+            descriptionText.setBackgroundDrawable(getResources().getDrawable(R.drawable.descr_picker_selector));
+            increment.setBackgroundDrawable(getResources().getDrawable(R.drawable.plus_minus_selector));
+            decrement.setBackgroundDrawable(getResources().getDrawable(R.drawable.plus_minus_selector));
+            valueText.setTextColor(getResources().getColor(R.color.interval_green));
+        }
     }
 }

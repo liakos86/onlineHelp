@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.model.*;
 import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Running;
@@ -19,10 +20,8 @@ import com.kostas.model.Database;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+
+import java.util.*;
 
 
 /**
@@ -42,6 +41,8 @@ public class FrgShowRuns extends BaseFragment {
 
     MyExpandableAdapter adapterExp;
 
+    TextView noRunsText;
+
 
 
 //    List<Polyline> mapLines;
@@ -56,6 +57,7 @@ public class FrgShowRuns extends BaseFragment {
 
     ViewFlipper viewFlipper;
     GoogleMap googleMap;
+    LatLngBounds bounds;
     ImageButton closeMapButton;
     RelativeLayout openMapButton, closeIntervalsButton;
 
@@ -82,6 +84,8 @@ public class FrgShowRuns extends BaseFragment {
         closeMapButton = (ImageButton) v.findViewById(R.id.buttonCloseMap);
         closeIntervalsButton = (RelativeLayout) v.findViewById(R.id.buttonCloseIntervals);
 
+        noRunsText = (TextView) v.findViewById(R.id.noRunsText);
+
         setList(v);
         initializeMap();
 
@@ -94,7 +98,20 @@ public class FrgShowRuns extends BaseFragment {
         googleMap = fm.getMap();
         googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         googleMap.setIndoorEnabled(false);
+
+
+
+        googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 60));
+            }
+        });
+
 //        mapLines = new ArrayList<Polyline>();
+
+//        viewFlipper.setDisplayedChild(2);
+//        viewFlipper.setDisplayedChild(0);
     }
 
     private void showIntervalsForRun(Running running){
@@ -266,74 +283,25 @@ public class FrgShowRuns extends BaseFragment {
         alreadyDrawn = true;
 
         List<Interval> currentIntervals = currentRun.getIntervals();
-        double latPoint, lonPoint;
-
 
         //merging the list of the points of the intervals
-        String latLonList = currentIntervals.get(0).getLatLonList();
-        int number = currentIntervals.size();
-        for (int i=1; i<number; i++){
-            latLonList +=","+ currentIntervals.get(i).getLatLonList();
-        }
+//        String latLonList = currentIntervals.get(0).getLatLonList();
+//        int number = currentIntervals.size();
+//        for (int i=1; i<number; i++){
+//            latLonList +=","+ currentIntervals.get(i).getLatLonList();
+//        }
 
 
-        String[] pointsList = latLonList.split(",");
-        int pointsLength = pointsList.length;
+//        String[] pointsList = latLonList.split(",");
 
         List<LatLng> locationList = new ArrayList<LatLng>();
-
-
-
 
         double northPoint=-85.05115 , southPoint=85.05115 , eastPoint=-180, westPoint=180;
         LatLng top = new LatLng(0,0), bottom=new LatLng(0,0), left=new LatLng(0,0), right=new LatLng(0,0);
 
-//        for (int i=0; i<pointsLength-1; i+=2){
-//
-//            latPoint = Double.valueOf(pointsList[i]);
-//            lonPoint = Double.parseDouble(pointsList[i + 1]);
-//
-//
-//            //create a box that contains the run, then take the center of the diagonal
-//            if (latPoint>northPoint) {
-//                northPoint = latPoint;
-//                top = new LatLng(latPoint, lonPoint);
-//            }
-//            if (latPoint< southPoint) {
-//                southPoint = latPoint;
-//                bottom = new LatLng(latPoint, lonPoint);
-//            }
-//
-//            if (lonPoint>eastPoint) {
-//                eastPoint = lonPoint;
-//                right = new LatLng(latPoint, lonPoint);
-//            }
-//            if (lonPoint< westPoint) {
-//                westPoint = lonPoint;
-//                left = new LatLng(latPoint, lonPoint);
-//            }
 
-            //todo re-enable if error
-//            locationList.add(new LatLng(latPoint, lonPoint));
-
-//        }
-//        int latlonLength = locationList.size();
-//
-//
-//        for (int i=0; i<latlonLength-1; i++){
-//
-//
-//            PolylineOptions line  = new PolylineOptions().add(locationList.get(i), locationList.get(i + 1)).width(5).color(Color.RED);
-//
-//            Polyline pline = googleMap.addPolyline(line);
-//
-//
-//            mapLines.add(pline);
-//
-//        }
-
-
-
+        int number = currentIntervals.size();
+        double latPoint, lonPoint;
         //for each interval
         for (int i=0; i<number; i++){
 
@@ -370,75 +338,80 @@ public class FrgShowRuns extends BaseFragment {
 
 
 
-                locationList.add(new LatLng(latPoint, lonPoint));
+               if (j%2==0) locationList.add(new LatLng(latPoint, lonPoint));
             }
 
             int currSize = locationList.size()-1;
 
             for (int k=0; k<currSize; k++){
-
-
-//                PolylineOptions line  = new PolylineOptions().add(locationList.get(k), locationList.get(k + 1)).width(6).color(color);
-
-//                Polyline pline =
                         googleMap.addPolyline(new PolylineOptions().add(locationList.get(k), locationList.get(k + 1)).width(6).color(color));
-//                mapLines.add(pline);
-
             }
 
         }
 
-        int zoom = 20;
-        boolean allVisible=false;
-        while (zoom>8 && !allVisible) {
-
-            zoomPoint = midPoint(northPoint, westPoint, southPoint, eastPoint);
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(midPoint(northPoint, westPoint, southPoint, eastPoint), zoom));
-            googleMap.animateCamera(CameraUpdateFactory.zoomTo(zoom), 1, null);
-            LatLngBounds bounds =  googleMap.getProjection().getVisibleRegion().latLngBounds;
-
-            if (bounds.contains(top)&& bounds.contains(bottom)&& bounds.contains(left)&& bounds.contains(right)){
-                allVisible=true;
-            }
-            --zoom;
-        }
-
-    }
-
-    public LatLng midPoint(double lat1,double lon1,double lat2,double lon2){
-
-        double dLon = Math.toRadians(lon2 - lon1);
-
-        //convert to radians
-        lat1 = Math.toRadians(lat1);
-        lat2 = Math.toRadians(lat2);
-        lon1 = Math.toRadians(lon1);
-
-        double Bx = Math.cos(lat2) * Math.cos(dLon);
-        double By = Math.cos(lat2) * Math.sin(dLon);
-        double lat3 = Math.atan2(Math.sin(lat1) + Math.sin(lat2), Math.sqrt((Math.cos(lat1) + Bx) * (Math.cos(lat1) + Bx) + By * By));
-        double lon3 = lon1 + Math.atan2(By, Math.cos(lat1) + Bx);
-
-        //print out in degrees
-//        System.out.println(Math.toDegrees(lat3) + " " + Math.toDegrees(lon3));
-//        googleMap.addMarker(new MarkerOptions()
-////                        .infoWindowAnchor(0.48f, 4.16f)
+//        int zoom = 20;
+//        boolean allVisible=false;
+//        while (zoom>8 && !allVisible) {
 //
-//                        .position(new LatLng(Math.toDegrees(lat3),Math.toDegrees(lon3)))
-//                        .title("You are here")
-//                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher))
-//        );
+//
 
-        return new LatLng(Math.toDegrees(lat3),Math.toDegrees(lon3));
+//            zoomPoint = midPoint(northPoint, westPoint, southPoint, eastPoint);
+//            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(zoomPoint, zoom));
+//            googleMap.animateCamera(CameraUpdateFactory.zoomTo(zoom), 1, null);
+//            LatLngBounds bounds =  googleMap.getProjection().getVisibleRegion().latLngBounds;
+
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            builder.include(top);
+            builder.include(bottom);
+            builder.include(left);
+            builder.include(right);
+
+            bounds = builder.build();
+
+            try{
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 60));
+
+            }catch (Exception e){
+                Log.v("LATLNG", "MAP CRASH");
+            }
+
+
+
+//            if (bounds.contains(top)&& bounds.contains(bottom)&& bounds.contains(left)&& bounds.contains(right)){
+//                allVisible=true;
+//            }
+//            --zoom;
+//
+//        }
+
     }
 
-    public void zoomMap(){
-
-        Log.v("LATLNG", "zooming only");
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(zoomPoint, 18));
-        googleMap.animateCamera(CameraUpdateFactory.zoomTo(16), 2000, null);
-
-    }
+//    public LatLng midPoint(double lat1,double lon1,double lat2,double lon2){
+//
+//        double dLon = Math.toRadians(lon2 - lon1);
+//
+//        //convert to radians
+//        lat1 = Math.toRadians(lat1);
+//        lat2 = Math.toRadians(lat2);
+//        lon1 = Math.toRadians(lon1);
+//
+//        double Bx = Math.cos(lat2) * Math.cos(dLon);
+//        double By = Math.cos(lat2) * Math.sin(dLon);
+//        double lat3 = Math.atan2(Math.sin(lat1) + Math.sin(lat2), Math.sqrt((Math.cos(lat1) + Bx) * (Math.cos(lat1) + Bx) + By * By));
+//        double lon3 = lon1 + Math.atan2(By, Math.cos(lat1) + Bx);
+//
+//        //print out in degrees
+////        System.out.println(Math.toDegrees(lat3) + " " + Math.toDegrees(lon3));
+////        googleMap.addMarker(new MarkerOptions()
+//////                        .infoWindowAnchor(0.48f, 4.16f)
+////
+////                        .position(new LatLng(Math.toDegrees(lat3),Math.toDegrees(lon3)))
+////                        .title("You are here")
+////                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher))
+////        );
+//
+//        return new LatLng(Math.toDegrees(lat3),Math.toDegrees(lon3));
+//    }
     
     
     static FrgShowRuns init(int val) {
@@ -452,79 +425,8 @@ public class FrgShowRuns extends BaseFragment {
         return truitonList;
     }
 
-    // here's our beautiful adapterRunning
-//    public class RunningAdapterItem extends ArrayAdapter<Running> {
-//
-//        Context mContext;
-//        int layoutResourceId;
-//        List<Running> data;
-//
-//        public RunningAdapterItem(Context mContext, int layoutResourceId,
-//                                List<Running> data) {
-//
-//            super(mContext, layoutResourceId, data);
-//            this.layoutResourceId = layoutResourceId;
-//            this.mContext = mContext;
-//            this.data = data;
-//        }
-//
-//        @Override
-//        public View getView(final int position, View convertView, ViewGroup parent) {
-//
-//            runningViewHolder holder =null;
-//            if (convertView == null || !(convertView.getTag() instanceof runningViewHolder)) {
-//                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_running_row, parent, false);
-//
-//                holder = new runningViewHolder();
-//
-//                holder.intervalCount = (TextView) convertView
-//                        .findViewById(R.id.intervalCount);
-//                holder.description = (TextView) convertView
-//                        .findViewById(R.id.runningDescription);
-//                holder.date =  (TextView) convertView
-//                        .findViewById(R.id.runningDate);
-//
-//                convertView.setTag(holder);
-//            } else {
-//                holder = (runningViewHolder) convertView.getTag();
-//
-//            }
-//
-//            holder.description.setText(runs.get(position).getDistance()+" meters with "+((int)(runs.get(position).getTime()/1000))+" secs rest");
-//            holder.date.setText( runs.get(position).getDate() );
-//            holder.intervalCount.setText(String.valueOf(runs.get(position).getIntervals().size())+" sessions");
-//
-//            convertView.setOnLongClickListener(new View.OnLongClickListener() {
-//                @Override
-//                public boolean onLongClick(View view) {
-//                    confirmDelete(runs.get(position).getRunning_id(), position);
-//                    return false;
-//                }
-//            });
-//
-//
-//            convertView.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//
-//                        currentRun = runs.get(position);
-//                        showIntervalsForRun(runs.get(position));
-//                }
-//            });
-//
-//            return convertView;
-//
-//        }
-//
-//    }
 
 
-
-    private class runningViewHolder{
-        TextView description;
-        TextView intervalCount;
-        TextView date;
-    }
 
     private void confirmDelete(final Long trId,final int groupPosition, final int position){
 
@@ -569,23 +471,6 @@ public class FrgShowRuns extends BaseFragment {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public class MyExpandableAdapter extends BaseExpandableListAdapter {
 
         private Activity activity;
@@ -605,6 +490,17 @@ public class FrgShowRuns extends BaseFragment {
             TextView description;
             TextView intervalCount;
             TextView date;
+        }
+
+        private class headerViewHolder{
+            TextView month;
+        }
+
+        @Override
+        public void notifyDataSetChanged() {
+
+            super.notifyDataSetChanged();
+            showTextNoRuns();
         }
 
         @Override
@@ -661,14 +557,26 @@ public class FrgShowRuns extends BaseFragment {
         @Override
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
-            if (convertView == null) {
+
+            headerViewHolder holder =null;
+            if (convertView == null || !(convertView.getTag() instanceof headerViewHolder)) {
+
+
+
                 convertView = inflater.inflate(R.layout.group_header, null);
-            }else{
+
+                holder = new headerViewHolder();
+
+                holder.month = (TextView) convertView.findViewById(R.id.textView1);
+
+                convertView.setTag(holder);
+            } else {
+                holder = (headerViewHolder) convertView.getTag();
 
             }
 
 
-            ((TextView) convertView.findViewById(R.id.textView1)).setText(parentItems.get(groupPosition)+" - "+((ArrayList<Running>)childtems.get(groupPosition)).size()+" workouts");
+            holder.month.setText(parentItems.get(groupPosition) + " - " + ((ArrayList<Running>) childtems.get(groupPosition)).size() + " workouts");
 
             return convertView;
         }
@@ -685,7 +593,13 @@ public class FrgShowRuns extends BaseFragment {
 
         @Override
         public int getChildrenCount(int groupPosition) {
-            return ((ArrayList<String>) childtems.get(groupPosition)).size();
+
+            if (childtems.size()>0)
+                return ((ArrayList<String>) childtems.get(groupPosition)).size();
+            else{
+                showTextNoRuns();
+                return 0;
+            }
         }
 
         @Override
@@ -726,6 +640,27 @@ public class FrgShowRuns extends BaseFragment {
     }
 
 
+
+    private void showTextNoRuns(){
+
+        boolean empty= true;
+
+        for (Object child : childItems){
+            if (((ArrayList)child).size()>0){
+                empty = false;
+                break;
+            }
+        }
+
+
+        if (empty){
+            runsExpListView.setVisibility(View.GONE);
+            noRunsText.setVisibility(View.VISIBLE);
+        }else{
+            runsExpListView.setVisibility(View.VISIBLE);
+            noRunsText.setVisibility(View.GONE);
+        }
+    }
 
 
 }

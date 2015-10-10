@@ -2,7 +2,6 @@ package com.kostas.onlineHelp;
 
 import android.app.*;
 import android.content.*;
-import android.graphics.Point;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -13,8 +12,6 @@ import android.os.CountDownTimer;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.*;
-import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -47,7 +44,7 @@ public class FrgInterval extends BaseFragment{
     SharedPreferences app_preferences ;
 
     RelativeLayout   buttonDismiss, buttonSave;
-    Button buttonSetIntervalValues;
+    Button buttonSetIntervalValues, buttonSavePlan;
     ImageButton buttonStart, buttonStop, buttonBack;
 //    boolean   running=false;//paused=false;
     String timerStop1;
@@ -101,7 +98,8 @@ public class FrgInterval extends BaseFragment{
                     intervalsList.add(new Interval(-1, latLonList, millis, intervalDistance));
                     adapterInterval.notifyDataSetChanged();
 
-                    prepareForNextInterval();
+
+                    prepareForNextInterval(bundle.getBoolean(RunningService.INTERVAL_COMPLETED, false));
                 }
 
 
@@ -130,6 +128,7 @@ public class FrgInterval extends BaseFragment{
         setSaveListener();
 
         initializeMap();
+
        return  v;
     }
 
@@ -143,6 +142,7 @@ public class FrgInterval extends BaseFragment{
         intervalsList = new ArrayList<Interval>();
 
         buttonSetIntervalValues = (Button) v.findViewById(R.id.buttonSetIntervalValues);
+        buttonSavePlan = (Button) v.findViewById(R.id.buttonSavePlan);
         buttonStart = (ImageButton) v.findViewById(R.id.buttonStart);
         buttonStop = (ImageButton) v.findViewById(R.id.buttonStop);
         buttonBack = (ImageButton) v.findViewById(R.id.buttonBack);
@@ -182,7 +182,7 @@ public class FrgInterval extends BaseFragment{
         return false;
     }
 
-    private void getInRunningMode(boolean isRunning, long millisecondsLeft, float distanceCovered){
+    private void getInRunningMode(boolean isRunning, boolean isCompleted, long millisecondsLeft, float distanceCovered){
 
         ((ExtApplication)getActivity().getApplication()).setInRunningMode(true);
 
@@ -192,26 +192,29 @@ public class FrgInterval extends BaseFragment{
         buttonBack.setVisibility(View.INVISIBLE);
         completedIntervalsListView.setVisibility(View.VISIBLE);
 
-        if (isRunning){
+        if (isRunning && !isCompleted){
             setDistanceProgress(distanceCovered);
             timerProgressWheel.setVisibility(View.INVISIBLE);
             distanceProgressWheel.setVisibility(View.VISIBLE);
 
-        }else{
+        }else if (!isRunning && !isCompleted){
             final int step = (int)( 360000 / intervalTime );
             distanceProgressWheel.setVisibility(View.INVISIBLE);
             timerProgressWheel.setVisibility(View.VISIBLE);
-            timerProgressWheel.setText("Starting in "+millisecondsLeft/1000+" secs");
-            Log.v("LATLNG", "Step is: "+step);
+            timerProgressWheel.setText(millisecondsLeft / 1000 + " secs");
+
+//            timerProgressWheel.setProgress((int) ((millisecondsLeft/intervalTime) * 360));
+            Log.v("LATLNG", "Step is: " + step);
 
 
             if (!(isMyServiceRunning()))
             startRunningService();
 
+            if (countDownTimer!=null) countDownTimer.cancel();
 
             countDownTimer =   new CountDownTimer(millisecondsLeft, 1000) {
                 public void onTick(long millisUntilFinished) {
-                    timerProgressWheel.setText("Starting in "+millisUntilFinished/1000+" secs");
+                    timerProgressWheel.setText(millisUntilFinished/1000+" secs");
                     timerProgressWheel.setProgress((int) (timerProgressWheel.getProgress() - step));
                 }
                 public void onFinish() {
@@ -226,32 +229,43 @@ public class FrgInterval extends BaseFragment{
                 }
             }.start();
 
+        }else if (isCompleted){
+            doStop();
         }
     }
 
 
-    private void prepareForNextInterval(){
+    private void prepareForNextInterval(boolean completed){
+
+        if (completed){
+
+            doStop();
+
+        }else {
 
 //        stopRunningService(false);
-        distanceProgressWheel.setVisibility(View.INVISIBLE);
-        distanceProgressWheel.setProgress(0);
-        distanceProgressWheel.setText(0+" / "+(int)intervalDistance);
-        timerProgressWheel.setVisibility(View.VISIBLE);
-        final int step = (int)( 360000 / intervalTime );
-        countDownTimer =   new CountDownTimer(intervalTime, 1000) {
-            public void onTick(long millisUntilFinished) {
-                timerProgressWheel.setText("Starting in "+millisUntilFinished/1000+" secs");
-                timerProgressWheel.setProgress((int) (timerProgressWheel.getProgress() - step));
-            }
-            public void onFinish() {
-                timerProgressWheel.setVisibility(View.INVISIBLE);
-                timerProgressWheel.setProgress(0);
-                distanceProgressWheel.setVisibility(View.VISIBLE);
-//                getUpdates(false);
-                completedIntervalsListView.setVisibility(View.VISIBLE);
-            }
-        }.start();
+            distanceProgressWheel.setVisibility(View.INVISIBLE);
+            distanceProgressWheel.setProgress(0);
+            distanceProgressWheel.setText(0 + " / " + (int) intervalDistance);
+            timerProgressWheel.setVisibility(View.VISIBLE);
+            final int step = (int) (360000 / intervalTime);
+            countDownTimer = new CountDownTimer(intervalTime, 1000) {
+                public void onTick(long millisUntilFinished) {
+                    timerProgressWheel.setText(millisUntilFinished / 1000 + " secs");
+                    timerProgressWheel.setProgress((int) (timerProgressWheel.getProgress() - step));
+                }
 
+                public void onFinish() {
+                    timerProgressWheel.setVisibility(View.INVISIBLE);
+                    timerProgressWheel.setProgress(0);
+                    distanceProgressWheel.setVisibility(View.VISIBLE);
+//                getUpdates(false);
+                    completedIntervalsListView.setVisibility(View.VISIBLE);
+                }
+            }.start();
+
+
+        }
 
     }
 
@@ -287,8 +301,10 @@ public class FrgInterval extends BaseFragment{
         editor.remove(RunningService.TOTAL_DIST);
         editor.remove(RunningService.TOTAL_TIME);
         editor.remove(RunningService.INTERVAL_ROUNDS);
+        editor.remove(RunningService.INTERVAL_COMPLETED);
         editor.remove(RunningService.INTERVAL_TIME);
         editor.remove(RunningService.INTERVAL_DISTANCE);
+        editor.remove(RunningService.INTERVAL_ROUNDS);
         editor.remove(RunningService.INTERVALS);
         editor.remove(RunningService.IS_RUNNING);
         editor.remove(RunningService.COUNTDOWN_REMAINING);
@@ -355,6 +371,16 @@ public class FrgInterval extends BaseFragment{
                 saveRunWithIntervalsDB();
             }
         });
+
+
+
+        buttonSavePlan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
 
 
 
@@ -428,9 +454,14 @@ public class FrgInterval extends BaseFragment{
 
             getActivity().registerReceiver(receiver, new IntentFilter(RunningService.NOTIFICATION));
 
-            getInRunningMode(app_preferences.getBoolean(RunningService.IS_RUNNING, false),
-                    app_preferences.getLong(RunningService.COUNTDOWN_REMAINING, 0),
-                    app_preferences.getFloat(RunningService.TOTAL_DIST,0));
+
+
+
+                getInRunningMode(app_preferences.getBoolean(RunningService.IS_RUNNING, false),
+                        app_preferences.getBoolean(RunningService.INTERVAL_COMPLETED, false),
+                        app_preferences.getLong(RunningService.COUNTDOWN_REMAINING, 0),
+                        app_preferences.getFloat(RunningService.TOTAL_DIST, 0));
+
 
         }
         //service is on and i am searching for loc fix
@@ -643,15 +674,8 @@ public class FrgInterval extends BaseFragment{
             @Override
             public void onClick(View view) {
 
-
-//                        if (provider != null) {
-//
-//                            getInRunningMode(false, intervalTime, 0);
-//                        }
-////                        else if (selectProvider()) {
-//                        else
                         if (   locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-                            getInRunningMode(false, intervalTime, 0);
+                            getInRunningMode(false, false, intervalTime, 0);
                         }else{
                             Toast.makeText(getActivity(), "Please enable GPS", Toast.LENGTH_SHORT).show();
                         }
@@ -703,22 +727,17 @@ public class FrgInterval extends BaseFragment{
     private void doStop(){
 
         stopRunningService();
-//        mHandler.removeCallbacks(mUpdateTimeTask);
-//        mStartTime = 0L;
         if (countDownTimer!=null)
         countDownTimer.cancel();
-        timerProgressWheel.setProgress(360);
+        timerProgressWheel.setProgress(0);
         timerProgressWheel.setVisibility(View.INVISIBLE);
         distanceProgressWheel.setProgress(0);
         distanceProgressWheel.setVisibility(View.INVISIBLE);
         resetAppPrefs();
-
         buttonStop.setVisibility(View.INVISIBLE);
-
         layoutBottomButtons.setVisibility(View.VISIBLE);
 
         if (intervalsList.size()==0) buttonDismiss.performClick();
-
     }
 
     private void saveRunWithIntervalsDB(){
@@ -753,9 +772,15 @@ public class FrgInterval extends BaseFragment{
                 //Builds the notification and issues it.
                 mNotifyMgr.cancel(123);
 
+
+
+
+
             }catch (Exception e){
                 Log.v("LATLNG", "Exception: Receiver was not registered");
             }
+
+
 
 
     }
@@ -793,12 +818,21 @@ public class FrgInterval extends BaseFragment{
             PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
             mBuilder.setContentIntent(resultPendingIntent);
 
+
+            Notification notification = mBuilder.build();
+
+            notification.ledARGB = getResources().getColor(R.color.interval_green);
+            notification.flags = Notification.FLAG_SHOW_LIGHTS;
+            notification.ledOffMS = 500;
+            notification.ledOnMS = 1500;
+
+
             NotificationManager notificationManager =
                     (NotificationManager) getActivity().getSystemService(android.content.Context.NOTIFICATION_SERVICE);
 
 
             // notificationID allows you to update the notification later on.
-            notificationManager.notify(123, mBuilder.build());
+            notificationManager.notify(123, notification);
         }
 
 

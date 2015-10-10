@@ -27,7 +27,7 @@ public class BaseDrawer extends BaseFragmentActivity {
 
     static final int POSITION_NEW_INTERVAL = 0;
     static final int POSITION_MY_DIARY = 1;
-    static final int POSITION_MY_SETTINGS = 2;
+    static final int POSITION_MY_PLANS = 2;
     static final int POSITION_EXIT = 3;
 
     static final String POSITION = "pos";
@@ -107,12 +107,18 @@ public class BaseDrawer extends BaseFragmentActivity {
         int drawerBlack = getResources().getColor(R.color.drawer_black);
         for (int i = 0; i < drawerTitles.length; i++) {
             Drawable imgRes = null;
-//            if ((i+1 == MY_NOTIFICATIONS_POSITION)&&app.getUserID()!=null&&app.getUserID()!=-1) {
-//                imgRes = getResources().getDrawable(R.drawable.notifications_bg);
-//            } else
-            if (i == POSITION_EXIT) {
-                imgRes = getResources().getDrawable(R.drawable.logout);
+            if ((i == POSITION_MY_DIARY)) {
+                imgRes = getResources().getDrawable(R.drawable.diary_32);
+            }
+            else if (i == POSITION_EXIT) {
+                imgRes = getResources().getDrawable(R.drawable.exit_32);
                 tf = Typeface.create("Helvetica", Typeface.BOLD);
+            }
+            else if (i == POSITION_MY_PLANS) {
+                imgRes = getResources().getDrawable(R.drawable.plan_32);
+            }
+            else if (i == POSITION_NEW_INTERVAL) {
+                imgRes = getResources().getDrawable(R.drawable.interval_32);
             }
 //            if (app.getUserID()!=null&&app.getUserID()==-1){
 
@@ -172,7 +178,7 @@ public class BaseDrawer extends BaseFragmentActivity {
                     startMain(mPager, position);
                     break;
 
-                case POSITION_MY_SETTINGS:
+                case POSITION_MY_PLANS:
 
                     break;
 
@@ -186,13 +192,10 @@ public class BaseDrawer extends BaseFragmentActivity {
                     break;
             }
 
-            if (position!=POSITION_MY_SETTINGS) setTitle(drawerTitles[position]);
+            if (position!=POSITION_MY_PLANS) setTitle(drawerTitles[position]);
             closeDrawer();
         }
     }
-
-
-
 
 
 
