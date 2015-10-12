@@ -76,6 +76,7 @@
                 <com.kostas.onlineHelp.NumberPickerKostas
                         android:layout_marginLeft="20dp"
                         android:layout_marginRight="20dp"
+                        android:layout_marginBottom="8dp"
                         android:layout_below="@+id/intervalTimePicker"
                         app:minValue="0"
                         app:maxValue="99"
@@ -87,6 +88,18 @@
                         android:layout_width="match_parent"
                         android:layout_height="48dp">
                 </com.kostas.onlineHelp.NumberPickerKostas>
+
+                <Spinner
+                        android:id="@+id/plansSpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_below="@+id/intervalRoundsPicker"
+                        android:drawSelectorOnTop="true"
+
+                        style="@style/spinner_style"
+
+
+                        />
 
                 <TextView
                         android:layout_above="@+id/setButtons"

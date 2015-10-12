@@ -66,6 +66,12 @@ public class MainActivity extends BaseDrawer {
                 if (getActiveFragment(getSupportFragmentManager(), position) instanceof FrgShowRuns) {
                     ((FrgShowRuns)getActiveFragment(getSupportFragmentManager(), position)).getRunsFromDb();
 
+                }else  if (getActiveFragment(getSupportFragmentManager(), position) instanceof FrgPlans) {
+                    ((FrgPlans)getActiveFragment(getSupportFragmentManager(), position)).getPlansFromDb();
+
+                }else  if (getActiveFragment(getSupportFragmentManager(), position) instanceof FrgInterval) {
+                    ((FrgInterval)getActiveFragment(getSupportFragmentManager(), position)).getPlansFromDb();
+
                 }
 
 
@@ -123,7 +129,10 @@ public class MainActivity extends BaseDrawer {
                     return FrgShowRuns.init(1);
                 }
                 case 2: {
-                    return FrgSettings.init(2);
+                    return FrgPlans.init(2);
+                }
+                case 3: {
+                    return FrgSettings.init(3);
                 }
                 default: return FrgInterval.init(position);
 

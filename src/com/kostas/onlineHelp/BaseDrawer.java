@@ -179,7 +179,7 @@ public class BaseDrawer extends BaseFragmentActivity {
                     break;
 
                 case POSITION_MY_PLANS:
-
+                    startMain(mPager, position);
                     break;
 
                 case POSITION_EXIT:
@@ -192,7 +192,7 @@ public class BaseDrawer extends BaseFragmentActivity {
                     break;
             }
 
-            if (position!=POSITION_MY_PLANS) setTitle(drawerTitles[position]);
+            setTitle(drawerTitles[position]);
             closeDrawer();
         }
     }

@@ -21,13 +21,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.kostas.dbObjects.Interval;
+import com.kostas.dbObjects.Plan;
 import com.kostas.dbObjects.Running;
 import com.kostas.model.Database;
 import com.kostas.service.RunningService;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.security.Provider;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -36,7 +36,7 @@ public class FrgInterval extends BaseFragment{
 
     GoogleMap googleMap;
     CountDownTimer countDownTimer;
-    private long  intervalTime;//mStartTime = 0L, totalTime=0L
+    private long  intervalTime=10;//mStartTime = 0L, totalTime=0L
 //    private Handler mHandler = new Handler();
     private LocationManager locationManager;
 //    private String provider;
@@ -50,7 +50,7 @@ public class FrgInterval extends BaseFragment{
     String timerStop1;
     LinearLayout layoutBottomButtons;
     EditText editTextIntervalDistance ;
-    float intervalDistance=0;
+    float intervalDistance=50;
     ViewFlipper flipper;
     NumberPickerKostas intervalTimePicker, intervalDistancePicker, intervalRoundsPicker;
     FrgInterval instance;
@@ -58,7 +58,10 @@ public class FrgInterval extends BaseFragment{
     ListView completedIntervalsListView;
     List <Interval> intervalsList;
     IntervalAdapterItem adapterInterval;
-    int rounds;
+    int rounds=0;
+    Spinner plansSpinner;
+    SpinnerAdapter plansAdapter;
+    List<Plan>plans = new ArrayList<Plan>();
 
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -121,19 +124,36 @@ public class FrgInterval extends BaseFragment{
 
         View v = inflater.inflate(R.layout.frg_interval, container, false);
 
+
+        setPlansSpinner(v);
+        getPlansFromDb();
         setTextViewsAndButtons(v);
         setListeners(v);
 //        selectProvider();
         getLastLocation(v);
         setSaveListener();
 
+
+
         initializeMap();
 
        return  v;
     }
 
+    private void setPlansSpinner(View v){
+        plansSpinner = (Spinner) v.findViewById(R.id.plansSpinner);
+
+        plansAdapter = new SpinnerAdapter(getActivity(), android.R.layout.simple_spinner_dropdown_item, plans);
+
+        plansSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+
+        plansSpinner.setAdapter(plansAdapter);
+
+    }
+
     private void setTextViewsAndButtons(View v){
         app_preferences = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
+
 
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 
@@ -168,6 +188,11 @@ public class FrgInterval extends BaseFragment{
          adapterInterval = new  IntervalAdapterItem(getActivity(), getActivity().getApplicationContext(),
                 R.layout.list_interval_row, intervalsList);
         completedIntervalsListView.setAdapter(adapterInterval);
+
+
+
+
+//        plansSpinner.setSelection(-1);
 
 
     }
@@ -378,6 +403,8 @@ public class FrgInterval extends BaseFragment{
             @Override
             public void onClick(View view) {
 
+                alertDialogPlan();
+
             }
         });
 
@@ -385,6 +412,121 @@ public class FrgInterval extends BaseFragment{
 
 
 
+    }
+
+
+    private void alertDialogPlan(){
+
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+// ...Irrelevant code for customizing the buttons and title
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.new_plan_alert_dialog, null);
+        dialogBuilder.setView(dialogView);
+        dialogBuilder.setTitle("Confirm new plan");
+
+        dialogBuilder
+                .setCancelable(false)
+                .setPositiveButton("Cancel", null)
+                .setNegativeButton("Save", null);
+
+        final AlertDialog alertDialog = dialogBuilder.create();
+
+
+        final EditText descText = (EditText) dialogView.findViewById(R.id.dialogDesc);
+        ((TextView) dialogView.findViewById(R.id.dialogMeters)).setText("Run "+intervalDistancePicker.getValue()+" meters");
+        ((TextView) dialogView.findViewById(R.id.dialogSeconds)).setText("With "+intervalTimePicker.getValue()+" secs rest");
+        final TextView error = ((TextView) dialogView.findViewById(R.id.dialogError));
+
+
+        if (intervalRoundsPicker.getValue()>0)
+            ((TextView) dialogView.findViewById(R.id.dialogRounds)).setText("Repeat "+intervalRoundsPicker.getValue()+" times");
+        else  (dialogView.findViewById(R.id.dialogRounds)).setVisibility(View.GONE);
+
+
+
+
+
+
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+
+            @Override
+            public void onShow(final DialogInterface dialog) {
+                Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                b.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                       dialog.dismiss();
+
+                    }
+                });
+
+                 b = alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+                b.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        // TODO Do something
+
+                        if (descText.getText().toString().length()>0 && descText.getText().length()<21){
+                            savePlan(descText.getText().toString());
+                            error.setVisibility(View.INVISIBLE);
+                            alertDialog.dismiss();
+
+                        }
+                        else
+                            error.setVisibility(View.VISIBLE);
+
+                    }
+                });
+            }
+        });
+
+
+
+
+
+        alertDialog.show();
+
+
+
+
+    }
+
+
+
+    //todo only in pro version
+    public  void getPlansFromDb(){
+        Database db = new Database(getActivity());
+
+        plans.clear();
+
+        List<Plan> newPlans = db.fetchPlansFromDb();
+        plans.add(new Plan("Select a plan"));
+
+        for (Plan plan : newPlans){
+            plans.add(plan);
+        }
+
+        if (plans.size()==1) plansSpinner.setVisibility(View.GONE);
+        else if (plansAdapter!=null) {plansAdapter.notifyDataSetChanged();plansSpinner.setVisibility(View.VISIBLE);}
+    }
+
+    private void savePlan(String desc){
+
+        intervalDistance = intervalDistancePicker.getValue();
+        intervalTime = intervalTimePicker.getValue();
+        rounds = intervalRoundsPicker.getValue();
+
+        Database db = new Database(getActivity().getApplicationContext());
+        db.addPlan(new Plan(-1, desc, (int)intervalDistance, (int)intervalTime, rounds));
+
+        getPlansFromDb();
+        plansSpinner.setVisibility(View.VISIBLE);
+
+
+
+        Toast.makeText(getActivity(), "Plan saved", Toast.LENGTH_SHORT).show();
     }
 
     private boolean validateDistanceAndTime(){
@@ -902,5 +1044,117 @@ public class FrgInterval extends BaseFragment{
         }
 
     }
+
+    private void loadPlan(int position){
+        Plan plan = plans.get(position);
+        intervalTimePicker.setValue(plan.getSeconds());
+        intervalDistancePicker.setValue(plan.getMeters());
+        intervalRoundsPicker.setValue(plan.getRounds());
+        intervalRoundsPicker.disableButtonColor(plan.getRounds()==0);
+
+        Toast.makeText(getActivity(), plan.getDescription()+" loaded", Toast.LENGTH_SHORT).show();
+    }
+
+
+
+
+    class CustomOnItemSelectedListener implements AdapterView.OnItemSelectedListener {
+
+        public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+
+            if (pos>0) loadPlan(pos);
+
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> arg0) {
+            Toast.makeText(getActivity(), "nothing", Toast.LENGTH_SHORT).show();
+            // Nothing
+        }
+
+    }
+
+
+    class SpinnerAdapter  extends ArrayAdapter<Plan> {
+
+        int layoutResourceId;
+        List<Plan> data;
+
+        public SpinnerAdapter(Context ctx, int layoutResourceId, List<Plan> data) {
+            super(ctx, layoutResourceId, data);
+            this.layoutResourceId = layoutResourceId;
+            this.data = data;
+        }
+
+
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            return getCustomDropView(position, convertView, parent);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            return getCustomView(position, convertView, parent);
+        }
+
+
+        //this is the spinner drop
+        public View getCustomDropView(int position, View convertView, ViewGroup parent) {
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+            planViewHolder holder;
+            if (convertView == null || !(convertView.getTag() instanceof planViewHolder)) {
+
+                holder = new planViewHolder();
+                    convertView = inflater.inflate(R.layout.custom_plans_spinner_item, null);
+                    holder.description = (TextView) convertView.findViewById(R.id.planDescriptionSpinner);
+
+                convertView.setTag(holder);
+            } else {
+                holder = (planViewHolder) convertView.getTag();
+            }
+
+
+
+                holder.description.setText(data.get(position).getDescription());
+
+
+
+            return convertView;
+        }
+
+        //this is the spinner header
+        public View getCustomView(int position, View convertView, ViewGroup parent) {
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+            planViewHolder holder;
+            if (convertView == null || !(convertView.getTag() instanceof planViewHolder)) {
+                convertView = inflater.inflate(R.layout.custom_spinner_dropdown, null);
+                holder = new planViewHolder();
+                holder.description = (TextView) convertView.findViewById(R.id.planDescriptionSpinner2);
+                holder.arrow = (ImageView) convertView.findViewById(R.id.planArrow);
+
+                convertView.setTag(holder);
+            } else {
+                holder = (planViewHolder) convertView.getTag();
+            }
+
+             if (plansSpinner.isActivated()){
+                 holder.arrow.setImageDrawable(getResources().getDrawable(R.drawable.arrow_up));
+             }else{
+                 holder.arrow.setImageDrawable(getResources().getDrawable(R.drawable.arrow_down));
+             }
+
+            holder.description.setText(data.get(position).getDescription());
+            return convertView;
+        }
+    }
+
+    private class planViewHolder{
+        TextView description;
+//        TextView info;
+        ImageView arrow;
+    }
+
+
 
 }

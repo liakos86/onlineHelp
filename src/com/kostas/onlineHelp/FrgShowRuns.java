@@ -338,7 +338,8 @@ public class FrgShowRuns extends BaseFragment {
 
 
 
-               if (j%2==0) locationList.add(new LatLng(latPoint, lonPoint));
+//               if (j%2==0)
+                   locationList.add(new LatLng(latPoint, lonPoint));
             }
 
             int currSize = locationList.size()-1;

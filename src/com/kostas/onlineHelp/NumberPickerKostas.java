@@ -346,6 +346,8 @@ public class NumberPickerKostas extends LinearLayout {
 			this.value = value;
 			valueText.setText(this.value.toString());
 		}
+
+
 	}
 
 
@@ -373,7 +375,7 @@ public class NumberPickerKostas extends LinearLayout {
         this.step = step;
     }
 
-    private void disableButtonColor(boolean disable){
+    public void disableButtonColor(boolean disable){
         if (disable){
             descriptionText.setBackgroundDrawable(getResources().getDrawable(R.drawable.descr_picker_inactive));
             increment.setBackgroundDrawable(getResources().getDrawable(R.drawable.plus_minus_inactive));
