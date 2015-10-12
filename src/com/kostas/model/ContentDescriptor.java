@@ -51,6 +51,7 @@ public class ContentDescriptor {
        
         Running.addToUriMatcher(authority, matcher);
         Interval.addToUriMatcher(authority, matcher);
+        Plan.addToUriMatcher(authority, matcher);
         
      
 
@@ -161,6 +162,58 @@ public class ContentDescriptor {
                     + String.format(sFrmTextNotNull, Cols.RUNNING_ID) + " , "
                     + String.format(sFrmTextNotNull, Cols.MILLISECONDS) + " , "
                     + String.format(sFrmTextNotNull, Cols.LATLONLIST) + " , "
+
+                    + String.format(sFrmPrimaryKey, Cols.ID) + ")";
+        }
+    }
+
+
+    public static class Plan {
+        public static final String TABLE_NAME = "plan";
+        // content://xxxxx/running
+        public static final String PATH = "plan";
+        public static final int PATH_TOKEN = 30;
+        // content://xxxxx/running/20
+        public static final String PATH_FOR_ID = "plan/#";
+        // see wa1 content://xxxxx/running/21
+        public static final String PATH_FOR_ID_WA = "plan/*";
+        public static final int PATH_FOR_ID_TOKEN = 31;
+        // content://xxxxx/simcounterdetailresponses/startletters
+        public static final String PATH_START_LETTERS = "plan/startletters";
+        public static final int PATH_START_LETTERS_TOKEN = 32;
+
+        public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH).build();
+
+        public static final String CONTENT_TYPE_DIR = "vnd.android.cursor.dir/vnd.com.kostas.onlineHelp.app";
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.com.kostas.onlineHelp.app";
+
+        public static class Cols {
+            public static final String ID = BaseColumns._ID; // by convention
+            public static final String DESCRIPTION = "description";
+            public static final String METERS = "meters";
+            public static final String SECONDS = "seconds";
+            public static final String ROUNDS = "rounds";
+
+
+
+
+        }
+
+        protected static UriMatcher addToUriMatcher(String authority, UriMatcher matcher) {
+            matcher.addURI(authority, Plan.PATH, Plan.PATH_TOKEN);
+            matcher.addURI(authority, Plan.PATH_FOR_ID, Plan.PATH_FOR_ID_TOKEN);
+            matcher.addURI(authority, Plan.PATH_FOR_ID_WA, Plan.PATH_FOR_ID_TOKEN);
+            matcher.addURI(authority, Plan.PATH_START_LETTERS, Plan.PATH_START_LETTERS_TOKEN);
+            return matcher;
+        }
+
+        public static String createTable() {
+            return "CREATE TABLE " + Plan.TABLE_NAME + " ( "
+                    + String.format(sFrmIdAutoinc, Cols.ID) + " , "
+                    + String.format(sFrmTextNotNull, Cols.DESCRIPTION) + " , "
+                    + String.format(sFrmTextNotNull, Cols.METERS) + " , "
+                    + String.format(sFrmTextNotNull, Cols.SECONDS) + " , "
+                    + String.format(sFrmTextNotNull, Cols.ROUNDS) + " , "
 
                     + String.format(sFrmPrimaryKey, Cols.ID) + ")";
         }

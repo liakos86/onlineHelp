@@ -54,6 +54,16 @@ public class DataProvider extends ContentProvider {
 
             case ContentDescriptor.Interval.PATH_FOR_ID_TOKEN:
                 return ContentDescriptor.Interval.CONTENT_ITEM_TYPE;
+
+
+            case ContentDescriptor.Plan.PATH_TOKEN:
+            case ContentDescriptor.Plan.PATH_START_LETTERS_TOKEN:
+                return ContentDescriptor.Plan.CONTENT_TYPE_DIR;
+
+
+
+            case ContentDescriptor.Plan.PATH_FOR_ID_TOKEN:
+                return ContentDescriptor.Plan.CONTENT_ITEM_TYPE;
                 
 
           
@@ -160,8 +170,44 @@ public class DataProvider extends ContentProvider {
             // END Interval
 
 
+            //START Plan
+            case ContentDescriptor.Plan.PATH_TOKEN: {
+                String searchFor = uri.getQueryParameter(ContentDescriptor.PARAM_SEARCH);
+                SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
+                builder.setTables(ContentDescriptor.Plan.TABLE_NAME);
 
+                if (!TextUtils.isEmpty(searchFor)) {
+                    String where = String.format(sWhereLike, ContentDescriptor.Plan.Cols.DESCRIPTION, searchFor);
+                    where += " OR " + (String.format(sWhereLike, ContentDescriptor.Plan.Cols.SECONDS, searchFor));
+                    Log.v(TAG, String.format("where [%s]", where));
+                    builder.appendWhere(where);
+                }
 
+                toRet = builder.query(db, projection, selection, selectionArgs, null, null,
+                        sortOrder);
+            }
+            break;
+            case ContentDescriptor.Plan.PATH_START_LETTERS_TOKEN: {
+                SQLiteDatabase rdb = database.getReadableDatabase();
+                toRet = rdb
+                        .rawQuery(
+                                "select distinct substr(description, 1, 1) from plan order by 1 asc",
+                                null);
+            }
+            break;
+            case ContentDescriptor.Plan.PATH_FOR_ID_TOKEN: {
+                String id = uri.getLastPathSegment();
+                Log.v(TAG, String.format("querying for [%s]", id));
+                SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
+                builder.setTables(ContentDescriptor.Plan.TABLE_NAME);
+                toRet = builder.query(db, projection,
+                        String.format(sWhere, ContentDescriptor.Plan.Cols.ID), new String[]{
+                                id
+                        },
+                        null, null, null, sortOrder);
+            }
+            break;
+            // END Plan
 
             default:
                 Log.d(TAG, String.format("Could not handle matcher [%d]", match));
@@ -186,6 +232,14 @@ public class DataProvider extends ContentProvider {
             }
             break;
             //End Running
+
+            //Plan
+            case ContentDescriptor.Plan.PATH_TOKEN: {
+                id = db.insert(ContentDescriptor.Plan.TABLE_NAME, null,
+                        adjustIdField(values, ContentDescriptor.Plan.Cols.ID));
+            }
+            break;
+            //End Plan
 
             //Interval
             case ContentDescriptor.Interval.PATH_TOKEN: {
@@ -228,6 +282,14 @@ public class DataProvider extends ContentProvider {
             }
             break;
             //End Interval
+
+            //Plan
+            case ContentDescriptor.Plan.PATH_TOKEN: {
+                toRet = db.update(ContentDescriptor.Plan.TABLE_NAME, values, selection,
+                        selectionArgs);
+            }
+            break;
+            //End Plan
            
 
             default: {
@@ -252,6 +314,13 @@ public class DataProvider extends ContentProvider {
             break;
             //running
 
+            //Plan
+            case ContentDescriptor.Plan.PATH_TOKEN: {
+                toRet = db.delete(ContentDescriptor.Plan.TABLE_NAME, selection, selectionArgs);
+            }
+            break;
+            //Plan
+
             //Interval
             case ContentDescriptor.Interval.PATH_TOKEN: {
                 toRet = db.delete(ContentDescriptor.Interval.TABLE_NAME, selection, selectionArgs);
@@ -259,7 +328,7 @@ public class DataProvider extends ContentProvider {
             break;
             //Interval
 
-           
+
             default: {
                 throw new UnsupportedOperationException("URI: " + uri + " not supported.");
             }

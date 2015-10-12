@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.util.Log;
 import com.kostas.dbObjects.Interval;
+import com.kostas.dbObjects.Plan;
 import com.kostas.dbObjects.Running;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class Database extends SQLiteOpenHelper {
 
         db.execSQL(ContentDescriptor.Running.createTable());
         db.execSQL(ContentDescriptor.Interval.createTable());
+        db.execSQL(ContentDescriptor.Plan.createTable());
 
 
     }
@@ -43,6 +45,7 @@ public class Database extends SQLiteOpenHelper {
                 + ", which will destroy all old data");
             db.execSQL("drop table if exists " + ContentDescriptor.Running.TABLE_NAME);
         db.execSQL("drop table if exists " + ContentDescriptor.Interval.TABLE_NAME);
+        db.execSQL("drop table if exists " + ContentDescriptor.Plan.TABLE_NAME);
 
             onCreate(db); // run onCreate to get new database
     }
@@ -80,6 +83,16 @@ public class Database extends SQLiteOpenHelper {
     public void deleteInterval(Long id){
         ContentResolver resolver = mContext.getContentResolver();
         resolver.delete(ContentDescriptor.Interval.CONTENT_URI, ContentDescriptor.Interval.Cols.ID + "=" + String.valueOf(id), null);
+    }
+
+    public void addPlan(Plan plan) {
+        ContentResolver resolver = mContext.getContentResolver();
+        resolver.insert(ContentDescriptor.Plan.CONTENT_URI, Plan.asContentValues(plan));
+    }
+
+    public void deletePlan(Long id){
+        ContentResolver resolver = mContext.getContentResolver();
+        resolver.delete(ContentDescriptor.Plan.CONTENT_URI, ContentDescriptor.Plan.Cols.ID + "=" + String.valueOf(id), null);
     }
 
 
@@ -160,6 +173,52 @@ public class Database extends SQLiteOpenHelper {
 
             while (c.moveToNext()) {
                 St.add(new Interval(c.getString(sLatPosition), c.getLong(sMillisPosition)));
+            }
+        }
+        c.close();
+        c = null;
+
+        return St;
+
+    }
+
+    public List<Plan> fetchPlansFromDb() {
+
+        String[] FROM = {
+                // ! beware. I mark the position of the fields
+                ContentDescriptor.Plan.Cols.ID,
+                ContentDescriptor.Plan.Cols.DESCRIPTION,
+                ContentDescriptor.Plan.Cols.METERS,
+                ContentDescriptor.Plan.Cols.SECONDS,
+                ContentDescriptor.Plan.Cols.ROUNDS
+
+        };
+
+        int sIdPosition = 0;
+        int sDescPosition = 1;
+        int sMetersPosition = 2;
+        int sSecondsPosition = 3;
+        int sRoundsPosition = 4;
+
+
+        Cursor c = mContext.getContentResolver().query(ContentDescriptor.Plan.CONTENT_URI, FROM,
+                null,
+                null, null);
+
+        List<Plan> St = new ArrayList<Plan>();
+
+        if (c.getCount() > 0) {
+
+            while (c.moveToNext()) {
+
+
+
+                St.add(new Plan(c.getLong(sIdPosition),
+                        c.getString(sDescPosition),
+                        c.getInt(sMetersPosition),
+                        c.getInt(sSecondsPosition),
+                        c.getInt(sRoundsPosition)
+                ));
             }
         }
         c.close();
