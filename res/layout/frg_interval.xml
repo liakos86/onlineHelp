@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res/com.kostas.onlineHelp"
-              android:background="@color/drawer_black"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical" >
 
 
-
-    <ViewFlipper android:id="@+id/flipper" android:layout_width="fill_parent" android:layout_height="fill_parent">
+    <ViewFlipper
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res/com.kostas.onlineHelp"
+            android:id="@+id/flipper" 
+            android:layout_width="fill_parent" 
+            android:layout_height="fill_parent" 
+            android:background="@color/drawer_black">
 
         <LinearLayout android:layout_width="fill_parent" android:layout_height="fill_parent"
                 android:orientation="vertical">
 
 
-        <LinearLayout
+        <RelativeLayout
 
-                android:id="@+id/prepareInterval"
+
                 android:layout_weight="5"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -24,20 +23,7 @@
                 android:background="@color/drawer_black"
                 >
 
-            <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
-
-                <!--<LinearLayout-->
-                        <!--android:layout_alignParentTop="true"-->
-                        <!--android:background="@color/runner_red"-->
-                        <!--android:visibility="invisible"-->
-                        <!--android:id="@+id/noGps"-->
-                        <!--android:layout_width="fill_parent"-->
-
-                        <!--android:layout_height="48dp">-->
-
-                <!--<TextView  android:text="Please enable location services" android:layout_width="fill_parent" android:layout_height="wrap_content" android:textColor="@color/white_back"-->
-                           <!--android:layout_gravity="center_vertical|center_horizontal" android:gravity="center" android:textStyle="bold" />-->
-            <!--</LinearLayout>-->
+            <!--<RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">-->
 
 
                 <com.kostas.onlineHelp.NumberPickerKostas
@@ -92,27 +78,28 @@
                 <Spinner
                         android:id="@+id/plansSpinner"
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
+                        android:layout_height="38dp"
                         android:layout_below="@+id/intervalRoundsPicker"
                         android:drawSelectorOnTop="true"
-
+                        android:layout_marginBottom="6dp"
                         style="@style/spinner_style"
 
 
                         />
 
-                <TextView
-                        android:layout_above="@+id/setButtons"
-                    android:id="@+id/myAddressText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:textColor="@color/white_back"
-                    android:maxLines="1" />
+                <com.google.android.gms.ads.AdView
+
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/adViewInterval"
+                app:adSize="BANNER"
+                app:adUnitId="ca-app-pub-1164456313108704/9576922674"
+                android:layout_below="@+id/plansSpinner"
+                />
 
 
-                <LinearLayout android:id="@+id/setButtons" android:layout_width="match_parent"  android:layout_alignParentBottom="true"
-                                android:layout_height="wrap_content" android:layout_margin="20dp">
+                <LinearLayout android:layout_below="@+id/adViewInterval" android:id="@+id/setButtons" android:layout_width="match_parent"
+                                android:layout_height="wrap_content" android:layout_marginRight="20dp" android:layout_marginLeft="20dp" android:layout_marginTop="20dp" android:layout_marginBottom="0dp">
 
                 <Button
                         android:layout_marginRight="8dp"
@@ -121,7 +108,7 @@
                         android:layout_height="54dp"
                         android:drawableStart="@drawable/arrow_right_v2"
                         android:paddingLeft="20dp"
-                        android:text="Start"
+                        android:text="@string/start"
                         android:textStyle="bold"
                         android:textSize="@dimen/xmedium_text"
                         android:textColor="@color/white_back"
@@ -133,7 +120,7 @@
                             android:layout_weight="1"
                             android:layout_width="0dp"
                             android:layout_height="54dp"
-                            android:text="Save Plan"
+                            android:text="@string/save_plan"
                             android:textStyle="bold"
                             android:textColor="@color/white_back"
                             android:textSize="@dimen/xmedium_text"
@@ -144,16 +131,18 @@
 
                 </LinearLayout>
 
-                <!--<ImageButton android:textColor="@color/white_back"-->
-                        <!--android:layout_alignParentBottom="true"-->
-                        <!--android:layout_marginTop="10dp"-->
-                        <!--android:src="@drawable/set_button"-->
-                        <!--android:id="@+id/buttonSetIntervalValues"-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:text="Set"-->
-                        <!--android:layout_height="wrap_content" />-->
-
-
+                <TextView
+                        android:id="@+id/myAddressText"
+                        android:textSize="12sp"
+                        android:textStyle="italic"
+                        android:layout_below="@+id/setButtons"
+                        android:layout_width="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:textColor="@color/white_back"
+                        android:maxLines="1"
+                        android:singleLine="true"/>
 
 
             </RelativeLayout>
@@ -162,7 +151,7 @@
 
 
 
-        </LinearLayout>
+        <!--</LinearLayout>-->
 
             <fragment
                     android:id="@+id/mapFrgKostas"
@@ -176,7 +165,6 @@
         </LinearLayout>
 
         <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                     xmlns:tools="http://schemas.android.com/tools"
                      android:layout_width="match_parent"
                      android:layout_height="match_parent"
                 >
@@ -188,8 +176,8 @@
 
             <com.kostas.onlineHelp.ProgressWheel
                     android:id="@+id/timerProgressWheel"
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
+                    android:layout_width="@dimen/progressBarSize"
+                    android:layout_height="@dimen/progressBarSize"
                     android:visibility="invisible"
                     app:textSize="@dimen/large_text"
                     android:layout_gravity="center_horizontal|center_vertical"
@@ -204,8 +192,8 @@
 
             <com.kostas.onlineHelp.ProgressWheel
                     android:id="@+id/distanceProgressWheel"
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
+                    android:layout_width="@dimen/progressBarSize"
+                    android:layout_height="@dimen/progressBarSize"
                     android:visibility="invisible"
                     app:textSize="@dimen/xmedium_text"
                     android:layout_gravity="center_horizontal|center_vertical"
@@ -219,11 +207,22 @@
                     app:rimWidth="20dp"
                     />
 
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:visibility="invisible"
+                      android:layout_gravity="center_horizontal|center_vertical"
+                      android:layout_marginTop="100dp"
+                      android:textSize="@dimen/large_text"
+                      android:textColor="@color/interval_red"
+                      android:textStyle="bold|italic"
+                      android:id="@+id/roundsText"
+                    />
+
 
             <ImageButton
                     android:layout_margin="15dp"
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
+                    android:layout_width="@dimen/progressBarSize"
+                    android:layout_height="@dimen/progressBarSize"
                     android:src="@drawable/replay"
                     android:background="@drawable/circle_green"
                     android:id="@+id/buttonStart"
@@ -248,8 +247,22 @@
                     android:id="@+id/buttonBack"
                     android:layout_gravity="center_horizontal|bottom" />
 
+            <com.google.android.gms.ads.AdView
 
-            <LinearLayout android:visibility="invisible" android:id="@+id/layoutBottomButtons" android:layout_gravity="center_horizontal|bottom" android:layout_width="fill_parent" android:layout_height="84dp" android:background="@color/circle_grey" android:paddingTop=".5dp">
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/adViewInterval2"
+                    app:adSize="BANNER"
+                    app:adUnitId="ca-app-pub-1164456313108704/6586430278"
+                    android:layout_gravity="center_horizontal|bottom"
+                    android:visibility="invisible"
+                    android:layout_marginBottom="90dp"
+
+                    />
+
+
+            <LinearLayout android:orientation="horizontal" android:visibility="invisible" android:id="@+id/layoutBottomButtons" android:layout_gravity="center_horizontal|bottom" android:layout_width="fill_parent" android:layout_height="84dp" android:background="@color/circle_grey" android:paddingTop=".5dp">
+
 
 
                 <RelativeLayout  android:id="@+id/buttonDismissInterval" android:background="@drawable/bottom_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="fill_parent">
@@ -277,4 +290,3 @@
 
     </ViewFlipper>
 
-</LinearLayout>

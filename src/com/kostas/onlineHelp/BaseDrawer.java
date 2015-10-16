@@ -30,14 +30,15 @@ public class BaseDrawer extends BaseFragmentActivity {
     static final int POSITION_MY_PLANS = 2;
     static final int POSITION_EXIT = 3;
 
-    static final String POSITION = "pos";
-    private static final Long EXIT_CODE = -99L;
+//    static final String POSITION = "pos";
+//    private static final Long EXIT_CODE = -99L;
     protected ActionBarDrawerToggle mDrawerToggle;
-    Map<Integer, Integer> bottomButtons;
+//    Map<Integer, Integer> bottomButtons;
     String[] drawerTitles;
     int[] drawerTitlesColors;
     DrawerLayout mDrawerLayout;
     private boolean logout = false;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

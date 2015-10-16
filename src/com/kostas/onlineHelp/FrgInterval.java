@@ -2,18 +2,23 @@ package com.kostas.onlineHelp;
 
 import android.app.*;
 import android.content.*;
+import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -28,6 +33,8 @@ import com.kostas.service.RunningService;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -46,10 +53,9 @@ public class FrgInterval extends BaseFragment{
     RelativeLayout   buttonDismiss, buttonSave;
     Button buttonSetIntervalValues, buttonSavePlan;
     ImageButton buttonStart, buttonStop, buttonBack;
-//    boolean   running=false;//paused=false;
     String timerStop1;
     LinearLayout layoutBottomButtons;
-    EditText editTextIntervalDistance ;
+    TextView roundsText, myAddress;
     float intervalDistance=50;
     ViewFlipper flipper;
     NumberPickerKostas intervalTimePicker, intervalDistancePicker, intervalRoundsPicker;
@@ -62,6 +68,8 @@ public class FrgInterval extends BaseFragment{
     Spinner plansSpinner;
     SpinnerAdapter plansAdapter;
     List<Plan>plans = new ArrayList<Plan>();
+    AdView adView, adView2;
+    AdRequest adRequest, adRequest2;
 
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -123,25 +131,75 @@ public class FrgInterval extends BaseFragment{
         super.onCreateView(inflater, container, savedInstanceState);
 
         View v = inflater.inflate(R.layout.frg_interval, container, false);
-
+//        placeAds(v);
 
         setPlansSpinner(v);
-        getPlansFromDb();
         setTextViewsAndButtons(v);
+        new PerformAsyncTask(getActivity(),0).execute();
         setListeners(v);
 //        selectProvider();
-        getLastLocation(v);
-        setSaveListener();
+
+//        setSaveListener();
 
 
 
-        initializeMap();
+//        initializeMap();
 
        return  v;
     }
 
+    public static  String md5(final String s) {
+        try {
+            // Create MD5 Hash
+            MessageDigest digest = java.security.MessageDigest
+                    .getInstance("MD5");
+            digest.update(s.getBytes());
+            byte messageDigest[] = digest.digest();
+
+            // Create Hex String
+            StringBuffer hexString = new StringBuffer();
+            for (int i = 0; i < messageDigest.length; i++) {
+                String h = Integer.toHexString(0xFF & messageDigest[i]);
+                while (h.length() < 2)
+                    h = "0" + h;
+                hexString.append(h);
+            }
+            return hexString.toString();
+
+        } catch (NoSuchAlgorithmException e) {
+            Log.v("SERVICE",e.getMessage());
+        }
+        return "";
+    }
+
+    private void placeAds() {
+
+        String android_id = Settings.Secure.getString(getActivity().getContentResolver(), Settings.Secure.ANDROID_ID);
+        String deviceId = md5(android_id).toUpperCase();
+
+
+//         adView = (AdView) v.findViewById(R.id.adViewInterval);
+//        adView2 = (AdView) v.findViewById(R.id.adViewInterval2);
+         adRequest = new AdRequest.Builder()
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .addTestDevice(deviceId)
+                .build();
+
+
+
+          adRequest2 = new AdRequest.Builder()
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .addTestDevice(deviceId)
+                .build();
+//        adView2.loadAd(adRequest2);
+//        adView.loadAd(adRequest);
+    }
+
+
     private void setPlansSpinner(View v){
         plansSpinner = (Spinner) v.findViewById(R.id.plansSpinner);
+
+//        new PerformAsyncTask(getActivity()).execute();
 
         plansAdapter = new SpinnerAdapter(getActivity(), android.R.layout.simple_spinner_dropdown_item, plans);
 
@@ -154,13 +212,20 @@ public class FrgInterval extends BaseFragment{
     private void setTextViewsAndButtons(View v){
         app_preferences = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
 
-
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+
+
+        adView = (AdView) v.findViewById(R.id.adViewInterval);
+        adView2 = (AdView) v.findViewById(R.id.adViewInterval2);
 
         instance = this;
 
         intervalsList = new ArrayList<Interval>();
 
+        myAddress = (TextView) v.findViewById(R.id.myAddressText);
+        roundsText = (TextView) v.findViewById(R.id.roundsText);
+        Typeface tf=Typeface.createFromAsset(getActivity().getAssets(), "fonts/roboto_boldItalic.ttf");
+        roundsText.setTypeface(tf);
         buttonSetIntervalValues = (Button) v.findViewById(R.id.buttonSetIntervalValues);
         buttonSavePlan = (Button) v.findViewById(R.id.buttonSavePlan);
         buttonStart = (ImageButton) v.findViewById(R.id.buttonStart);
@@ -182,18 +247,9 @@ public class FrgInterval extends BaseFragment{
         buttonDismiss = (RelativeLayout) v.findViewById(R.id.buttonDismissInterval);
         buttonSave = (RelativeLayout) v.findViewById(R.id.buttonSaveRunWithIntervals);
 
-
-
-
          adapterInterval = new  IntervalAdapterItem(getActivity(), getActivity().getApplicationContext(),
                 R.layout.list_interval_row, intervalsList);
         completedIntervalsListView.setAdapter(adapterInterval);
-
-
-
-
-//        plansSpinner.setSelection(-1);
-
 
     }
 
@@ -216,6 +272,14 @@ public class FrgInterval extends BaseFragment{
         buttonStop.setVisibility(View.VISIBLE);
         buttonBack.setVisibility(View.INVISIBLE);
         completedIntervalsListView.setVisibility(View.VISIBLE);
+
+        if (rounds>0){
+
+            roundsText.setText(intervalsList.size()+" / "+rounds);
+            roundsText.setVisibility(View.VISIBLE);
+
+        }
+
 
         if (isRunning && !isCompleted){
             setDistanceProgress(distanceCovered);
@@ -249,8 +313,6 @@ public class FrgInterval extends BaseFragment{
                     distanceProgressWheel.setProgress(0);
                     distanceProgressWheel.setVisibility(View.VISIBLE);
 
-
-
                 }
             }.start();
 
@@ -269,6 +331,7 @@ public class FrgInterval extends BaseFragment{
         }else {
 
 //        stopRunningService(false);
+            roundsText.setText(intervalsList.size()+" / "+rounds);
             distanceProgressWheel.setVisibility(View.INVISIBLE);
             distanceProgressWheel.setProgress(0);
             distanceProgressWheel.setText(0 + " / " + (int) intervalDistance);
@@ -341,13 +404,10 @@ public class FrgInterval extends BaseFragment{
     private void clear(){
 
         ((ExtApplication)getActivity().getApplication()).setInRunningMode(false);
-
         intervalDistance = 0;
         intervalTime = 0;
         intervalsList.clear();
         buttonBack.setVisibility(View.VISIBLE);
-
-//        totalTime = 0;
         clearViews();
         hideFrame();
     }
@@ -361,9 +421,6 @@ public class FrgInterval extends BaseFragment{
             @Override
             public void onClick(View view) {
 
-
-
-//                if (provider!=null && validateDistanceAndTime())
                 if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && validateDistanceAndTime()){
                     if (isMyServiceRunning()){
                         stopRunningService();
@@ -410,6 +467,32 @@ public class FrgInterval extends BaseFragment{
 
 
 
+        buttonStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (   locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                    getInRunningMode(false, false, intervalTime, 0);
+                }else{
+                    Toast.makeText(getActivity(), "Please enable GPS", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+        });
+
+        buttonStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                confirmStop();
+            }
+        });
+
+        buttonBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                hideFrame();
+            }
+        });
 
 
     }
@@ -422,7 +505,7 @@ public class FrgInterval extends BaseFragment{
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.new_plan_alert_dialog, null);
         dialogBuilder.setView(dialogView);
-        dialogBuilder.setTitle("Confirm new plan");
+//        dialogBuilder.setTitle("Confirm new plan");
 
         dialogBuilder
                 .setCancelable(false)
@@ -496,8 +579,8 @@ public class FrgInterval extends BaseFragment{
 
 
     //todo only in pro version
-    public  void getPlansFromDb(){
-        Database db = new Database(getActivity());
+    public  void getPlansFromDb(Activity activity, boolean fromAsync){
+        Database db = new Database(activity);
 
         plans.clear();
 
@@ -508,8 +591,18 @@ public class FrgInterval extends BaseFragment{
             plans.add(plan);
         }
 
-        if (plans.size()==1) plansSpinner.setVisibility(View.GONE);
-        else if (plansAdapter!=null) {plansAdapter.notifyDataSetChanged();plansSpinner.setVisibility(View.VISIBLE);}
+        if (!fromAsync) {
+           setPlansVisibility();
+        }
+    }
+
+
+    private void setPlansVisibility(){
+        if (plans.size() == 1) plansSpinner.setVisibility(View.GONE);
+        else if (plansAdapter != null) {
+            plansAdapter.notifyDataSetChanged();
+            plansSpinner.setVisibility(View.VISIBLE);
+        }
     }
 
     private void savePlan(String desc){
@@ -518,10 +611,10 @@ public class FrgInterval extends BaseFragment{
         intervalTime = intervalTimePicker.getValue();
         rounds = intervalRoundsPicker.getValue();
 
-        Database db = new Database(getActivity().getApplicationContext());
+        Database db = new Database(getActivity());
         db.addPlan(new Plan(-1, desc, (int)intervalDistance, (int)intervalTime, rounds));
 
-        getPlansFromDb();
+        getPlansFromDb(getActivity(), false);
         plansSpinner.setVisibility(View.VISIBLE);
 
 
@@ -570,6 +663,17 @@ public class FrgInterval extends BaseFragment{
         }
     }
 
+
+    private void startSingleUpdate(){
+        SharedPreferences.Editor editor = app_preferences.edit();
+        editor.putBoolean("SEARCHING", true);
+        editor.commit();
+        Intent intent = new Intent(getActivity().getBaseContext(), RunningService.class);
+        intent.putExtra(RunningService.SINGLE_UPDATE, true);
+        getActivity().startService(intent);
+        getActivity().registerReceiver(receiver, new IntentFilter(RunningService.NOTIFICATION));
+    }
+
     /* Request updates at startup */
     @Override
     public void onResume() {
@@ -613,19 +717,24 @@ public class FrgInterval extends BaseFragment{
         }
         //service not running and i start loc fix update
         else {
-//            toggleNoGps(!(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)));
 
             Log.v("SERVICE", "getting location..");
 
+
+
+
             if ((locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) /**&& (lastLocation == null)**/  ) {
 
-                SharedPreferences.Editor editor = app_preferences.edit();
-                editor.putBoolean("SEARCHING", true);
-                editor.commit();
-                Intent intent = new Intent(getActivity().getBaseContext(), RunningService.class);
-                intent.putExtra(RunningService.SINGLE_UPDATE, true);
-                getActivity().startService(intent);
-                getActivity().registerReceiver(receiver, new IntentFilter(RunningService.NOTIFICATION));
+                new PerformAsyncTask(getActivity(), 1).execute();
+
+
+//                SharedPreferences.Editor editor = app_preferences.edit();
+//                editor.putBoolean("SEARCHING", true);
+//                editor.commit();
+//                Intent intent = new Intent(getActivity().getBaseContext(), RunningService.class);
+//                intent.putExtra(RunningService.SINGLE_UPDATE, true);
+//                getActivity().startService(intent);
+//                getActivity().registerReceiver(receiver, new IntentFilter(RunningService.NOTIFICATION));
 
             }
         }
@@ -690,7 +799,7 @@ public class FrgInterval extends BaseFragment{
 
 
 
-    public void getLastLocation(View v){
+    public void getLastLocation(){
 
 
 
@@ -723,12 +832,17 @@ public class FrgInterval extends BaseFragment{
         }
         lastLocation =  bestLocation;
 
+
+
+    }
+
+
+    private void setAddressText(){
         if (lastLocation!=null) {
-            TextView myAddress = (TextView) v.findViewById(R.id.myAddressText);
+
             myAddress.setText("Currently at: " + getMyLocationAddress(lastLocation.getLatitude(), lastLocation.getLongitude()));
 
         }
-
     }
 
     private void setAddressTextAndMap(){
@@ -741,8 +855,11 @@ public class FrgInterval extends BaseFragment{
             }catch (Exception e){
                 Log.v("SERVICE", "could not find address of location");
             }
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 12));
-            googleMap.animateCamera(CameraUpdateFactory.zoomTo(12), 1000, null);
+
+            if (googleMap!=null) {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 12));
+                googleMap.animateCamera(CameraUpdateFactory.zoomTo(12), 1000, null);
+            }
 
         }
     }
@@ -791,6 +908,7 @@ public class FrgInterval extends BaseFragment{
          buttonStop.setVisibility(View.INVISIBLE);
         buttonBack.setVisibility(View.VISIBLE);
         layoutBottomButtons.setVisibility(View.INVISIBLE);
+        adView2.setVisibility(View.INVISIBLE);
          timerProgressWheel.setVisibility(View.INVISIBLE);
         distanceProgressWheel.setVisibility(View.INVISIBLE);
 
@@ -809,38 +927,12 @@ public class FrgInterval extends BaseFragment{
         flipper.setDisplayedChild(0);
     }
 
-    public void setSaveListener(){
-
-
-        buttonStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                        if (   locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-                            getInRunningMode(false, false, intervalTime, 0);
-                        }else{
-                            Toast.makeText(getActivity(), "Please enable GPS", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-        });
-
-        buttonStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                confirmStop();
-            }
-        });
-
-        buttonBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                hideFrame();
-            }
-        });
-
-
-    }
+//    public void setSaveListener(){
+//
+//
+//
+//
+//    }
 
 
     private void confirmStop(){
@@ -878,6 +970,8 @@ public class FrgInterval extends BaseFragment{
         resetAppPrefs();
         buttonStop.setVisibility(View.INVISIBLE);
         layoutBottomButtons.setVisibility(View.VISIBLE);
+        adView2.setVisibility(View.VISIBLE);
+        roundsText.setVisibility(View.INVISIBLE);
 
         if (intervalsList.size()==0) buttonDismiss.performClick();
     }
@@ -1035,12 +1129,15 @@ public class FrgInterval extends BaseFragment{
     public void initializeMap(){
         SupportMapFragment fm = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapFrgKostas);
         googleMap = fm.getMap();
-        googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-        googleMap.setIndoorEnabled(false);
-        googleMap.setMyLocationEnabled(true);
-        if (lastLocation!=null){
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 12));
-            googleMap.animateCamera(CameraUpdateFactory.zoomTo(12), 2000, null);
+
+        if (googleMap!=null) {
+            googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+            googleMap.setIndoorEnabled(false);
+            googleMap.setMyLocationEnabled(true);
+            if (lastLocation != null) {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 12));
+                googleMap.animateCamera(CameraUpdateFactory.zoomTo(12), 2000, null);
+            }
         }
 
     }
@@ -1128,7 +1225,7 @@ public class FrgInterval extends BaseFragment{
             LayoutInflater inflater = getActivity().getLayoutInflater();
             planViewHolder holder;
             if (convertView == null || !(convertView.getTag() instanceof planViewHolder)) {
-                convertView = inflater.inflate(R.layout.custom_spinner_dropdown, null);
+                convertView = inflater.inflate(R.layout.custom_spinner_header, null);
                 holder = new planViewHolder();
                 holder.description = (TextView) convertView.findViewById(R.id.planDescriptionSpinner2);
                 holder.arrow = (ImageView) convertView.findViewById(R.id.planArrow);
@@ -1139,7 +1236,7 @@ public class FrgInterval extends BaseFragment{
             }
 
              if (plansSpinner.isActivated()){
-                 holder.arrow.setImageDrawable(getResources().getDrawable(R.drawable.arrow_up));
+                 holder.arrow.setImageDrawable(getResources().getDrawable(R.drawable.arrow_collapse));
              }else{
                  holder.arrow.setImageDrawable(getResources().getDrawable(R.drawable.arrow_down));
              }
@@ -1153,6 +1250,57 @@ public class FrgInterval extends BaseFragment{
         TextView description;
 //        TextView info;
         ImageView arrow;
+    }
+
+
+
+    private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
+        private Activity activity;
+        int type;
+
+
+
+        public PerformAsyncTask(Activity activity, int type) {
+            this.activity = activity;
+            this.type = type;
+
+        }
+
+        protected void onPreExecute() {
+            plansSpinner.setClickable(false);
+        }
+
+        @Override
+        protected Void doInBackground(Void... unused) {
+
+
+            if (type==0) {
+                getLastLocation();
+                getPlansFromDb(activity, true);
+                placeAds();
+            }else if (type==1){
+              startSingleUpdate();
+            }
+
+            return null;
+
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+
+            adView2.loadAd(adRequest2);
+            adView.loadAd(adRequest);
+            plansSpinner.setClickable(true);
+            initializeMap();
+            setAddressText();
+            setPlansVisibility();
+
+
+
+
+        }
+
     }
 
 

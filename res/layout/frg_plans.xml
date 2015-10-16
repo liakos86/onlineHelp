@@ -12,7 +12,7 @@
               android:layout_height="match_parent"
               />
 
-    <TextView android:id="@+id/noPlansText" android:textColor="@color/white_back" android:layout_centerInParent="true" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="No saved plans yet!" android:textSize="20dp" android:drawableBottom="@drawable/empty_100"/>
+    <TextView android:id="@+id/noPlansText" android:textColor="@color/white_back" android:layout_centerInParent="true" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/no_plans" android:textSize="20dp" android:drawableBottom="@drawable/empty_100"/>
 
 
 

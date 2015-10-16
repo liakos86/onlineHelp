@@ -1,8 +1,10 @@
 package com.kostas.onlineHelp;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.media.AudioManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -40,13 +42,14 @@ public class MainActivity extends BaseDrawer {
 
         mPager.setOffscreenPageLimit(2);
 
-        mPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(), PAGER_SIZE));
+        mPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(),  PAGER_SIZE));
 
 //        setBottomButtons(mPager);
 
 //        pagerTitles = getResources().getStringArray(R.array.pager_titles);
 
 
+        final Activity activity = this;
         mPager.setOnPageChangeListener(new NonSwipeableViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i2) {
@@ -64,13 +67,13 @@ public class MainActivity extends BaseDrawer {
 
 
                 if (getActiveFragment(getSupportFragmentManager(), position) instanceof FrgShowRuns) {
-                    ((FrgShowRuns)getActiveFragment(getSupportFragmentManager(), position)).getRunsFromDb();
+                    ((FrgShowRuns)getActiveFragment(getSupportFragmentManager(), position)).getRunsFromDb(activity, false);
 
                 }else  if (getActiveFragment(getSupportFragmentManager(), position) instanceof FrgPlans) {
-                    ((FrgPlans)getActiveFragment(getSupportFragmentManager(), position)).getPlansFromDb();
+                    ((FrgPlans)getActiveFragment(getSupportFragmentManager(), position)).getPlansFromDb(activity, false);
 
                 }else  if (getActiveFragment(getSupportFragmentManager(), position) instanceof FrgInterval) {
-                    ((FrgInterval)getActiveFragment(getSupportFragmentManager(), position)).getPlansFromDb();
+                    ((FrgInterval)getActiveFragment(getSupportFragmentManager(), position)).getPlansFromDb(activity, false);
 
                 }
 
@@ -105,6 +108,7 @@ public class MainActivity extends BaseDrawer {
     private class MyPagerAdapter extends FragmentPagerAdapter {
 
         Fragment[] fragments;
+        Activity activity;
 
         public MyPagerAdapter(FragmentManager supportFragmentManager, int pageCount) {
             super(supportFragmentManager);
@@ -165,4 +169,54 @@ public class MainActivity extends BaseDrawer {
     protected void onRestart() {
         super.onRestart();
     }
+
+//    public void doAsync(int position){
+//        new PerformAsyncTask(this, position).execute();
+//    }
+//
+//
+//    public class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
+//        private Activity activity;
+//        private int whichFragment;
+//
+//
+//
+//        public PerformAsyncTask(Activity activity, int whichFragment) {
+//            this.activity = activity;
+//            this.whichFragment = whichFragment;
+//
+//        }
+//
+//        protected void onPreExecute() {
+//
+//        }
+//
+//        @Override
+//        protected Void doInBackground(Void... unused) {
+//
+//             String name =
+//            "android:switcher:" + mPager.getId() + ":" + whichFragment;
+//
+//            if (whichFragment==0) {
+//                ((FrgInterval)getSupportFragmentManager().findFragmentByTag(name)).getPlansFromDb(activity);
+//
+//            }else  if (whichFragment==1) {
+//                ((FrgShowRuns)getSupportFragmentManager().findFragmentByTag(name)).getRunsFromDb(activity);
+//
+//            }else  if (whichFragment==2) {
+//                ((FrgPlans)getSupportFragmentManager().findFragmentByTag(name)).getPlansFromDb(activity);
+//
+//            }
+//            return null;
+//
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Void result) {
+//
+//        }
+//
+//    }
+
+
 }

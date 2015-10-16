@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:background="@color/drawer_black"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
 
-    <ViewFlipper
+
+    <ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/viewFlipper"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
+            android:background="@color/drawer_black"
             >
 
         <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
@@ -22,7 +19,7 @@
 
 
 
-        <TextView android:id="@+id/noRunsText" android:textColor="@color/white_back" android:layout_centerInParent="true" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="No saved runs yet!" android:textSize="20dp" android:drawableBottom="@drawable/empty_100"/>
+        <TextView android:id="@+id/noRunsText" android:textColor="@color/white_back" android:layout_centerInParent="true" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/no_runs" android:textSize="20dp" android:drawableBottom="@drawable/empty_100"/>
 
         </RelativeLayout>
 
@@ -55,7 +52,7 @@
 
             <!--</RelativeLayout>-->
 
-            <LinearLayout android:id="@+id/intervalsButtons" android:layout_alignParentBottom="true" android:layout_width="fill_parent" android:layout_height="84dp" android:background="@color/circle_grey" android:paddingTop=".5dp">
+            <LinearLayout android:baselineAligned="false" android:id="@+id/intervalsButtons" android:layout_alignParentBottom="true" android:layout_width="fill_parent" android:layout_height="84dp" android:background="@color/circle_grey" android:paddingTop="0.5dp">
 
 
                 <RelativeLayout  android:id="@+id/buttonCloseIntervals" android:background="@drawable/bottom_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="fill_parent">
@@ -101,4 +98,3 @@
     </ViewFlipper>
 
 
-</LinearLayout>

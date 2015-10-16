@@ -1,8 +1,10 @@
 package com.kostas.onlineHelp;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,7 +40,7 @@ public class FrgPlans extends BaseFragment{
 
         View v = inflater.inflate(R.layout.frg_plans, container, false);
 
-        getPlansFromDb();
+
 
 
         setList(v);
@@ -52,6 +54,9 @@ public class FrgPlans extends BaseFragment{
 
     private void setList(View v){
         plansListView = (ListView) v.findViewById(R.id.plansList);
+
+        new PerformAsyncTask(getActivity()).execute();
+
         noPlansText = (TextView) v.findViewById(R.id.noPlansText);
 
         adapterPlans = new PlansAdapterItem(getActivity().getApplicationContext(), R.layout.list_plan_row, plans);
@@ -62,8 +67,8 @@ public class FrgPlans extends BaseFragment{
 
     }
 
-    public  void getPlansFromDb(){
-        Database db = new Database(getActivity());
+    public  void getPlansFromDb(Activity activity, boolean fromAsync){
+        Database db = new Database(activity);
 
         plans.clear();
 
@@ -73,7 +78,7 @@ public class FrgPlans extends BaseFragment{
             plans.add(plan);
         }
 
-        if (adapterPlans!=null) adapterPlans.notifyDataSetChanged();
+        if (adapterPlans!=null && !fromAsync) adapterPlans.notifyDataSetChanged();
     }
 
     private void showTextNoPlans(){
@@ -153,15 +158,19 @@ public class FrgPlans extends BaseFragment{
             holder.info.setText( plan.getMeters()+"m with "+plan.getSeconds()+"secs rest"+ (plan.getRounds()>0 ? " x"+plan.getRounds()+" rounds" : "" ));
 
 
+            if (position%2==0)
+                convertView.setBackgroundColor(getResources().getColor(R.color.drawer_black));
+            else
+                convertView.setBackgroundColor(getResources().getColor(R.color.drawer_grey));
 
 
-            holder.delete.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+        holder.delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-                    confirmDelete(plan.getId(), position);
-                }
-            });
+                confirmDelete(plan.getId(), position);
+            }
+        });
 
             return convertView;
 
@@ -208,6 +217,41 @@ public class FrgPlans extends BaseFragment{
         db.deletePlan(trId);
         plans.remove(position);
         adapterPlans.notifyDataSetChanged();
+    }
+
+
+    private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
+        private Activity activity;
+
+
+
+        public PerformAsyncTask(Activity activity) {
+            this.activity = activity;
+
+        }
+
+        protected void onPreExecute() {
+            plansListView.setClickable(false);
+        }
+
+        @Override
+        protected Void doInBackground(Void... unused) {
+
+           getPlansFromDb(activity, true);
+            return null;
+
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+
+            plansListView.setClickable(true);
+            if (adapterPlans!=null) adapterPlans.notifyDataSetChanged();
+
+
+
+        }
+
     }
 
 

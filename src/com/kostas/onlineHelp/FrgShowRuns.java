@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.model.*;
 import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Running;
@@ -29,11 +28,11 @@ import java.util.*;
  */
 public class FrgShowRuns extends BaseFragment {
 
-    List<Running> runs;
-    List<Interval> intervals;
+//    List<Running> runs;
+    List<Interval> intervals = new ArrayList<Interval>();
 
     private ArrayList<String> parentItems = new ArrayList<String>();
-    private String[]parents;
+//    private String[]parents;
     private ArrayList<Object> childItems = new ArrayList<Object>();
 
     private ExpandableListView runsExpListView;
@@ -47,11 +46,12 @@ public class FrgShowRuns extends BaseFragment {
 
 //    List<Polyline> mapLines;
 
-    Marker markerStart, markerFinish;
+//    Marker markerStart, markerFinish;
 
     Running currentRun;
 
-    ListView runningListView, intervalListView;
+    ListView intervalListView;
+//    ListView runningListView;
 //    RunningAdapterItem adapterRunning;
     IntervalAdapterItem adapterInterval;
 
@@ -64,7 +64,7 @@ public class FrgShowRuns extends BaseFragment {
     //if he goes back and forth in map <-> intervals
     boolean alreadyDrawn;
 
-    LatLng zoomPoint;
+//    LatLng zoomPoint;
 
 
 
@@ -78,6 +78,16 @@ public class FrgShowRuns extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.frg_show_runs, container, false);
 
+        initializeViews(v);
+
+        setList();
+//        initializeMap();
+
+
+        return  v;
+    }
+
+    private void initializeViews(View v){
         viewFlipper = (ViewFlipper) v.findViewById(R.id.viewFlipper);
 
         openMapButton = (RelativeLayout) v.findViewById(R.id.buttonShowMap);
@@ -86,32 +96,26 @@ public class FrgShowRuns extends BaseFragment {
 
         noRunsText = (TextView) v.findViewById(R.id.noRunsText);
 
-        setList(v);
-        initializeMap();
+        runsExpListView = (ExpandableListView) v.findViewById(R.id.listExpRunning);
 
+        intervalListView = (ListView) v.findViewById(R.id.listIntervals);
 
-        return  v;
     }
 
     public void initializeMap(){
-        SupportMapFragment fm = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapListKostas);
-        googleMap = fm.getMap();
-        googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-        googleMap.setIndoorEnabled(false);
+        googleMap = ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapListKostas)).getMap();
 
+        if (googleMap!=null) {
+            googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+            googleMap.setIndoorEnabled(false);
+            googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+                @Override
+                public void onMapLoaded() {
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 60));
+                }
+            });
+        }
 
-
-        googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
-            @Override
-            public void onMapLoaded() {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 60));
-            }
-        });
-
-//        mapLines = new ArrayList<Polyline>();
-
-//        viewFlipper.setDisplayedChild(2);
-//        viewFlipper.setDisplayedChild(0);
     }
 
     private void showIntervalsForRun(Running running){
@@ -127,37 +131,32 @@ public class FrgShowRuns extends BaseFragment {
 
         adapterInterval.notifyDataSetChanged();
 
-        drawMap();
-
+        if (googleMap!=null) {
+            drawMap();
+        }else{
+            Toast.makeText(getActivity(), "Google maps not present...", Toast.LENGTH_SHORT).show();
+        }
+//        new PerformAsyncTask(getActivity(), true).execute();
 
 
     }
     
-    private void setList(View v){
+    private void setList(){
 
-//        runs = new ArrayList<Running>();
-        intervals = new ArrayList<Interval>();
 
-        runsExpListView = (ExpandableListView) v.findViewById(R.id.listExpRunning);
-
-//        runningListView = (ListView) v.findViewById(R.id.listRunning);
-//        runningListView.setDivider(null);
-        intervalListView = (ListView) v.findViewById(R.id.listIntervals);
         intervalListView.setDivider(null);
 
 //        adapterRunning = new RunningAdapterItem(getActivity().getApplicationContext(),
 //                R.layout.list_running_row, runs);
 //        runningListView.setAdapter(adapterRunning);
 
-        getRunsFromDb();
+         new PerformAsyncTask(getActivity()).execute();
+
+//        getRunsFromDb();
         runsExpListView.setDividerHeight(2);
         runsExpListView.setClickable(true);
         adapterExp = new MyExpandableAdapter(parentItems, childItems, getActivity());
-
         runsExpListView.setAdapter(adapterExp);
-
-
-
 
         runsExpListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             int previousItem = -1;
@@ -221,8 +220,8 @@ public class FrgShowRuns extends BaseFragment {
         
     }
 
-    public void getRunsFromDb(){
-        Database db = new Database(getActivity());
+    public void getRunsFromDb(Activity activity, boolean fromAsync){
+        Database db = new Database(activity);
         List <Running> newRuns = db.fetchRunsFromDb();
 
         Collections.reverse(newRuns);
@@ -270,7 +269,7 @@ public class FrgShowRuns extends BaseFragment {
                 childItems.add(monthRuns);
             }
 
-            if (adapterExp!=null) adapterExp.notifyDataSetChanged();
+            if (adapterExp!=null&& !fromAsync) adapterExp.notifyDataSetChanged();
 //            adapterRunning.notifyDataSetChanged();
 
         }
@@ -661,6 +660,43 @@ public class FrgShowRuns extends BaseFragment {
             runsExpListView.setVisibility(View.VISIBLE);
             noRunsText.setVisibility(View.GONE);
         }
+    }
+
+
+
+    private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
+        private Activity activity;
+
+
+        public PerformAsyncTask(Activity activity) {
+            this.activity = activity;
+        }
+
+        protected void onPreExecute() {
+            runsExpListView.setClickable(false);
+        }
+
+        @Override
+        protected Void doInBackground(Void... unused) {
+
+
+                getRunsFromDb(activity, true);
+
+            return null;
+
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+
+            runsExpListView.setClickable(true);
+            initializeMap();
+            if (adapterExp!=null) adapterExp.notifyDataSetChanged();
+
+
+
+        }
+
     }
 
 
