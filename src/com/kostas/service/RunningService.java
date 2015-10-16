@@ -65,6 +65,7 @@ public class RunningService extends IntentService implements LocationListener{
     MediaPlayer mp = new MediaPlayer();
     LocationListener listener;
     ExtApplication application;
+    int updates;
 
 
     //i need the list here. The app might be killed and user might complete several intervals
@@ -229,7 +230,7 @@ public class RunningService extends IntentService implements LocationListener{
             Log.v("SERVICE", "found");
 
             lastLocation = location;
-            broadcastLocation(true);
+            broadcastLocation();
             mHandler.removeCallbacks(singleUpdateTask);
             return;
         }
@@ -308,10 +309,10 @@ public class RunningService extends IntentService implements LocationListener{
         return d;
     }
 
-    private void broadcastLocation(boolean found){
+    private void broadcastLocation(){
 
         Intent intent = new Intent(NOTIFICATION);
-        intent.putExtra(LOCATION_FOUND, found);
+        intent.putExtra(LOCATION_FOUND, true);
         intent.putExtra(SINGLE_UPDATE, lastLocation);
         sendBroadcast(intent);
 
@@ -451,7 +452,7 @@ public class RunningService extends IntentService implements LocationListener{
 
 
         Log.v("SERVICE", "Disabled provider");
-        broadcastLocation(false);
+        broadcastLocation();
 
     }
 
@@ -466,7 +467,12 @@ public class RunningService extends IntentService implements LocationListener{
 
     public  void requestSingleUpdate(){
 
-        locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, this, null);
+        if (++updates < 6) {
+            locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, this, null);
+        }else{
+            broadcastLocation();
+            mHandler.removeCallbacks(singleUpdateTask);
+        }
         Log.v("SERVICE", "single_update..");
 
 
