@@ -15,4 +15,5 @@
     <dimen name="usage_icon">18dp</dimen>
     <dimen name="usage_icon_mr">10dp</dimen>
     <dimen name="margin10">10dp</dimen>
+    <dimen name="progressBarSize">170dp</dimen>
 </resources>
