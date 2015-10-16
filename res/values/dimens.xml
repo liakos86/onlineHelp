@@ -11,9 +11,10 @@
     <dimen name="xsmall_text">10sp</dimen>
     <dimen name="xxsmall_text">8sp</dimen>
     <dimen name="map_icon_size">60dp</dimen>
-    <dimen name="usage_margin">4dp</dimen>
+    <dimen name="four_dp">4dp</dimen>
     <dimen name="usage_icon">18dp</dimen>
     <dimen name="usage_icon_mr">10dp</dimen>
     <dimen name="margin10">10dp</dimen>
     <dimen name="progressBarSize">170dp</dimen>
+
 </resources>

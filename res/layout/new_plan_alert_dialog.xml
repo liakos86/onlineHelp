@@ -6,7 +6,7 @@
         android:background="@color/white_back"
         android:padding="10dp">
 
-    <TextView android:drawablePadding="8dp" android:textStyle="italic"  android:textColor="@color/interval_red" android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/dialogError" android:text="Description must be between 1 and 20 characters" android:textSize="12dp" android:singleLine="true" android:visibility="invisible"/>
+    <TextView android:drawablePadding="8dp" android:textStyle="italic"  android:textColor="@color/interval_red" android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/dialogError" android:text="@string/dialog_error" android:textSize="12dp" android:singleLine="true" android:visibility="invisible"/>
 
     <TextView android:layout_marginTop="4dp" android:drawablePadding="8dp" android:textStyle="bold" android:drawableLeft="@drawable/checkbox" android:textColor="@color/interval_green" android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/dialogMeters" android:layout_below="@+id/dialogError" android:textSize="16dp"/>
     <TextView android:layout_marginTop="10dp"  android:drawablePadding="8dp" android:textStyle="bold" android:drawableLeft="@drawable/checkbox" android:textColor="@color/interval_green" android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/dialogSeconds" android:layout_below="@+id/dialogMeters" android:textSize="16dp"/>

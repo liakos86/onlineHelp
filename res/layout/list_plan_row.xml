@@ -14,7 +14,7 @@
     <TextView android:textStyle="bold" android:layout_toRightOf="@+id/planIcon" android:id="@+id/planDescription" android:textColor="@color/white_back"  android:layout_width="wrap_content" android:layout_height="wrap_content" />
     <TextView android:textStyle="italic" android:layout_toRightOf="@+id/planIcon" android:layout_below="@+id/planDescription" android:id="@+id/planInfo" android:textColor="@color/white_back" android:layout_width="wrap_content" android:layout_height="wrap_content" />
 
-    <ImageView android:src="@drawable/trash"  android:layout_alignParentRight="true" android:layout_centerVertical="true" android:id="@+id/planDelete"  android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/fastest" android:layout_marginRight="4dp"/>
+    <ImageView android:src="@drawable/trash"  android:layout_alignParentRight="true" android:layout_centerVertical="true" android:id="@+id/planDelete"  android:layout_width="wrap_content" android:layout_height="wrap_content"  android:layout_marginRight="4dp"/>
 
 
 </RelativeLayout>
