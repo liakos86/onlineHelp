@@ -2,6 +2,7 @@ package com.kostas.onlineHelp;
 
 import android.app.*;
 import android.content.*;
+import android.graphics.Point;
 import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
@@ -56,6 +57,7 @@ public class FrgInterval extends BaseFragment{
     String timerStop1;
     LinearLayout layoutBottomButtons;
     TextView roundsText, myAddress;
+//            , speedText;
     float intervalDistance=50;
     ViewFlipper flipper;
     NumberPickerKostas intervalTimePicker, intervalDistancePicker, intervalRoundsPicker;
@@ -103,6 +105,9 @@ public class FrgInterval extends BaseFragment{
 
 
                 }
+//                else if (bundle.getBoolean(RunningService.SPEED_UPDATE, false)){
+//                    speedText.setText("Speed: "+bundle.getFloat("speed",0));
+//                }
                 else {
                     String latLonList = bundle.getString(RunningService.LATLONLIST);
                     long millis = bundle.getLong(RunningService.INTERVAL_TIME);
@@ -207,6 +212,16 @@ public class FrgInterval extends BaseFragment{
 
         plansSpinner.setAdapter(plansAdapter);
 
+
+
+        if (Build.VERSION.SDK_INT > 15) {
+            Display display = getActivity().getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            int _width = size.x;
+            plansSpinner.setDropDownWidth(_width-10);
+        }
+
     }
 
     private void setTextViewsAndButtons(View v){
@@ -224,8 +239,10 @@ public class FrgInterval extends BaseFragment{
 
         myAddress = (TextView) v.findViewById(R.id.myAddressText);
         roundsText = (TextView) v.findViewById(R.id.roundsText);
+//        speedText = (TextView) v.findViewById(R.id.speedText);
         Typeface tf=Typeface.createFromAsset(getActivity().getAssets(), "fonts/roboto_boldItalic.ttf");
         roundsText.setTypeface(tf);
+//        speedText.setTypeface(tf);
         buttonSetIntervalValues = (Button) v.findViewById(R.id.buttonSetIntervalValues);
         buttonSavePlan = (Button) v.findViewById(R.id.buttonSavePlan);
         buttonStart = (ImageButton) v.findViewById(R.id.buttonStart);
@@ -273,12 +290,14 @@ public class FrgInterval extends BaseFragment{
         buttonBack.setVisibility(View.INVISIBLE);
         completedIntervalsListView.setVisibility(View.VISIBLE);
 
-        if (rounds>0){
-
-            roundsText.setText(intervalsList.size()+" / "+rounds);
-            roundsText.setVisibility(View.VISIBLE);
-
-        }
+//        if (rounds>0){
+//
+//            roundsText.setText("Rounds: "+intervalsList.size()+" / "+rounds);
+//            roundsText.setVisibility(View.VISIBLE);
+//
+//        }
+//
+//        speedText.setVisibility(View.VISIBLE);
 
 
         if (isRunning && !isCompleted){
@@ -920,11 +939,20 @@ public class FrgInterval extends BaseFragment{
     private void showFrame(){
         flipper.setDisplayedChild(1);
 
+        if (rounds>0){
+
+            roundsText.setText("Rounds: 0 / "+rounds);
+            roundsText.setVisibility(View.VISIBLE);
+
+        }
+
+
 
     }
 
     private void hideFrame(){
         flipper.setDisplayedChild(0);
+        roundsText.setVisibility(View.INVISIBLE);
     }
 
 //    public void setSaveListener(){
@@ -972,6 +1000,7 @@ public class FrgInterval extends BaseFragment{
         layoutBottomButtons.setVisibility(View.VISIBLE);
         adView2.setVisibility(View.VISIBLE);
         roundsText.setVisibility(View.INVISIBLE);
+//        speedText.setVisibility(View.INVISIBLE);
 
         if (intervalsList.size()==0) buttonDismiss.performClick();
     }
@@ -1043,7 +1072,7 @@ public class FrgInterval extends BaseFragment{
             mBuilder.setSmallIcon(R.drawable.interval_flag);
             mBuilder.setContentTitle("Interval in progress");
             mBuilder.setContentText("Click to get into");
-            mBuilder.setOngoing(true);
+//            mBuilder.setOngoing(true);
 
             Intent resultIntent = new Intent(getActivity(), MainActivity.class);
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(getActivity());
@@ -1058,8 +1087,9 @@ public class FrgInterval extends BaseFragment{
             Notification notification = mBuilder.build();
 
             notification.ledARGB = getResources().getColor(R.color.interval_green);
-            notification.flags = Notification.FLAG_SHOW_LIGHTS;
-            notification.ledOffMS = 500;
+            notification.flags |= Notification.FLAG_SHOW_LIGHTS;
+            notification.flags |= Notification.FLAG_ONGOING_EVENT;
+            notification.ledOffMS = 1000;
             notification.ledOnMS = 1500;
 
 
@@ -1200,13 +1230,17 @@ public class FrgInterval extends BaseFragment{
         public View getCustomDropView(int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater = getActivity().getLayoutInflater();
             planViewHolder holder;
-            if (convertView == null || !(convertView.getTag() instanceof planViewHolder)) {
+            if (position> 0 && (convertView == null || !(convertView.getTag() instanceof planViewHolder))) {
 
                 holder = new planViewHolder();
                     convertView = inflater.inflate(R.layout.custom_plans_spinner_item, null);
                     holder.description = (TextView) convertView.findViewById(R.id.planDescriptionSpinner);
 
                 convertView.setTag(holder);
+            }else if(position==0){
+                holder = new planViewHolder();
+                convertView = inflater.inflate(R.layout.zero_height_spinner_item, null);
+                holder.description = (TextView) convertView.findViewById(R.id.planDescriptionSpinner);
             } else {
                 holder = (planViewHolder) convertView.getTag();
             }

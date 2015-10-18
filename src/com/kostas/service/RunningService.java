@@ -44,6 +44,7 @@ public class RunningService extends IntentService implements LocationListener{
     public static final String COUNTDOWN_REMAINING = "countdown_remaining";
     public static final String SINGLE_UPDATE = "single_update";
     public static final String LOCATION_FOUND = "location_found";
+//    public static final String SPEED_UPDATE = "speed_update";
 
 //    FusedLocationProviderApi providerApi;
 
@@ -189,7 +190,7 @@ public class RunningService extends IntentService implements LocationListener{
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 8, this);
 
             mHandler.removeCallbacks(mUpdateTimeTask);
-            mHandler.postDelayed(mUpdateTimeTask, 200);
+            mHandler.postDelayed(mUpdateTimeTask, 3000);
 
 //        }else{
 //
@@ -230,7 +231,7 @@ public class RunningService extends IntentService implements LocationListener{
             Log.v("SERVICE", "found");
 
             lastLocation = location;
-            broadcastLocation();
+            broadcastLocationOrSpeed(true);
             mHandler.removeCallbacks(singleUpdateTask);
             return;
         }
@@ -309,11 +310,20 @@ public class RunningService extends IntentService implements LocationListener{
         return d;
     }
 
-    private void broadcastLocation(){
+    private void broadcastLocationOrSpeed(boolean forLocation){
 
         Intent intent = new Intent(NOTIFICATION);
-        intent.putExtra(LOCATION_FOUND, true);
-        intent.putExtra(SINGLE_UPDATE, lastLocation);
+
+        if (forLocation) {
+
+            intent.putExtra(LOCATION_FOUND, true);
+            intent.putExtra(SINGLE_UPDATE, lastLocation);
+
+        }
+//        else{
+//            intent.putExtra(SPEED_UPDATE, true);
+//            intent.putExtra("speed", lastLocation.getSpeed());
+//        }
         sendBroadcast(intent);
 
     }
@@ -323,12 +333,8 @@ public class RunningService extends IntentService implements LocationListener{
 
         locationManager.removeUpdates(this);
 
-
         //user might complete several intervals when app killed
         SharedPreferences.Editor editor = app_preferences.edit();
-
-
-
 
         intervals.add(new Interval(latLonList, totalTime, intervalDistance));
         Intent intent = new Intent(NOTIFICATION);
@@ -350,12 +356,6 @@ public class RunningService extends IntentService implements LocationListener{
             play(getApplication(), R.raw.interval_finish);
             startCountDownForNextInterval(intervalTime);
         }
-
-
-
-
-
-
 
         editor.putBoolean(IS_RUNNING, false);
 
@@ -452,7 +452,7 @@ public class RunningService extends IntentService implements LocationListener{
 
 
         Log.v("SERVICE", "Disabled provider");
-        broadcastLocation();
+        broadcastLocationOrSpeed(true);
 
     }
 
@@ -470,7 +470,7 @@ public class RunningService extends IntentService implements LocationListener{
         if (++updates < 6) {
             locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, this, null);
         }else{
-            broadcastLocation();
+            broadcastLocationOrSpeed(true);
             mHandler.removeCallbacks(singleUpdateTask);
         }
         Log.v("SERVICE", "single_update..");
@@ -507,7 +507,7 @@ public class RunningService extends IntentService implements LocationListener{
 
             final long start = mStartTime;
             totalTime = SystemClock.uptimeMillis()- start;
-            mHandler.postDelayed(this, 200);
+            mHandler.postDelayed(this, 3000);
 
 
         }
