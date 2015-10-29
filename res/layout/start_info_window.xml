@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:padding="8dp"
+       >
+
+    <TextView android:textColor="@color/white_back" android:id="@+id/info_top_text"
+              android:layout_width="wrap_content"
+              android:layout_alignParentTop="true"
+              android:layout_centerHorizontal="true"
+              android:text="QUICK TUTORIAL"
+              android:textSize="@dimen/xlarge_text"
+              android:textStyle="bold|italic"
+              android:layout_height="wrap_content"
+
+            />
+
+    <!--<LinearLayout android:orientation="vertical" android:layout_centerVertical="true" android:layout_width="match_parent" android:layout_height="wrap_content">-->
+
+    <TextView
+            android:layout_centerVertical="true"
+            android:textColor="@color/white_back"
+              android:id="@+id/info_main_text"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+
+              android:textSize="@dimen/large_text"
+
+              android:drawableBottom="@drawable/pick_rounds"
+              />
+        <!--<ImageView android:layout_width="match_parent" android:layout_height="wrap_content" android:src="@drawable/pick_rounds"/>-->
+
+    <!--</LinearLayout>-->
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="80dp" android:layout_alignParentBottom="true">
+        <Button android:textSize="@dimen/large_text" style="?android:attr/buttonBarButtonStyle" android:textStyle="bold" android:layout_marginRight="2dp" android:textColor="@color/dialog_button_left_colors" android:id="@+id/buttonCloseInfo" android:layout_weight="4" android:layout_width="0dp" android:layout_height="match_parent" android:text="OK" />
+        <Button android:textSize="@dimen/large_text" style="?android:attr/buttonBarButtonStyle" android:textStyle="bold|italic"  android:textColor="@color/dialog_button_colors" android:id="@+id/buttonDoNotShowInfo" android:layout_weight="6" android:layout_width="0dp" android:layout_height="match_parent" android:text="Do not show again" />
+
+    </LinearLayout>
+</RelativeLayout>

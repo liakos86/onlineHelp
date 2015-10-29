@@ -105,7 +105,7 @@ public class Interval implements Serializable{
     }
 
     public static Interval getFromId(Context context, long id) {
-        Log.v(TAG, String.format("Requesting item [%d]", id));
+        //Log.v(TAG, String.format("Requesting item [%d]", id));
         synchronized (context) {
             Cursor cursor = null;
             try {
@@ -139,7 +139,7 @@ public class Interval implements Serializable{
     public static Interval createFromCursor(Cursor cursor) {
         synchronized (cursor) {
             if (cursor.isClosed() || cursor.isAfterLast() || cursor.isBeforeFirst()) {
-                Log.v(TAG, String.format("Requesting entity but no valid cursor"));
+                //Log.v(TAG, String.format("Requesting entity but no valid cursor"));
                 return null;
             }
             Interval toRet = new Interval();

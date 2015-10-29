@@ -4,9 +4,26 @@
     <string name="crash_toast_text">eskase</string>
     <string name="start">Start</string>
     <string name="save_plan">Save Plan</string>
+    <string name="save_settings">Save Settings</string>
     <string name="no_plans">No saved plans yet!</string>
     <string name="no_runs">No saved runs yet!</string>
     <string name="fastest">fastest</string>
     <string name="select">select</string>
     <string name="dialog_error">Description must be between 1 and 20 characters</string>
+    <string name="settings_error">Lengths must be up to 20 characters</string>
+    <string name="start_hint">start sound (default \'Started\')</string>
+    <string name="stop_hint">stop sound (default \'Stopped\')</string>
+
+    <string name="nice_html">
+        <![CDATA[
+
+        <p>
+       &#8226;  <b>Step 1:</b> Pick your desired distance to run intervals <br/><br/>
+       &#8226;   <b>Step 2:</b> Pick your rest periods in seconds between intervals <br/><br/>
+       &#8226;  <b>Step 3:</b> Pick the number of times/rounds to repeat<br/><br/>
+       &#8226;  <b>Step 4:</b> Save this plan with a name of your choice for future use<br/>
+       </p>
+]]>
+    </string>
+
 </resources>

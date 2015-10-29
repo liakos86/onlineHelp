@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:background="@color/drawer_black"
+              android:padding="10dp"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <TextView android:layout_alignParentTop="true" android:textStyle="italic" android:layout_marginBottom="4dp"  android:textColor="@color/interval_red" android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/settingsError" android:text="@string/settings_error" android:textSize="12dp" android:singleLine="true" android:visibility="invisible"/>
+
+    <EditText android:padding="4dp" android:background="@color/white_back"  android:textColor="@color/drawer_black" android:hint="@string/start_hint" android:layout_marginBottom="10dp" android:layout_width="fill_parent" android:layout_height="48dp" android:id="@+id/speechEditTextStart" android:singleLine="true" android:layout_below="@+id/settingsError"/>
+
+    <EditText android:padding="4dp" android:background="@color/white_back" android:textColor="@color/drawer_black" android:hint="@string/stop_hint" android:layout_marginBottom="10dp" android:layout_width="fill_parent" android:layout_height="48dp" android:id="@+id/speechEditTextFinish" android:singleLine="true" android:layout_below="@id/speechEditTextStart" />
+
+    <CheckBox android:textColor="@color/white_back" android:id="@+id/checkbox_sound" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Sound" android:layout_below="@+id/speechEditTextFinish"/>
+
+    <CheckBox android:layout_marginBottom="30dp" android:textColor="@color/white_back" android:id="@+id/checkbox_vibration" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Vibrate" android:layout_below="@+id/checkbox_sound"/>
+
+    <Button
+            android:padding="8dp"
+            android:text="@string/save_settings"
+            android:textStyle="bold"
+            android:textSize="@dimen/xmedium_text"
+            android:textColor="@color/white_back"
+            android:background="@drawable/plus_minus_selector"
+             android:layout_width="wrap_content" android:layout_centerHorizontal="true" android:layout_height="wrap_content" android:layout_below="@+id/checkbox_vibration" android:id="@+id/saveSettingsButton"/>
+
+</RelativeLayout>

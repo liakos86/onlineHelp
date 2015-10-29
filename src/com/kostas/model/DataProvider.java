@@ -31,7 +31,7 @@ public class DataProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        Log.v(TAG, String.format("GetType for uri [%s]", uri));
+        //Log.v(TAG, String.format("GetType for uri [%s]", uri));
         final int match = ContentDescriptor.URI_MATCHER.match(uri);
         switch (match) {
         
@@ -75,7 +75,7 @@ public class DataProvider extends ContentProvider {
     @Override
     public Cursor query(final Uri uri, final String[] projection, final String selection,
                         final String[] selectionArgs, final String sortOrder) {
-        Log.v(TAG, String.format("Query for uri [%s]", uri));
+        //Log.v(TAG, String.format("Query for uri [%s]", uri));
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             if (projection != null) {
                 String proj = "projection: ";
@@ -99,7 +99,7 @@ public class DataProvider extends ContentProvider {
                 if (!TextUtils.isEmpty(searchFor)) {
                     String where = String.format(sWhereLike, ContentDescriptor.Running.Cols.DESCRIPTION, searchFor);
                     where += " OR " + (String.format(sWhereLike, ContentDescriptor.Running.Cols.DESCRIPTION, searchFor));
-                    Log.v(TAG, String.format("where [%s]", where));
+                    //Log.v(TAG, String.format("where [%s]", where));
                     builder.appendWhere(where);
                 }
 
@@ -117,7 +117,7 @@ public class DataProvider extends ContentProvider {
             break;
             case ContentDescriptor.Running.PATH_FOR_ID_TOKEN: {
                 String id = uri.getLastPathSegment();
-                Log.v(TAG, String.format("querying for [%s]", id));
+                //Log.v(TAG, String.format("querying for [%s]", id));
                 SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
                 builder.setTables(ContentDescriptor.Running.TABLE_NAME);
                 toRet = builder.query(db, projection,
@@ -139,7 +139,7 @@ public class DataProvider extends ContentProvider {
                 if (!TextUtils.isEmpty(searchFor)) {
                     String where = String.format(sWhereLike, ContentDescriptor.Interval.Cols.MILLISECONDS, searchFor);
                     where += " OR " + (String.format(sWhereLike, ContentDescriptor.Interval.Cols.MILLISECONDS, searchFor));
-                    Log.v(TAG, String.format("where [%s]", where));
+                    //Log.v(TAG, String.format("where [%s]", where));
                     builder.appendWhere(where);
                 }
 
@@ -157,7 +157,7 @@ public class DataProvider extends ContentProvider {
             break;
             case ContentDescriptor.Interval.PATH_FOR_ID_TOKEN: {
                 String id = uri.getLastPathSegment();
-                Log.v(TAG, String.format("querying for [%s]", id));
+                //Log.v(TAG, String.format("querying for [%s]", id));
                 SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
                 builder.setTables(ContentDescriptor.Interval.TABLE_NAME);
                 toRet = builder.query(db, projection,
@@ -179,7 +179,7 @@ public class DataProvider extends ContentProvider {
                 if (!TextUtils.isEmpty(searchFor)) {
                     String where = String.format(sWhereLike, ContentDescriptor.Plan.Cols.DESCRIPTION, searchFor);
                     where += " OR " + (String.format(sWhereLike, ContentDescriptor.Plan.Cols.SECONDS, searchFor));
-                    Log.v(TAG, String.format("where [%s]", where));
+                    //Log.v(TAG, String.format("where [%s]", where));
                     builder.appendWhere(where);
                 }
 
@@ -197,7 +197,7 @@ public class DataProvider extends ContentProvider {
             break;
             case ContentDescriptor.Plan.PATH_FOR_ID_TOKEN: {
                 String id = uri.getLastPathSegment();
-                Log.v(TAG, String.format("querying for [%s]", id));
+                //Log.v(TAG, String.format("querying for [%s]", id));
                 SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
                 builder.setTables(ContentDescriptor.Plan.TABLE_NAME);
                 toRet = builder.query(db, projection,
@@ -220,7 +220,7 @@ public class DataProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        Log.v(TAG, String.format("Insert for uri [%s]", uri));
+        //Log.v(TAG, String.format("Insert for uri [%s]", uri));
         SQLiteDatabase db = database.getWritableDatabase();
         int token = ContentDescriptor.URI_MATCHER.match(uri);
         long id = Database.INVALID_ID;
@@ -255,14 +255,14 @@ public class DataProvider extends ContentProvider {
             }
         }
         Uri toRet = ContentUris.withAppendedId(uri, id);
-        Log.v(TAG, String.format("new id [%d] notify via [%s]", id, toRet));
+        //Log.v(TAG, String.format("new id [%d] notify via [%s]", id, toRet));
         getContext().getContentResolver().notifyChange(toRet, null);
         return toRet;
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        Log.v(TAG, String.format("update for uri [%s]", uri));
+        //Log.v(TAG, String.format("update for uri [%s]", uri));
         int toRet = 0;
         SQLiteDatabase db = database.getWritableDatabase();
         int token = ContentDescriptor.URI_MATCHER.match(uri);
@@ -302,7 +302,7 @@ public class DataProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        Log.v(TAG, String.format("Delete for uri [%s]", uri));
+        //Log.v(TAG, String.format("Delete for uri [%s]", uri));
         int toRet = 0;
         SQLiteDatabase db = database.getWritableDatabase();
         int token = ContentDescriptor.URI_MATCHER.match(uri);

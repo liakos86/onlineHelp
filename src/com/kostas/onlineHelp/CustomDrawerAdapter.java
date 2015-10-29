@@ -8,10 +8,7 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.*;
 
 import java.util.List;
 
@@ -143,6 +140,8 @@ public class CustomDrawerAdapter extends ArrayAdapter<DrawerItem> {
 
 
 
+
+
 //        if (dItem.getItemNameColor()== getContext().getResources().getColor(R.color.death_grey)) {
 //            drawerHolder.itemName.setTextColor(dItem.itemNameColor);
 //
@@ -154,6 +153,7 @@ public class CustomDrawerAdapter extends ArrayAdapter<DrawerItem> {
 //                view.performClick();
 //            }
 //        }
+
 
         return view;
     }

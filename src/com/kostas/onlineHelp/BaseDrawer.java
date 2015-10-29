@@ -16,26 +16,30 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.SocketHandler;
 
 public class BaseDrawer extends BaseFragmentActivity {
 //    private static final String TAG = Thread.currentThread().getStackTrace()[2].getClassName();
 
+
     static final int POSITION_NEW_INTERVAL = 0;
     static final int POSITION_MY_DIARY = 1;
     static final int POSITION_MY_PLANS = 2;
-    static final int POSITION_EXIT = 3;
+    static final int POSITION_MY_SETTINGS = 3;
+    static final int POSITION_EXIT = 4;
 
 //    static final String POSITION = "pos";
 //    private static final Long EXIT_CODE = -99L;
     protected ActionBarDrawerToggle mDrawerToggle;
 //    Map<Integer, Integer> bottomButtons;
     String[] drawerTitles;
-    int[] drawerTitlesColors;
+//    int[] drawerTitlesColors;
     DrawerLayout mDrawerLayout;
     private boolean logout = false;
 
@@ -45,7 +49,8 @@ public class BaseDrawer extends BaseFragmentActivity {
         super.onCreate(savedInstanceState);
         drawerTitles = getResources().getStringArray(R.array.drawer_titles);
 
-        drawerTitlesColors = getResources().getIntArray(R.array.drawer_titles_colors);
+
+//        drawerTitlesColors = getResources().getIntArray(R.array.drawer_titles_colors);
     }
 
 
@@ -72,6 +77,7 @@ public class BaseDrawer extends BaseFragmentActivity {
         ListView mDrawerList = getDrawerList();
 
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener(mPager));
+
 
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
@@ -118,6 +124,9 @@ public class BaseDrawer extends BaseFragmentActivity {
             else if (i == POSITION_MY_PLANS) {
                 imgRes = getResources().getDrawable(R.drawable.plan_32);
             }
+            else if (i == POSITION_MY_SETTINGS) {
+                imgRes = getResources().getDrawable(R.drawable.settings_32);
+            }
             else if (i == POSITION_NEW_INTERVAL) {
                 imgRes = getResources().getDrawable(R.drawable.interval_32);
             }
@@ -128,12 +137,13 @@ public class BaseDrawer extends BaseFragmentActivity {
 
 //                drawerTitles[drawerTitles.length-1]="Exit";
 //            }
-            dataList.add(new DrawerItem(drawerTitles[i],  drawerTitlesColors[i]  ,null,0,View.GONE,View.VISIBLE,
+            dataList.add(new DrawerItem(drawerTitles[i], 0  ,null,0,View.GONE,View.VISIBLE,
                     i%2==0?drawerBlack:drawerGrey,imgRes,tf,null,null,null,0));
         }
 
         ListView mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mDrawerList.setAdapter(new CustomDrawerAdapter(this, R.layout.custom_drawer_item, dataList));
+        mDrawerList.setItemChecked(0, true);
         return mDrawerList;
     }
 
@@ -183,6 +193,10 @@ public class BaseDrawer extends BaseFragmentActivity {
                     startMain(mPager, position);
                     break;
 
+                case POSITION_MY_SETTINGS:
+                    startMain(mPager, position);
+                    break;
+
                 case POSITION_EXIT:
                     finish();
 //                    startMain(mPager, ActMain.MY_PLAN_PAGER_POSITION);
@@ -196,6 +210,7 @@ public class BaseDrawer extends BaseFragmentActivity {
             setTitle(drawerTitles[position]);
             closeDrawer();
         }
+
     }
 
 

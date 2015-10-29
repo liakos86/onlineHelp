@@ -2,15 +2,29 @@ package com.kostas.onlineHelp;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.text.Html;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.kostas.service.RunningService;
+import org.w3c.dom.Text;
 
 
 import java.io.ByteArrayOutputStream;
@@ -24,7 +38,7 @@ public class MainActivity extends BaseDrawer {
      */
 
     private NonSwipeableViewPager mPager;
-    static final int PAGER_SIZE = 3;
+    static final int PAGER_SIZE = 4;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -33,14 +47,17 @@ public class MainActivity extends BaseDrawer {
         getPager();
         setDrawer(mPager);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
     }
+
+
 
 
 
     private void getPager() {
         mPager = (NonSwipeableViewPager) findViewById(R.id.pager);
 
-        mPager.setOffscreenPageLimit(2);
+        mPager.setOffscreenPageLimit(3);
 
         mPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(),  PAGER_SIZE));
 

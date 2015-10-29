@@ -4,16 +4,15 @@ import android.app.*;
 import android.content.*;
 import android.graphics.Point;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.CountDownTimer;
+import android.os.*;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
+import android.text.Html;
 import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
@@ -48,20 +47,21 @@ public class FrgInterval extends BaseFragment{
 //    private Handler mHandler = new Handler();
     private LocationManager locationManager;
 //    private String provider;
-    Location lastLocation;
+//    Location lastLocation;
     SharedPreferences app_preferences ;
 
-    RelativeLayout   buttonDismiss, buttonSave;
+    RelativeLayout   buttonDismiss, buttonSave, textsInfoRun;
     Button buttonSetIntervalValues, buttonSavePlan;
     ImageButton buttonStart, buttonStop, buttonBack;
-    String timerStop1;
+//    String timerStop1;
     LinearLayout layoutBottomButtons;
-    TextView roundsText, myAddress;
-//            , speedText;
+    TextView roundsText, myAddress
+            , paceText, paceAvgText, timeText;
     float intervalDistance=50;
     ViewFlipper flipper;
+    private Handler mHandler = new Handler();
     NumberPickerKostas intervalTimePicker, intervalDistancePicker, intervalRoundsPicker;
-    FrgInterval instance;
+//    FrgInterval instance;
     ProgressWheel timerProgressWheel, distanceProgressWheel;
     ListView completedIntervalsListView;
     List <Interval> intervalsList;
@@ -72,6 +72,8 @@ public class FrgInterval extends BaseFragment{
     List<Plan>plans = new ArrayList<Plan>();
     AdView adView, adView2;
     AdRequest adRequest, adRequest2;
+    long startTimeMillis;
+    boolean initialDialogShown;
 
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -88,25 +90,25 @@ public class FrgInterval extends BaseFragment{
                 if (bundle.getFloat(RunningService.INTERVAL_DISTANCE)!=0){
 
                     setDistanceProgress(bundle.getFloat(RunningService.INTERVAL_DISTANCE));
+                    setPaceText(false, bundle.getFloat(RunningService.INTERVAL_SPEED), 0);
 
                 }
-                else if((bundle.getBoolean(RunningService.LOCATION_FOUND,false))){
-
-                    stopRunningService();
-
-
-                    SharedPreferences.Editor editor = app_preferences.edit();
-                    editor.putBoolean("SEARCHING", false);
-                    editor.commit();
-
-                    lastLocation = (Location)bundle.get(RunningService.SINGLE_UPDATE);
-                    if (lastLocation!=null) setAddressTextAndMap();
-//                    toggleNoGps(!(bundle.getBoolean(RunningService.LOCATION_FOUND,false)));
-
-
-                }
+//                else if((bundle.getBoolean(RunningService.LOCATION_FOUND,false))){
+//
+//                    stopRunningService();
+//
+//                    SharedPreferences.Editor editor = app_preferences.edit();
+//                    editor.putBoolean("SEARCHING", false);
+//                    editor.apply();
+//
+//                    lastLocation = (Location)bundle.get(RunningService.SINGLE_UPDATE);
+//                    if (lastLocation!=null) setAddressTextAndMap();
+////                    toggleNoGps(!(bundle.getBoolean(RunningService.LOCATION_FOUND,false)));
+//
+//
+//                }
 //                else if (bundle.getBoolean(RunningService.SPEED_UPDATE, false)){
-//                    speedText.setText("Speed: "+bundle.getFloat("speed",0));
+//                    paceText.setText("Speed: "+bundle.getFloat("speed",0));
 //                }
                 else {
                     String latLonList = bundle.getString(RunningService.LATLONLIST);
@@ -114,15 +116,15 @@ public class FrgInterval extends BaseFragment{
                     intervalsList.add(new Interval(-1, latLonList, millis, intervalDistance));
                     adapterInterval.notifyDataSetChanged();
 
-
                     prepareForNextInterval(bundle.getBoolean(RunningService.INTERVAL_COMPLETED, false));
                 }
 
 
-            }else{
-                Log.v("LATLON", "Bundle is null");
-
             }
+//            else{
+//                //Log.v("LATLON", "Bundle is null");
+//
+//            }
         }
     };
 
@@ -135,22 +137,63 @@ public class FrgInterval extends BaseFragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
+
+
+
+//        Toast.makeText(getActivity(), "createview", Toast.LENGTH_SHORT).show();
+
         View v = inflater.inflate(R.layout.frg_interval, container, false);
 //        placeAds(v);
 
         setPlansSpinner(v);
         setTextViewsAndButtons(v);
-        new PerformAsyncTask(getActivity(),0).execute();
+        new PerformAsyncTask(getActivity()).execute();
         setListeners(v);
-//        selectProvider();
-
-//        setSaveListener();
-
-
-
-//        initializeMap();
+//        displayHelpDialog();
 
        return  v;
+    }
+
+    public void displayHelpDialog(){
+
+        if (!app_preferences.getBoolean("OK", false)  && !initialDialogShown){
+
+            initialDialogShown = true;
+            final Dialog dialogBuilder = new Dialog(getActivity());
+            dialogBuilder.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialogBuilder.getWindow().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.semitrans_green)));
+
+            View dialogView = getActivity().getLayoutInflater().inflate(R.layout.start_info_window, null);
+            Button close = (Button) dialogView.findViewById(R.id.buttonCloseInfo);
+            close.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dialogBuilder.dismiss();
+                }
+            });
+
+            Button doNotShow = (Button) dialogView.findViewById(R.id.buttonDoNotShowInfo);
+            doNotShow.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    SharedPreferences.Editor editor = app_preferences.edit();
+                    editor.putBoolean("OK", true);
+                    editor.apply();
+                    dialogBuilder.dismiss();
+                }
+            });
+
+            TextView infoMainText = (TextView) dialogView.findViewById(R.id.info_main_text);
+            infoMainText.setText(Html.fromHtml(getString(R.string.nice_html)));
+
+            dialogBuilder.setContentView(dialogView);
+            dialogBuilder
+                    .setCancelable(false);
+
+            dialogBuilder.show();
+
+        }
+
     }
 
     public static  String md5(final String s) {
@@ -172,7 +215,7 @@ public class FrgInterval extends BaseFragment{
             return hexString.toString();
 
         } catch (NoSuchAlgorithmException e) {
-            Log.v("SERVICE",e.getMessage());
+            //Log.v("SERVICE",e.getMessage());
         }
         return "";
     }
@@ -226,23 +269,24 @@ public class FrgInterval extends BaseFragment{
 
     private void setTextViewsAndButtons(View v){
         app_preferences = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
-
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-
-
         adView = (AdView) v.findViewById(R.id.adViewInterval);
         adView2 = (AdView) v.findViewById(R.id.adViewInterval2);
 
-        instance = this;
+//        instance = this;
 
         intervalsList = new ArrayList<Interval>();
 
         myAddress = (TextView) v.findViewById(R.id.myAddressText);
         roundsText = (TextView) v.findViewById(R.id.roundsText);
-//        speedText = (TextView) v.findViewById(R.id.speedText);
+        paceText = (TextView) v.findViewById(R.id.paceText);
+        paceAvgText = (TextView) v.findViewById(R.id.avgPaceText);
+        timeText = (TextView) v.findViewById(R.id.timeText);
         Typeface tf=Typeface.createFromAsset(getActivity().getAssets(), "fonts/roboto_boldItalic.ttf");
         roundsText.setTypeface(tf);
-//        speedText.setTypeface(tf);
+        paceText.setTypeface(tf);
+        paceAvgText.setTypeface(tf);
+        timeText.setTypeface(tf);
         buttonSetIntervalValues = (Button) v.findViewById(R.id.buttonSetIntervalValues);
         buttonSavePlan = (Button) v.findViewById(R.id.buttonSavePlan);
         buttonStart = (ImageButton) v.findViewById(R.id.buttonStart);
@@ -263,6 +307,7 @@ public class FrgInterval extends BaseFragment{
         layoutBottomButtons = (LinearLayout) v.findViewById(R.id.layoutBottomButtons);
         buttonDismiss = (RelativeLayout) v.findViewById(R.id.buttonDismissInterval);
         buttonSave = (RelativeLayout) v.findViewById(R.id.buttonSaveRunWithIntervals);
+        textsInfoRun = (RelativeLayout) v.findViewById(R.id.textsInfoRun);
 
          adapterInterval = new  IntervalAdapterItem(getActivity(), getActivity().getApplicationContext(),
                 R.layout.list_interval_row, intervalsList);
@@ -280,6 +325,8 @@ public class FrgInterval extends BaseFragment{
         return false;
     }
 
+
+    //the first time and every time we come back from resume
     private void getInRunningMode(boolean isRunning, boolean isCompleted, long millisecondsLeft, float distanceCovered){
 
         ((ExtApplication)getActivity().getApplication()).setInRunningMode(true);
@@ -290,29 +337,25 @@ public class FrgInterval extends BaseFragment{
         buttonBack.setVisibility(View.INVISIBLE);
         completedIntervalsListView.setVisibility(View.VISIBLE);
 
-//        if (rounds>0){
-//
-//            roundsText.setText("Rounds: "+intervalsList.size()+" / "+rounds);
-//            roundsText.setVisibility(View.VISIBLE);
-//
-//        }
-//
-//        speedText.setVisibility(View.VISIBLE);
 
-
+        //from resume
         if (isRunning && !isCompleted){
             setDistanceProgress(distanceCovered);
             timerProgressWheel.setVisibility(View.INVISIBLE);
             distanceProgressWheel.setVisibility(View.VISIBLE);
+            mHandler.postDelayed(mUpdateTimeTask, 1000);
 
-        }else if (!isRunning && !isCompleted){
+
+        }
+        //from resume OR first time
+        else if (!isRunning && !isCompleted){
             final int step = (int)( 360000 / intervalTime );
             distanceProgressWheel.setVisibility(View.INVISIBLE);
             timerProgressWheel.setVisibility(View.VISIBLE);
             timerProgressWheel.setText(millisecondsLeft / 1000 + " secs");
 
 //            timerProgressWheel.setProgress((int) ((millisecondsLeft/intervalTime) * 360));
-            Log.v("LATLNG", "Step is: " + step);
+            //Log.v("LATLNG", "Step is: " + step);
 
 
             if (!(isMyServiceRunning()))
@@ -331,26 +374,71 @@ public class FrgInterval extends BaseFragment{
                     distanceProgressWheel.setText(0+" / "+(int)intervalDistance);
                     distanceProgressWheel.setProgress(0);
                     distanceProgressWheel.setVisibility(View.VISIBLE);
+                    startTimeMillis = SystemClock.uptimeMillis();
+                    mHandler.postDelayed(mUpdateTimeTask, 1000);
+
 
                 }
             }.start();
 
-        }else if (isCompleted){
+        }
+        //from resume(isCompleted=true)
+        else {
             doStop();
         }
+    }
+
+    private void setTimerText(){
+
+        long total = SystemClock.uptimeMillis() - startTimeMillis;
+
+        int hours = (int)(total/3600000);
+        int mins = (int)((total - (hours*3600000))/60000);
+        int secs = (int)((total - (hours*3600000) - (mins*60000))/1000);
+
+        timeText.setText("Time: "+String.format("%02d", hours)+"h " +String.format("%02d", mins)+"m "+String.format("%02d", secs)+"s");
+
+    }
+
+    private void setPaceText(boolean avg, float pace, long milliseconds){
+
+
+        float distance = app_preferences.getFloat(RunningService.TOTAL_DIST, 1);
+        if (avg)
+           pace =  milliseconds / distance;
+
+        int paceMinutes = (int)(pace/60);
+        int paceSeconds = (int)(pace - (paceMinutes*60));
+
+        String text = paceMinutes < 20 ? String.format("%02d", paceMinutes)+"m "+String.format("%02d", paceSeconds)+"s  / km" : "00m 00s / km";
+
+        if (avg && distance>1)
+                paceAvgText.setText("Pace avg: "+text);
+        else if (!avg)
+                paceText.setText("Pace: "+text);
+
+
     }
 
 
     private void prepareForNextInterval(boolean completed){
 
+
+        mHandler.removeCallbacks(mUpdateTimeTask);
+        paceAvgText.setText("Pace avg: 00m 00s / km");
+
+        paceText.setText("Pace: 00m 00s / km");
+        timeText.setText("Time: 00h 00m 00s");
         if (completed){
 
             doStop();
 
         }else {
 
+
 //        stopRunningService(false);
-            roundsText.setText(intervalsList.size()+" / "+rounds);
+            if (rounds>0)
+            roundsText.setText("Rounds: "+intervalsList.size()+" / "+rounds);
             distanceProgressWheel.setVisibility(View.INVISIBLE);
             distanceProgressWheel.setProgress(0);
             distanceProgressWheel.setText(0 + " / " + (int) intervalDistance);
@@ -363,6 +451,9 @@ public class FrgInterval extends BaseFragment{
                 }
 
                 public void onFinish() {
+
+                    startTimeMillis = SystemClock.uptimeMillis();
+                    mHandler.postDelayed(mUpdateTimeTask, 1000);
                     timerProgressWheel.setVisibility(View.INVISIBLE);
                     timerProgressWheel.setProgress(0);
                     distanceProgressWheel.setVisibility(View.VISIBLE);
@@ -384,30 +475,13 @@ public class FrgInterval extends BaseFragment{
     }
 
 
-//    public boolean selectProvider(){
-//
-//        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-//        provider =  (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) ? LocationManager.GPS_PROVIDER : null;
-//
-//        if (provider==null){
-////            noGps.setVisibility(View.VISIBLE);
-////            Toast.makeText(getActivity(), "Please enable location services",
-////                    Toast.LENGTH_SHORT).show();
-//            return false;
-//        }else {
-//            return true;
-//
-//        }
-//
-//    }
-
-
     public void resetAppPrefs(){
         SharedPreferences.Editor editor = app_preferences.edit();
         editor.remove(RunningService.LATLONLIST);
         editor.remove(RunningService.TOTAL_DIST);
         editor.remove(RunningService.TOTAL_TIME);
         editor.remove(RunningService.INTERVAL_ROUNDS);
+        editor.remove(RunningService.INTERVAL_SPEED);
         editor.remove(RunningService.INTERVAL_COMPLETED);
         editor.remove(RunningService.INTERVAL_TIME);
         editor.remove(RunningService.INTERVAL_DISTANCE);
@@ -417,12 +491,15 @@ public class FrgInterval extends BaseFragment{
         editor.remove(RunningService.COUNTDOWN_REMAINING);
         editor.remove(RunningService.MSTART_TIME);
 
-        editor.commit();
+        editor.apply();
     }
 
     private void clear(){
 
+//        new PerformAsyncTask(getActivity(),1).execute();
+
         ((ExtApplication)getActivity().getApplication()).setInRunningMode(false);
+        myAddress.setVisibility(View.INVISIBLE);
         intervalDistance = 0;
         intervalTime = 0;
         intervalsList.clear();
@@ -440,12 +517,17 @@ public class FrgInterval extends BaseFragment{
             @Override
             public void onClick(View view) {
 
+                timeText.setText("Time: 00h 00m 00s");
+                paceAvgText.setText("Pace avg: 00m 00s / km");
+
+                paceText.setText("Pace: 00m 00s / km");
+
                 if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && validateDistanceAndTime()){
                     if (isMyServiceRunning()){
                         stopRunningService();
-                        SharedPreferences.Editor editor = app_preferences.edit();
-                        editor.putBoolean("SEARCHING" , false);
-                        editor.commit();
+//                        SharedPreferences.Editor editor = app_preferences.edit();
+//                        editor.putBoolean("SEARCHING" , false);
+//                        editor.apply();
                     }
 
                     showFrame();
@@ -617,10 +699,13 @@ public class FrgInterval extends BaseFragment{
 
 
     private void setPlansVisibility(){
-        if (plans.size() == 1) plansSpinner.setVisibility(View.GONE);
-        else if (plansAdapter != null) {
+
+        if (plans.size() > 1) plansSpinner.setVisibility(View.VISIBLE);
+        else plansSpinner.setVisibility(View.INVISIBLE);
+
+         if (plansAdapter != null) {
             plansAdapter.notifyDataSetChanged();
-            plansSpinner.setVisibility(View.VISIBLE);
+
         }
     }
 
@@ -661,7 +746,7 @@ public class FrgInterval extends BaseFragment{
             }
 
         }catch (Exception e){
-            Toast.makeText(getActivity(),"Enter a valid distance in meters", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(),"wrong data", Toast.LENGTH_LONG).show();
             return false;
         }
 
@@ -683,22 +768,23 @@ public class FrgInterval extends BaseFragment{
     }
 
 
-    private void startSingleUpdate(){
-        SharedPreferences.Editor editor = app_preferences.edit();
-        editor.putBoolean("SEARCHING", true);
-        editor.commit();
-        Intent intent = new Intent(getActivity().getBaseContext(), RunningService.class);
-        intent.putExtra(RunningService.SINGLE_UPDATE, true);
-        getActivity().startService(intent);
-        getActivity().registerReceiver(receiver, new IntentFilter(RunningService.NOTIFICATION));
-    }
+//    private void startSingleUpdate(){
+//        SharedPreferences.Editor editor = app_preferences.edit();
+//        editor.putBoolean("SEARCHING", true);
+//        editor.apply();
+//        Intent intent = new Intent(getActivity().getBaseContext(), RunningService.class);
+//        intent.putExtra(RunningService.SINGLE_UPDATE, true);
+//        getActivity().startService(intent);
+//        getActivity().registerReceiver(receiver, new IntentFilter(RunningService.NOTIFICATION));
+//    }
 
     /* Request updates at startup */
     @Override
     public void onResume() {
         super.onResume();
+//        Toast.makeText(getActivity(), "resume", Toast.LENGTH_SHORT).show();
 
-        Log.v("LIFECYCLE", "RESUME");
+        //Log.v("LIFECYCLE", "RESUME");
 
 //        if (isMyServiceRunning()){
 //            Toast.makeText(getActivity(), "service on", Toast.LENGTH_SHORT).show();
@@ -706,10 +792,12 @@ public class FrgInterval extends BaseFragment{
 
 
         //service is on and i am running
-        if (isMyServiceRunning() && !(app_preferences.getBoolean("SEARCHING", false))){
+        if (isMyServiceRunning()){
 
             intervalDistance = app_preferences.getFloat(RunningService.INTERVAL_DISTANCE, 0);
             intervalTime = app_preferences.getLong(RunningService.INTERVAL_TIME, 0);
+            startTimeMillis = app_preferences.getLong(RunningService.MSTART_TIME, SystemClock.uptimeMillis());
+            rounds = app_preferences.getInt(RunningService.INTERVAL_ROUNDS, 0);
             Gson gson = new Gson();
             Type listOfObjects = new TypeToken<List<Interval>>(){}.getType();
             String intervalsGson = app_preferences.getString(RunningService.INTERVALS,"");
@@ -719,9 +807,6 @@ public class FrgInterval extends BaseFragment{
 
             getActivity().registerReceiver(receiver, new IntentFilter(RunningService.NOTIFICATION));
 
-
-
-
                 getInRunningMode(app_preferences.getBoolean(RunningService.IS_RUNNING, false),
                         app_preferences.getBoolean(RunningService.INTERVAL_COMPLETED, false),
                         app_preferences.getLong(RunningService.COUNTDOWN_REMAINING, 0),
@@ -730,33 +815,33 @@ public class FrgInterval extends BaseFragment{
 
         }
         //service is on and i am searching for loc fix
-        else  if (isMyServiceRunning() && (app_preferences.getBoolean("SEARCHING", false))){
-            getActivity().registerReceiver(receiver, new IntentFilter(RunningService.NOTIFICATION));
-
-        }
+//        else  if (isMyServiceRunning() && (app_preferences.getBoolean("SEARCHING", false))){
+//            getActivity().registerReceiver(receiver, new IntentFilter(RunningService.NOTIFICATION));
+//
+//        }
         //service not running and i start loc fix update
-        else {
+//        else {
 
-            Log.v("SERVICE", "getting location..");
-
-
+            //Log.v("SERVICE", "getting location..");
 
 
-            if ((locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) /**&& (lastLocation == null)**/  ) {
 
-                new PerformAsyncTask(getActivity(), 1).execute();
+
+//            if ((locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) /**&& (lastLocation == null)**/  ) {
+//
+//                new PerformAsyncTask(getActivity(), 1).execute();
 
 
 //                SharedPreferences.Editor editor = app_preferences.edit();
 //                editor.putBoolean("SEARCHING", true);
-//                editor.commit();
+//                editor.apply();
 //                Intent intent = new Intent(getActivity().getBaseContext(), RunningService.class);
 //                intent.putExtra(RunningService.SINGLE_UPDATE, true);
 //                getActivity().startService(intent);
 //                getActivity().registerReceiver(receiver, new IntentFilter(RunningService.NOTIFICATION));
 
-            }
-        }
+//            }
+//        }
 
         }
 
@@ -769,16 +854,16 @@ public class FrgInterval extends BaseFragment{
 
 //        Toast.makeText(getActivity(),"pause",Toast.LENGTH_SHORT).show();
 
-        if (isMyServiceRunning() && app_preferences.getBoolean("SEARCHING", false)){
-            SharedPreferences.Editor editor = app_preferences.edit();
-            editor.putBoolean("SEARCHING", false);
-            editor.commit();
-            stopRunningService();
-        }
+//        if (isMyServiceRunning() && app_preferences.getBoolean("SEARCHING", false)){
+//            SharedPreferences.Editor editor = app_preferences.edit();
+//            editor.putBoolean("SEARCHING", false);
+//            editor.apply();
+//            stopRunningService();
+//        }
 
 
 
-        Log.v("LIFECYCLE", "PAUSE");
+        //Log.v("LIFECYCLE", "PAUSE");
 
         super.onPause();
     }
@@ -793,95 +878,95 @@ public class FrgInterval extends BaseFragment{
             if (isMyServiceRunning())
                 getActivity().unregisterReceiver(receiver);
         }catch(Exception e){
-            Log.v("LATLNG", "Exception: Receiver not registered");
+            //Log.v("LATLNG", "Exception: Receiver not registered");
             e.printStackTrace();
         }
 
 
-        Log.v("LIFECYCLE", "STOP");
+        //Log.v("LIFECYCLE", "STOP");
         super.onStop();
     }
 
     @Override
     public void onDestroy() {
-        Log.v("LIFECYCLE", "DESTROY");
-        Log.v("LATLNG", "Destroy");
+        //Log.v("LIFECYCLE", "DESTROY");
+        //Log.v("LATLNG", "Destroy");
 
         super.onDestroy();
     }
 
     @Override
     public void onStart() {
-        Log.v("LIFECYCLE", "START");
+        //Log.v("LIFECYCLE", "START");
         super.onStart();
     }
 
 
 
-    public void getLastLocation(){
+//    public void getLastLocation(){
+//
+//
+//
+//
+//        Location bestLocation = null;
+//
+//        long minTime=Long.MAX_VALUE;  float bestAccuracy = Float.MAX_VALUE;
+//        long bestTime = Long.MIN_VALUE;
+//
+//        List<String> matchingProviders = locationManager.getAllProviders();
+//        for (String provider: matchingProviders) {
+//            Location location = locationManager.getLastKnownLocation(provider);
+//            if (location != null) {
+//                float accuracy = location.getAccuracy();
+//                long time = location.getTime();
+//
+//
+//
+//                if ((time > minTime && accuracy < bestAccuracy)) {
+//                    bestLocation = location;
+//                    bestAccuracy = accuracy;
+//                    bestTime = time;
+//                }
+//                else if (time < minTime &&
+//                        bestAccuracy == Float.MAX_VALUE && time > bestTime){
+//                    bestLocation = location;
+//                    bestTime = time;
+//                }
+//            }
+//        }
+//        lastLocation =  bestLocation;
+//
+//
+//
+//    }
 
 
+    private void setAddressText(Location lastLocation){
+        if (myAddress.getVisibility() == View.INVISIBLE) {
 
-
-        Location bestLocation = null;
-
-        long minTime=Long.MAX_VALUE;  float bestAccuracy = Float.MAX_VALUE;
-        long bestTime = Long.MIN_VALUE;
-
-        List<String> matchingProviders = locationManager.getAllProviders();
-        for (String provider: matchingProviders) {
-            Location location = locationManager.getLastKnownLocation(provider);
-            if (location != null) {
-                float accuracy = location.getAccuracy();
-                long time = location.getTime();
-
-
-
-                if ((time > minTime && accuracy < bestAccuracy)) {
-                    bestLocation = location;
-                    bestAccuracy = accuracy;
-                    bestTime = time;
-                }
-                else if (time < minTime &&
-                        bestAccuracy == Float.MAX_VALUE && time > bestTime){
-                    bestLocation = location;
-                    bestTime = time;
-                }
-            }
-        }
-        lastLocation =  bestLocation;
-
-
-
-    }
-
-
-    private void setAddressText(){
-        if (lastLocation!=null) {
-
-            myAddress.setText("Currently at: " + getMyLocationAddress(lastLocation.getLatitude(), lastLocation.getLongitude()));
-
-        }
-    }
-
-    private void setAddressTextAndMap(){
-        if (lastLocation!=null) {
-            TextView myAddress = (TextView) getView().findViewById(R.id.myAddressText);
-
-            try {
-                myAddress.setText("Currently at: " + getMyLocationAddress(lastLocation.getLatitude(), lastLocation.getLongitude()));
-
-            }catch (Exception e){
-                Log.v("SERVICE", "could not find address of location");
-            }
-
-            if (googleMap!=null) {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 12));
-                googleMap.animateCamera(CameraUpdateFactory.zoomTo(12), 1000, null);
-            }
-
+            myAddress.setText("Currently near " + getMyLocationAddress(lastLocation.getLatitude(), lastLocation.getLongitude()));
+            myAddress.setVisibility(View.VISIBLE);
         }
     }
+
+//    private void setAddressTextAndMap(){
+//        if (lastLocation!=null) {
+//            TextView myAddress = (TextView) getView().findViewById(R.id.myAddressText);
+//
+//            try {
+//                myAddress.setText("Currently at: " + getMyLocationAddress(lastLocation.getLatitude(), lastLocation.getLongitude()));
+//
+//            }catch (Exception e){
+//                //Log.v("SERVICE", "could not find address of location");
+//            }
+//
+//            if (googleMap!=null) {
+//                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 12));
+//                googleMap.animateCamera(CameraUpdateFactory.zoomTo(12), 1000, null);
+//            }
+//
+//        }
+//    }
 
 
 //    private Runnable mUpdateTimeTask = new Runnable(){
@@ -935,24 +1020,19 @@ public class FrgInterval extends BaseFragment{
 
 
 
-
     private void showFrame(){
         flipper.setDisplayedChild(1);
 
         if (rounds>0){
-
             roundsText.setText("Rounds: 0 / "+rounds);
-            roundsText.setVisibility(View.VISIBLE);
-
         }
-
-
+        textsInfoRun.setVisibility(View.VISIBLE);
 
     }
 
     private void hideFrame(){
         flipper.setDisplayedChild(0);
-        roundsText.setVisibility(View.INVISIBLE);
+        textsInfoRun.setVisibility(View.INVISIBLE);
     }
 
 //    public void setSaveListener(){
@@ -988,19 +1068,22 @@ public class FrgInterval extends BaseFragment{
 
     private void doStop(){
 
+
+        mHandler.removeCallbacks(mUpdateTimeTask);
+
         stopRunningService();
         if (countDownTimer!=null)
         countDownTimer.cancel();
         timerProgressWheel.setProgress(0);
-        timerProgressWheel.setVisibility(View.INVISIBLE);
+        timerProgressWheel.setVisibility(View.GONE);
         distanceProgressWheel.setProgress(0);
         distanceProgressWheel.setVisibility(View.INVISIBLE);
         resetAppPrefs();
         buttonStop.setVisibility(View.INVISIBLE);
         layoutBottomButtons.setVisibility(View.VISIBLE);
         adView2.setVisibility(View.VISIBLE);
-        roundsText.setVisibility(View.INVISIBLE);
-//        speedText.setVisibility(View.INVISIBLE);
+        textsInfoRun.setVisibility(View.INVISIBLE);
+
 
         if (intervalsList.size()==0) buttonDismiss.performClick();
     }
@@ -1023,7 +1106,7 @@ public class FrgInterval extends BaseFragment{
 
 
     private void stopRunningService(){
-        Log.v("LATLNG","STOP SERVICE");
+        //Log.v("LATLNG","STOP SERVICE");
 
 
             try {
@@ -1042,7 +1125,7 @@ public class FrgInterval extends BaseFragment{
 
 
             }catch (Exception e){
-                Log.v("LATLNG", "Exception: Receiver was not registered");
+                //Log.v("LATLNG", "Exception: Receiver was not registered");
             }
 
 
@@ -1055,7 +1138,7 @@ public class FrgInterval extends BaseFragment{
 
 
 
-        Log.v("LATLNG", "START SERVICE");
+        //Log.v("LATLNG", "START SERVICE");
         Intent intent = new Intent(getActivity().getBaseContext(), RunningService.class);
         intent.putExtra(RunningService.INTERVAL_DISTANCE, intervalDistance);
         intent.putExtra(RunningService.INTERVAL_TIME, intervalTime);
@@ -1138,13 +1221,13 @@ public class FrgInterval extends BaseFragment{
                 }
 
 
-                Log.v("LATLNG","I am at: " +strAddress.toString());
+                //Log.v("LATLNG","I am at: " +strAddress.toString());
                 return strAddress.toString() ;
 
             }
 
             else
-                Log.v("LATLNG", "No location found..!");
+                //Log.v("LATLNG", "No location found..!");
             return "No address for this location";
 
         }
@@ -1164,11 +1247,22 @@ public class FrgInterval extends BaseFragment{
             googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
             googleMap.setIndoorEnabled(false);
             googleMap.setMyLocationEnabled(true);
-            if (lastLocation != null) {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 12));
-                googleMap.animateCamera(CameraUpdateFactory.zoomTo(12), 2000, null);
-            }
+//            if (lastLocation != null) {
+//                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 14));
+//                googleMap.animateCamera(CameraUpdateFactory.zoomTo(14), 2000, null);
+//            }
         }
+
+        googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+            @Override
+            public void onMyLocationChange(Location location) {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 14));
+                googleMap.animateCamera(CameraUpdateFactory.zoomTo(14), 200, null);
+
+                    setAddressText(location);
+
+            }
+        });
 
     }
 
@@ -1290,13 +1384,13 @@ public class FrgInterval extends BaseFragment{
 
     private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
         private Activity activity;
-        int type;
+//        int type;
 
 
 
-        public PerformAsyncTask(Activity activity, int type) {
+        public PerformAsyncTask(Activity activity) {
             this.activity = activity;
-            this.type = type;
+//            this.type = type;
 
         }
 
@@ -1308,13 +1402,14 @@ public class FrgInterval extends BaseFragment{
         protected Void doInBackground(Void... unused) {
 
 
-            if (type==0) {
-                getLastLocation();
+//            if (type==0) {
+//                getLastLocation();
                 getPlansFromDb(activity, true);
                 placeAds();
-            }else if (type==1){
-              startSingleUpdate();
-            }
+//            }
+//            else if (type==1){
+//              startSingleUpdate();
+//            }
 
             return null;
 
@@ -1327,7 +1422,7 @@ public class FrgInterval extends BaseFragment{
             adView.loadAd(adRequest);
             plansSpinner.setClickable(true);
             initializeMap();
-            setAddressText();
+//            setAddressText();
             setPlansVisibility();
 
 
@@ -1336,6 +1431,22 @@ public class FrgInterval extends BaseFragment{
         }
 
     }
+
+    private Runnable mUpdateTimeTask = new Runnable(){
+
+        public void run() {
+
+            setTimerText();
+            long totalMillis = SystemClock.uptimeMillis()-startTimeMillis;
+
+            if (((int)totalMillis/1000)%4 ==0 )
+            setPaceText(true, 0 , totalMillis );
+            mHandler.postDelayed(this, 1000);
+
+
+        }
+    };
+
 
 
 

@@ -144,8 +144,6 @@ public class FrgPlans extends BaseFragment{
                         .findViewById(R.id.planDescription);
                 holder.info =  (TextView) convertView
                         .findViewById(R.id.planInfo);
-                holder.delete =  (ImageView) convertView
-                        .findViewById(R.id.planDelete);
 
                 convertView.setTag(holder);
             } else {
@@ -164,13 +162,13 @@ public class FrgPlans extends BaseFragment{
                 convertView.setBackgroundColor(getResources().getColor(R.color.drawer_grey));
 
 
-        holder.delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                confirmDelete(plan.getId(), position);
-            }
-        });
+            convertView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    confirmDelete(plan.getId(), position);
+                    return false;
+                }
+            });
 
             return convertView;
 
@@ -183,7 +181,6 @@ public class FrgPlans extends BaseFragment{
     private class planViewHolder{
         TextView description;
         TextView info;
-        ImageView delete;
     }
 
 

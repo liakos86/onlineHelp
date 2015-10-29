@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -41,6 +42,8 @@ public class FrgShowRuns extends BaseFragment {
     MyExpandableAdapter adapterExp;
 
     TextView noRunsText;
+
+    ProgressBar progressBarMap;
 
 
 
@@ -88,6 +91,8 @@ public class FrgShowRuns extends BaseFragment {
     }
 
     private void initializeViews(View v){
+
+        progressBarMap = (ProgressBar) v.findViewById(R.id.progressBarMap);
         viewFlipper = (ViewFlipper) v.findViewById(R.id.viewFlipper);
 
         openMapButton = (RelativeLayout) v.findViewById(R.id.buttonShowMap);
@@ -102,16 +107,21 @@ public class FrgShowRuns extends BaseFragment {
 
     }
 
+
     public void initializeMap(){
         googleMap = ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapListKostas)).getMap();
 
         if (googleMap!=null) {
-            googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+            googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
             googleMap.setIndoorEnabled(false);
+
+
             googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
                 @Override
                 public void onMapLoaded() {
+
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 60));
+                    progressBarMap.setVisibility(View.GONE);
                 }
             });
         }
@@ -304,11 +314,12 @@ public class FrgShowRuns extends BaseFragment {
         //for each interval
         for (int i=0; i<number; i++){
 
+            Interval current = currentIntervals.get(i);
             int color = i%2==0 ? getResources().getColor(R.color.interval_red) : getResources().getColor(R.color.interval_green);
 
             locationList.clear();
 
-            String [] latStringList =  currentIntervals.get(i).getLatLonList().split(",");
+            String [] latStringList =  current.getLatLonList().split(",");
             int listLength = latStringList.length-1;
             for (int j=0; j< listLength; j+=2){
 
@@ -347,6 +358,16 @@ public class FrgShowRuns extends BaseFragment {
                         googleMap.addPolyline(new PolylineOptions().add(locationList.get(k), locationList.get(k + 1)).width(6).color(color));
             }
 
+
+            googleMap.addMarker(new MarkerOptions()
+//                        .infoWindowAnchor(0.48f, 4.16f)
+                            .position(locationList.get(currSize))
+                            .title(String.valueOf(Html.fromHtml("<b>Interval " + (i + 1) + "</b>")))
+                            .snippet("Speed: " + String.format("%1$,.2f", ((double) ((current.getDistance() / current.getMilliseconds()) * 3600))) + " km/h")
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_stop))
+            );
+
+
         }
 
 //        int zoom = 20;
@@ -372,7 +393,7 @@ public class FrgShowRuns extends BaseFragment {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 60));
 
             }catch (Exception e){
-                Log.v("LATLNG", "MAP CRASH");
+                //Log.v("LATLNG", "MAP CRASH");
             }
 
 
@@ -575,8 +596,35 @@ public class FrgShowRuns extends BaseFragment {
 
             }
 
+            int month=1;
+            try {
+                 month = Integer.valueOf(parentItems.get(groupPosition).split("/")[0]);
+            }catch (Exception e){
+                //Log.v("LATLNG", "month error");
+            }
+            String monthName="";
 
-            holder.month.setText(parentItems.get(groupPosition) + " - " + ((ArrayList<Running>) childtems.get(groupPosition)).size() + " workouts");
+            switch (month){
+
+                case 1: monthName = "January"; break;
+                case 2: monthName = "February"; break;
+                case 3: monthName = "March"; break;
+                case 4 : monthName = "April"; break;
+                case 5: monthName = "May"; break;
+                case 6: monthName = "June"; break;
+                case 7: monthName = "July"; break;
+                case 8 : monthName = "August"; break;
+                case 9: monthName = "September"; break;
+                case 10: monthName = "October"; break;
+                case 11: monthName = "November"; break;
+                case 12 : monthName = "December"; break;
+                default: monthName = parentItems.get(groupPosition);
+            }
+
+
+
+
+            holder.month.setText(monthName+" "+parentItems.get(groupPosition).split("/")[1] + " - " + ((ArrayList<Running>) childtems.get(groupPosition)).size() + " workouts");
 
             return convertView;
         }
