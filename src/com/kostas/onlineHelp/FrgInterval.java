@@ -21,6 +21,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
@@ -38,7 +39,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class FrgInterval extends BaseFragment{
+public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
 
 
     GoogleMap googleMap;
@@ -93,23 +94,6 @@ public class FrgInterval extends BaseFragment{
                     setPaceText(false, bundle.getFloat(RunningService.INTERVAL_SPEED), 0);
 
                 }
-//                else if((bundle.getBoolean(RunningService.LOCATION_FOUND,false))){
-//
-//                    stopRunningService();
-//
-//                    SharedPreferences.Editor editor = app_preferences.edit();
-//                    editor.putBoolean("SEARCHING", false);
-//                    editor.apply();
-//
-//                    lastLocation = (Location)bundle.get(RunningService.SINGLE_UPDATE);
-//                    if (lastLocation!=null) setAddressTextAndMap();
-////                    toggleNoGps(!(bundle.getBoolean(RunningService.LOCATION_FOUND,false)));
-//
-//
-//                }
-//                else if (bundle.getBoolean(RunningService.SPEED_UPDATE, false)){
-//                    paceText.setText("Speed: "+bundle.getFloat("speed",0));
-//                }
                 else {
                     String latLonList = bundle.getString(RunningService.LATLONLIST);
                     long millis = bundle.getLong(RunningService.INTERVAL_TIME);
@@ -137,16 +121,12 @@ public class FrgInterval extends BaseFragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
-
-
-
-//        Toast.makeText(getActivity(), "createview", Toast.LENGTH_SHORT).show();
-
         View v = inflater.inflate(R.layout.frg_interval, container, false);
 //        placeAds(v);
 
         setPlansSpinner(v);
         setTextViewsAndButtons(v);
+        initializeMap();
         new PerformAsyncTask(getActivity()).execute();
         setListeners(v);
 //        displayHelpDialog();
@@ -1240,29 +1220,8 @@ public class FrgInterval extends BaseFragment{
 
 
     public void initializeMap(){
-        SupportMapFragment fm = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapFrgKostas);
-        googleMap = fm.getMap();
 
-        if (googleMap!=null) {
-            googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-            googleMap.setIndoorEnabled(false);
-            googleMap.setMyLocationEnabled(true);
-//            if (lastLocation != null) {
-//                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 14));
-//                googleMap.animateCamera(CameraUpdateFactory.zoomTo(14), 2000, null);
-//            }
-        }
-
-        googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-            @Override
-            public void onMyLocationChange(Location location) {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 14));
-                googleMap.animateCamera(CameraUpdateFactory.zoomTo(14), 200, null);
-
-                    setAddressText(location);
-
-            }
-        });
+        ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapFrgKostas)).getMapAsync(this);
 
     }
 
@@ -1276,7 +1235,25 @@ public class FrgInterval extends BaseFragment{
         Toast.makeText(getActivity(), plan.getDescription()+" loaded", Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void onMapReady(GoogleMap gMap) {
 
+        googleMap = gMap;
+        googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+        googleMap.setIndoorEnabled(false);
+        googleMap.setMyLocationEnabled(true);
+
+        googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+            @Override
+            public void onMyLocationChange(Location location) {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 14));
+                googleMap.animateCamera(CameraUpdateFactory.zoomTo(14), 200, null);
+
+                setAddressText(location);
+
+            }
+        });
+    }
 
 
     class CustomOnItemSelectedListener implements AdapterView.OnItemSelectedListener {
@@ -1421,7 +1398,7 @@ public class FrgInterval extends BaseFragment{
             adView2.loadAd(adRequest2);
             adView.loadAd(adRequest);
             plansSpinner.setClickable(true);
-            initializeMap();
+//            initializeMap();
 //            setAddressText();
             setPlansVisibility();
 

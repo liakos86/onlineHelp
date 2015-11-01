@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.*;
 import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Running;
@@ -27,7 +28,7 @@ import java.util.*;
 /**
  * Created by liakos on 11/4/2015.
  */
-public class FrgShowRuns extends BaseFragment {
+public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
 
 //    List<Running> runs;
     List<Interval> intervals = new ArrayList<Interval>();
@@ -84,7 +85,7 @@ public class FrgShowRuns extends BaseFragment {
         initializeViews(v);
 
         setList();
-//        initializeMap();
+        initializeMap();
 
 
         return  v;
@@ -109,22 +110,7 @@ public class FrgShowRuns extends BaseFragment {
 
 
     public void initializeMap(){
-        googleMap = ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapListKostas)).getMap();
-
-        if (googleMap!=null) {
-            googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-            googleMap.setIndoorEnabled(false);
-
-
-            googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
-                @Override
-                public void onMapLoaded() {
-
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 60));
-                    progressBarMap.setVisibility(View.GONE);
-                }
-            });
-        }
+       ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapListKostas)).getMapAsync(this);
 
     }
 
@@ -486,10 +472,24 @@ public class FrgShowRuns extends BaseFragment {
 //        adapterRunning.notifyDataSetChanged();
     }
 
+    @Override
+    public void onMapReady(GoogleMap gMap) {
+
+            googleMap = gMap;
+            googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+            googleMap.setIndoorEnabled(false);
+
+        progressBarMap.setVisibility(View.GONE);
+
+        googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 60));
+            }
+        });
 
 
-
-
+    }
 
 
     public class MyExpandableAdapter extends BaseExpandableListAdapter {
@@ -738,7 +738,6 @@ public class FrgShowRuns extends BaseFragment {
         protected void onPostExecute(Void result) {
 
             runsExpListView.setClickable(true);
-            initializeMap();
             if (adapterExp!=null) adapterExp.notifyDataSetChanged();
 
 
