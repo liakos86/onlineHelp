@@ -155,12 +155,14 @@ public class Database extends SQLiteOpenHelper {
         String[] FROM = {
                 // ! beware. I mark the position of the fields
                 ContentDescriptor.Interval.Cols.LATLONLIST,
-                ContentDescriptor.Interval.Cols.MILLISECONDS
+                ContentDescriptor.Interval.Cols.MILLISECONDS,
+                ContentDescriptor.Interval.Cols.DISTANCE
 
         };
 
         int sLatPosition = 0;
         int sMillisPosition = 1;
+        int sDistancePosition = 2;
 
 
         Cursor c = mContext.getContentResolver().query(ContentDescriptor.Interval.CONTENT_URI, FROM,
@@ -172,7 +174,7 @@ public class Database extends SQLiteOpenHelper {
         if (c.getCount() > 0) {
 
             while (c.moveToNext()) {
-                St.add(new Interval(c.getString(sLatPosition), c.getLong(sMillisPosition)));
+                St.add(new Interval(c.getString(sLatPosition), c.getLong(sMillisPosition), c.getFloat(sDistancePosition)));
             }
         }
         c.close();

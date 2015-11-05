@@ -5,7 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
+//import android.util.Log;
 import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 
@@ -131,6 +131,7 @@ public class Interval implements Serializable{
             toRet.put(ContentDescriptor.Interval.Cols.RUNNING_ID, item.running_id);
             toRet.put(ContentDescriptor.Interval.Cols.MILLISECONDS, item.milliseconds);
             toRet.put(ContentDescriptor.Interval.Cols.LATLONLIST, item.latLonList);
+            toRet.put(ContentDescriptor.Interval.Cols.DISTANCE, item.distance);
 
             return toRet;
         }
@@ -147,7 +148,7 @@ public class Interval implements Serializable{
             toRet.running_id = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.RUNNING_ID));
             toRet.latLonList = cursor.getString(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.LATLONLIST));
             toRet.milliseconds = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.MILLISECONDS));
-
+            toRet.distance = cursor.getFloat(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.DISTANCE));
             return toRet;
         }
     }

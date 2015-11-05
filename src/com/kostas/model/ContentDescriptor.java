@@ -142,6 +142,7 @@ public class ContentDescriptor {
             public static final String RUNNING_ID = "running_id";
             public static final String MILLISECONDS = "milliseconds";
             public static final String LATLONLIST = "latlonlist";
+            public static final String DISTANCE = "distance";
 
 
 
@@ -162,7 +163,7 @@ public class ContentDescriptor {
                     + String.format(sFrmTextNotNull, Cols.RUNNING_ID) + " , "
                     + String.format(sFrmTextNotNull, Cols.MILLISECONDS) + " , "
                     + String.format(sFrmTextNotNull, Cols.LATLONLIST) + " , "
-
+                    + String.format(sFrmTextNotNull, Cols.DISTANCE) + " , "
                     + String.format(sFrmPrimaryKey, Cols.ID) + ")";
         }
     }
