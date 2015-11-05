@@ -334,7 +334,7 @@ public class ProgressWheel extends View {
 //                    canvas.drawText(s, getWidth() / 2 - 2*(horizontalTextOffset/3),
 //                            getHeight() / 2 + 5*verticalTextOffset, blackPaint);
 //                else
-                    canvas.drawText(s, getWidth() / 2 - (5*horizontalTextOffset/6),
+                    canvas.drawText(s, getWidth() / 2 - (7*horizontalTextOffset/8),
                             getHeight() / 2 - 3*verticalTextOffset/5, textPaint);
             }
         }
