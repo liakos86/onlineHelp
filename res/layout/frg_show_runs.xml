@@ -23,14 +23,6 @@
 
         </RelativeLayout>
 
-
-        <!--<ListView-->
-
-            <!--android:id="@+id/listRunning"-->
-            <!--android:layout_width="fill_parent"-->
-            <!--android:layout_height="fill_parent"-->
-            <!--/>-->
-
         <RelativeLayout  android:layout_width="fill_parent" android:layout_height="fill_parent">
 
         <ListView
@@ -42,27 +34,14 @@
                 android:layout_alignParentTop="true"
                 />
 
-            <!--<RelativeLayout android:id="@+id/intervalsButtons" android:layout_alignParentBottom="true" android:layout_width="fill_parent" android:layout_height="84dp" android:background="@drawable/bottom_buttons">-->
+
+            <LinearLayout android:baselineAligned="false" android:id="@+id/intervalsButtons" android:layout_alignParentBottom="true" android:layout_width="fill_parent" android:layout_height="wrap_content"  android:padding="@dimen/eight">
 
 
-
-                <!--<ImageButton android:focusable="false" android:layout_centerVertical="true" android:layout_alignParentLeft="true" android:layout_marginLeft="48dp"  android:id="@+id/buttonCloseIntervals"  android:layout_width="wrap_content" android:layout_height="wrap_content"  android:background="@drawable/return_64_selector"/>-->
-                <!--<ImageButton android:focusable="false" android:layout_centerVertical="true" android:layout_alignParentRight="true" android:layout_marginRight="48dp" android:id="@+id/buttonShowMap"  android:layout_width="wrap_content" android:layout_height="wrap_content"  android:background="@drawable/map_64_selector"/>-->
-
-
-            <!--</RelativeLayout>-->
-
-            <LinearLayout android:baselineAligned="false" android:id="@+id/intervalsButtons" android:layout_alignParentBottom="true" android:layout_width="fill_parent" android:layout_height="84dp" android:background="@color/circle_grey" android:paddingTop="0.5dp">
+                <Button android:textStyle="bold" android:layout_marginRight="@dimen/four" android:textColor="@color/white_back"  android:id="@+id/buttonCloseIntervals" android:background="@drawable/close_button_selector" android:text="Close"  android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height"/>
+                <Button android:textStyle="bold"  android:id="@+id/buttonShowMap" android:textColor="@color/white_back" android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height" android:background="@drawable/plus_minus_selector" android:text="Map"/>
 
 
-                <RelativeLayout  android:id="@+id/buttonCloseIntervals" android:background="@drawable/bottom_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="fill_parent">
-                <ImageView  android:layout_centerVertical="true" android:layout_centerHorizontal="true"    android:layout_width="wrap_content" android:layout_height="wrap_content"  android:src="@drawable/return_64"/>
-                </RelativeLayout>
-            <RelativeLayout  android:id="@+id/buttonShowMap" android:background="@drawable/bottom_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="fill_parent">
-
-            <ImageView  android:layout_centerHorizontal="true" android:layout_centerVertical="true"  android:layout_width="wrap_content" android:layout_height="wrap_content"  android:src="@drawable/map_64"/>
-
-            </RelativeLayout>
 
             </LinearLayout>
 
@@ -70,8 +49,7 @@
         </RelativeLayout>
 
 
-        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                 xmlns:tools="http://schemas.android.com/tools"
+        <FrameLayout
                  android:layout_width="match_parent"
                  android:layout_height="match_parent"
 

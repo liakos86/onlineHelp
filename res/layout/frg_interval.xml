@@ -27,9 +27,9 @@
 
 
                 <com.kostas.onlineHelp.NumberPickerKostas
-                        android:layout_marginTop="8dp"
-                        android:layout_marginLeft="20dp"
-                        android:layout_marginRight="20dp"
+                        android:layout_marginTop="@dimen/eight"
+                        android:layout_marginLeft="@dimen/twenty"
+                        android:layout_marginRight="@dimen/twenty"
                         android:layout_alignParentTop="true"
                     app:minValue="50"
                     app:maxValue="5000"
@@ -39,13 +39,13 @@
                     android:id="@+id/intervalDistancePicker"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
-                        android:layout_marginBottom="8dp"
-                    android:layout_height="48dp">
+                        android:layout_marginBottom="@dimen/eight"
+                    android:layout_height="@dimen/standard_view_height">
             </com.kostas.onlineHelp.NumberPickerKostas>
 
                 <com.kostas.onlineHelp.NumberPickerKostas
-                        android:layout_marginLeft="20dp"
-                        android:layout_marginRight="20dp"
+                        android:layout_marginLeft="@dimen/twenty"
+                        android:layout_marginRight="@dimen/twenty"
                         android:layout_below="@+id/intervalDistancePicker"
                     app:minValue="10"
                     app:maxValue="300"
@@ -55,14 +55,14 @@
                     android:id="@+id/intervalTimePicker"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
-                        android:layout_marginBottom="8dp"
-                    android:layout_height="48dp">
+                        android:layout_marginBottom="@dimen/eight"
+                    android:layout_height="@dimen/standard_view_height">
             </com.kostas.onlineHelp.NumberPickerKostas>
 
                 <com.kostas.onlineHelp.NumberPickerKostas
-                        android:layout_marginLeft="20dp"
-                        android:layout_marginRight="20dp"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginLeft="@dimen/twenty"
+                        android:layout_marginRight="@dimen/twenty"
+                        android:layout_marginBottom="@dimen/eight"
                         android:layout_below="@+id/intervalTimePicker"
                         app:minValue="0"
                         app:maxValue="99"
@@ -72,7 +72,7 @@
                         android:id="@+id/intervalRoundsPicker"
                         android:orientation="horizontal"
                         android:layout_width="match_parent"
-                        android:layout_height="48dp">
+                        android:layout_height="@dimen/standard_view_height">
                 </com.kostas.onlineHelp.NumberPickerKostas>
 
                 <Spinner
@@ -94,22 +94,22 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/adViewInterval"
                 app:adSize="BANNER"
-                app:adUnitId="ca-app-pub-1164456313108704/9576922674"
+                app:adUnitId="@string/adId1"
                 android:layout_below="@+id/plansSpinner"
                 />
 
 
                 <LinearLayout android:layout_below="@+id/adViewInterval" android:id="@+id/setButtons" android:layout_width="match_parent"
-                                android:layout_height="wrap_content" android:layout_marginRight="20dp" android:layout_marginLeft="20dp" android:layout_marginTop="20dp" android:layout_marginBottom="0dp">
+                                android:layout_height="wrap_content" android:layout_marginRight="@dimen/twenty" android:layout_marginLeft="@dimen/twenty" android:layout_marginTop="@dimen/twenty" android:layout_marginBottom="0dp">
 
                 <Button
-                        android:layout_marginRight="8dp"
+                        android:layout_marginRight="@dimen/eight"
                         android:layout_weight="2"
                         android:layout_width="0dp"
                         android:layout_height="54dp"
                         android:drawableStart="@drawable/arrow_right_v2"
                         android:drawableLeft="@drawable/arrow_right_v2"
-                        android:paddingLeft="20dp"
+                        android:paddingLeft="@dimen/twenty"
                         android:text="@string/start"
                         android:textStyle="bold"
                         android:textSize="@dimen/xmedium_text"
@@ -151,12 +151,6 @@
             </RelativeLayout>
 
 
-
-
-
-        <!--</LinearLayout>-->
-
-
             <fragment
                     android:id="@+id/mapFrgKostas"
                     android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -185,7 +179,7 @@
                     android:layout_width="@dimen/progressBarSize"
                     android:layout_height="@dimen/progressBarSize"
                     android:visibility="invisible"
-                    app:textSize="@dimen/large_text"
+                    app:textSize="@dimen/progressBarText"
                     android:layout_centerInParent="true"
 
                     app:textColor="@color/interval_green"
@@ -193,7 +187,7 @@
                     app:barColor="@color/interval_red"
                     app:contourColor="@color/circle_grey"
                     app:barWidth="16dp"
-                    app:rimWidth="20dp"
+                    app:rimWidth="@dimen/twenty"
                     />
 
             <com.kostas.onlineHelp.ProgressWheel
@@ -201,7 +195,7 @@
                     android:layout_width="@dimen/progressBarSize"
                     android:layout_height="@dimen/progressBarSize"
                     android:visibility="invisible"
-                    app:textSize="@dimen/xmedium_text"
+                    app:textSize="@dimen/progressBarText"
                     android:layout_centerInParent="true"
 
                     app:textColor="@color/interval_green"
@@ -209,12 +203,9 @@
                     app:barColor="@color/interval_green"
                     app:contourColor="@color/circle_grey"
                     app:barWidth="16dp"
-                    app:rimWidth="20dp"
+                    app:rimWidth="@dimen/twenty"
                     />
-
-
-
-
+            
             <ImageButton
                     android:layout_margin="15dp"
                     android:layout_width="@dimen/progressBarSize"
@@ -225,16 +216,16 @@
                     android:layout_centerInParent="true"/>
 
 
-            <RelativeLayout android:layout_marginRight="8dp" android:layout_marginLeft="8dp" android:background="@drawable/info_back" android:padding="10dp" android:id="@+id/textsInfoRun" android:layout_below="@+id/buttonStart" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <RelativeLayout android:layout_marginRight="@dimen/eight" android:layout_marginLeft="@dimen/eight" android:background="@drawable/info_back" android:padding="10dp" android:id="@+id/textsInfoRun" android:layout_below="@+id/buttonStart" android:layout_width="fill_parent" android:layout_height="wrap_content">
                 <TextView android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
                           android:layout_alignParentLeft="true"
                           android:layout_alignParentTop="true"
                           android:textSize="@dimen/medium_text"
-                          android:textColor="@color/white_back"
+                          android:textColor="@color/drawer_black"
                           android:textStyle="bold|italic"
                           android:id="@+id/roundsText"
-                          android:text="Rounds: N/A"
+                          android:text="@string/text_rounds"
                         />
 
                 <TextView android:layout_width="wrap_content"
@@ -242,10 +233,10 @@
                           android:layout_alignParentLeft="true"
                           android:layout_below="@+id/roundsText"
                           android:textSize="@dimen/medium_text"
-                          android:textColor="@color/white_back"
+                          android:textColor="@color/drawer_black"
                           android:textStyle="bold"
                           android:id="@+id/paceText"
-                          android:text="Pace: 0m 0s / km"
+                          android:text="@string/text_pace"
                         />
 
                 <TextView android:layout_width="wrap_content"
@@ -253,10 +244,10 @@
                           android:layout_alignParentRight="true"
                           android:layout_alignParentTop="true"
                           android:textSize="@dimen/medium_text"
-                          android:textColor="@color/white_back"
+                          android:textColor="@color/drawer_black"
                           android:textStyle="bold"
                           android:id="@+id/timeText"
-                          android:text="Time: 00h 00m 00s"
+                          android:text="@string/text_time"
                         />
 
                 <TextView android:layout_width="wrap_content"
@@ -264,32 +255,23 @@
                           android:layout_alignParentRight="true"
                           android:layout_below="@+id/timeText"
                           android:textSize="@dimen/medium_text"
-                          android:textColor="@color/white_back"
+                          android:textColor="@color/drawer_black"
                           android:textStyle="bold"
                           android:id="@+id/avgPaceText"
-                          android:text="Pace avg: 0m 0s / km"
+                          android:text="@string/text_avg_pace"
                         />
 
 
-
-
-
-
-
-
-
             </RelativeLayout>
-
-
-
+            
             <ImageButton
 
                     android:layout_below="@+id/textsInfoRun"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_width="70dp"
+                    android:layout_marginTop="@dimen/four"
+                    android:layout_marginBottom="@dimen/four"
+                    android:layout_width="@dimen/circular_image_size"
                     android:visibility="invisible"
-                    android:layout_height="70dp"
+                    android:layout_height="@dimen/circular_image_size"
                     android:src="@drawable/stop_32"
                     android:background="@drawable/circle_red"
                     android:id="@+id/buttonStop"
@@ -297,10 +279,10 @@
 
             <ImageButton
                     android:layout_below="@+id/textsInfoRun"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_width="70dp"
-                    android:layout_height="70dp"
+                    android:layout_marginTop="@dimen/four"
+                    android:layout_marginBottom="@dimen/four"
+                    android:layout_width="@dimen/circular_image_size"
+                    android:layout_height="@dimen/circular_image_size"
                     android:src="@drawable/return_32"
                     android:background="@drawable/circle_red"
                     android:id="@+id/buttonBack"
@@ -312,7 +294,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/adViewInterval2"
                     app:adSize="BANNER"
-                    app:adUnitId="ca-app-pub-1164456313108704/6586430278"
+                    app:adUnitId="@string/adId2"
                     android:layout_gravity="center_horizontal|bottom"
                     android:visibility="invisible"
                     android:layout_above="@+id/layoutBottomButtons"
@@ -320,18 +302,10 @@
                     />
 
 
-            <LinearLayout android:baselineAligned="false" android:layout_alignParentBottom="true"  android:orientation="horizontal" android:visibility="gone" android:id="@+id/layoutBottomButtons" android:layout_gravity="center_horizontal|bottom" android:layout_width="fill_parent" android:layout_height="84dp" android:background="@color/circle_grey" android:paddingTop=".5dp">
+            <LinearLayout android:baselineAligned="false" android:layout_alignParentBottom="true"  android:orientation="horizontal" android:visibility="gone" android:id="@+id/layoutBottomButtons" android:layout_gravity="center_horizontal|bottom" android:layout_width="fill_parent" android:layout_height="wrap_content" android:padding="@dimen/eight">
 
-
-
-                <RelativeLayout  android:id="@+id/buttonDismissInterval" android:background="@drawable/bottom_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="fill_parent">
-                    <ImageView  android:layout_centerVertical="true" android:layout_centerHorizontal="true"    android:layout_width="wrap_content" android:layout_height="wrap_content"  android:src="@drawable/dismiss_64"/>
-                </RelativeLayout>
-                <RelativeLayout  android:id="@+id/buttonSaveRunWithIntervals" android:background="@drawable/bottom_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="fill_parent">
-
-                    <ImageView  android:layout_centerHorizontal="true" android:layout_centerVertical="true"  android:layout_width="wrap_content" android:layout_height="wrap_content"  android:src="@drawable/save_64"/>
-
-                </RelativeLayout>
+                <Button android:text="Delete" android:layout_marginRight="@dimen/four" android:textColor="@color/white_back" android:textStyle="bold" android:id="@+id/buttonDismissInterval" android:background="@drawable/close_button_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height"/>
+                <Button android:text="Save" android:textColor="@color/white_back" android:textStyle="bold" android:id="@+id/buttonSaveRunWithIntervals" android:background="@drawable/plus_minus_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height"/>
 
             </LinearLayout>
 

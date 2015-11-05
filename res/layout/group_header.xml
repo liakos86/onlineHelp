@@ -5,7 +5,7 @@
               android:background="@color/drawer_grey"
               android:focusable="false"
               android:orientation="vertical"
-              android:paddingLeft="8dp"
+              android:paddingLeft="@dimen/eight"
               tools:context=".MainActivity" >
 
     <!--<LinearLayout-->

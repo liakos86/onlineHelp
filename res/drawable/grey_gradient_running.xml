@@ -11,10 +11,10 @@
             <corners
                     android:radius="0dp" />
             <padding
-                    android:left="8dp"
-                    android:top="8dp"
-                    android:right="8dp"
-                    android:bottom="8dp" />
+                    android:left="@dimen/eight"
+                    android:top="@dimen/eight"
+                    android:right="@dimen/eight"
+                    android:bottom="@dimen/eight" />
         </shape>
     </item>
 
@@ -28,10 +28,10 @@
             <corners
                     android:radius="0dp" />
             <padding
-                    android:left="8dp"
-                    android:top="8dp"
-                    android:right="8dp"
-                    android:bottom="8dp" />
+                    android:left="@dimen/eight"
+                    android:top="@dimen/eight"
+                    android:right="@dimen/eight"
+                    android:bottom="@dimen/eight" />
         </shape>
     </item>
 </selector>
