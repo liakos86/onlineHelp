@@ -42,15 +42,13 @@ public class BaseDrawer extends BaseFragmentActivity {
 //    int[] drawerTitlesColors;
     DrawerLayout mDrawerLayout;
     private boolean logout = false;
+    ListView mDrawerList;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         drawerTitles = getResources().getStringArray(R.array.drawer_titles);
-
-
-//        drawerTitlesColors = getResources().getIntArray(R.array.drawer_titles_colors);
     }
 
 
@@ -141,11 +139,14 @@ public class BaseDrawer extends BaseFragmentActivity {
                     i%2==0?drawerBlack:drawerGrey,imgRes,tf,null,null,null,0));
         }
 
-        ListView mDrawerList = (ListView) findViewById(R.id.left_drawer);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mDrawerList.setAdapter(new CustomDrawerAdapter(this, R.layout.custom_drawer_item, dataList));
         mDrawerList.setItemChecked(0, true);
+        setTitle(drawerTitles[0]);
         return mDrawerList;
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -180,22 +181,27 @@ public class BaseDrawer extends BaseFragmentActivity {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+
+
+
+            closeDrawer();
+
             switch (position) {
-                case POSITION_NEW_INTERVAL:
-                    startMain(mPager, position);
-                    break;
-
-                case POSITION_MY_DIARY:
-                    startMain(mPager, position);
-                    break;
-
-                case POSITION_MY_PLANS:
-                    startMain(mPager, position);
-                    break;
-
-                case POSITION_MY_SETTINGS:
-                    startMain(mPager, position);
-                    break;
+//                case POSITION_NEW_INTERVAL:
+//                    startMain(mPager, position);
+//                    break;
+//
+//                case POSITION_MY_DIARY:
+//                    startMain(mPager, position);
+//                    break;
+//
+//                case POSITION_MY_PLANS:
+//                    startMain(mPager, position);
+//                    break;
+//
+//                case POSITION_MY_SETTINGS:
+//                    startMain(mPager, position);
+//                    break;
 
                 case POSITION_EXIT:
                     finish();
@@ -206,9 +212,8 @@ public class BaseDrawer extends BaseFragmentActivity {
                     startMain(mPager, position);
                     break;
             }
-
             setTitle(drawerTitles[position]);
-            closeDrawer();
+
         }
 
     }
