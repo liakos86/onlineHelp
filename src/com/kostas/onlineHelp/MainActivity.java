@@ -167,13 +167,19 @@ public class MainActivity extends BaseDrawer {
     @Override
     public void onBackPressed() {
 
-        if (((ExtApplication) getApplicationContext()).isInRunningMode()){
-            Toast.makeText(getApplication(), "Interval in progress", Toast.LENGTH_SHORT).show();
-        }
-        else {
-            //todo check why it is not working
-            super.onBackPressed();
-            finish();
+        if  (getTitle().toString().equals(drawerTitles[0])) {
+
+            if (((ExtApplication) getApplicationContext()).isInRunningMode()) {
+                Toast.makeText(getApplication(), "Interval in progress", Toast.LENGTH_SHORT).show();
+            } else {
+                //todo check why it is not working
+                super.onBackPressed();
+//            finish();
+            }
+        }else{
+            mPager.setCurrentItem(0, true);
+            setTitle(drawerTitles[0]);
+           mDrawerList.setItemChecked(0, true);
         }
     }
 
