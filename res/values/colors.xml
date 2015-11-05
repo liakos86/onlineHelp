@@ -27,7 +27,8 @@
     <color name="pressed_background_stores">#00869e</color>
     <color name="interval_green">#27ae60</color>
     <color name="interval_green_pressed">#2ecc71</color>
-    <color name="interval_red">#e74c3c</color>
+    <color name="interval_red">#c0392b</color>
+    <color name="interval_red_pressed">#e74c3c</color>
     <color name="cyan">#00ffff</color>
 
 </resources>

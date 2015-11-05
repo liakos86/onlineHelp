@@ -13,17 +13,23 @@
     <string name="settings_error">Lengths must be up to 20 characters</string>
     <string name="start_hint">start sound (default \'Started\')</string>
     <string name="stop_hint">stop sound (default \'Stopped\')</string>
+    <string name="text_time">Time: 00h 00m 00s</string>
+    <string name="text_avg_pace">Pace avg: 0m 0s / km</string>
+    <string name="text_pace">Pace: 0m 0s / km</string>
+    <string name="text_rounds">Rounds: N/A</string>
+    <string name="adId1">ca-app-pub-1164456313108704/9576922674</string>
+    <string name="adId2">ca-app-pub-1164456313108704/6586430278</string>
 
-    <string name="nice_html">
-        <![CDATA[
+    <!--<string name="nice_html">-->
+        <!--<![CDATA[-->
 
-        <p>
-       &#8226;  <b>Step 1:</b> Pick your desired distance to run intervals <br/><br/>
-       &#8226;   <b>Step 2:</b> Pick your rest periods in seconds between intervals <br/><br/>
-       &#8226;  <b>Step 3:</b> Pick the number of times/rounds to repeat<br/><br/>
-       &#8226;  <b>Step 4:</b> Save this plan with a name of your choice for future use<br/>
-       </p>
-]]>
-    </string>
+        <!--<p>-->
+       <!--&#8226;  <b>Step 1:</b> Pick your desired distance to run intervals <br/><br/>-->
+       <!--&#8226;   <b>Step 2:</b> Pick your rest periods in seconds between intervals <br/><br/>-->
+       <!--&#8226;  <b>Step 3:</b> Pick the number of times/rounds to repeat<br/><br/>-->
+       <!--&#8226;  <b>Step 4:</b> Save this plan with a name of your choice for future use<br/>-->
+       <!--</p>-->
+<!--]]>-->
+    <!--</string>-->
 
 </resources>
