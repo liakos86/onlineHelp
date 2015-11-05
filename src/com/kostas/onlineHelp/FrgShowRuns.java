@@ -63,7 +63,7 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
     GoogleMap googleMap;
     LatLngBounds bounds;
     ImageButton closeMapButton;
-    RelativeLayout openMapButton, closeIntervalsButton;
+    Button openMapButton, closeIntervalsButton;
 
     //if he goes back and forth in map <-> intervals
     boolean alreadyDrawn;
@@ -96,14 +96,13 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
         progressBarMap = (ProgressBar) v.findViewById(R.id.progressBarMap);
         viewFlipper = (ViewFlipper) v.findViewById(R.id.viewFlipper);
 
-        openMapButton = (RelativeLayout) v.findViewById(R.id.buttonShowMap);
+        openMapButton = (Button) v.findViewById(R.id.buttonShowMap);
         closeMapButton = (ImageButton) v.findViewById(R.id.buttonCloseMap);
-        closeIntervalsButton = (RelativeLayout) v.findViewById(R.id.buttonCloseIntervals);
+        closeIntervalsButton = (Button) v.findViewById(R.id.buttonCloseIntervals);
 
         noRunsText = (TextView) v.findViewById(R.id.noRunsText);
 
         runsExpListView = (ExpandableListView) v.findViewById(R.id.listExpRunning);
-
         intervalListView = (ListView) v.findViewById(R.id.listIntervals);
 
     }
@@ -120,7 +119,6 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
 
         // DO NOT USE: intervals = running.getIntervals() !!!! IT WILL CHANGE THE OBJECT REFERENCED
         for (Interval interval : running.getIntervals()){
-            interval.setDistance(running.getDistance());
             intervals.add(interval);
         }
         viewFlipper.setDisplayedChild(1);
@@ -376,7 +374,7 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
             bounds = builder.build();
 
             try{
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 60));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 200));
 
             }catch (Exception e){
                 //Log.v("LATLNG", "MAP CRASH");
@@ -478,13 +476,14 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
             googleMap = gMap;
             googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
             googleMap.setIndoorEnabled(false);
+        googleMap.getUiSettings().setZoomControlsEnabled(true);
 
         progressBarMap.setVisibility(View.GONE);
 
         googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 60));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 200));
             }
         });
 
