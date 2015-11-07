@@ -1,12 +1,15 @@
 package com.kostas.service;
 
-import android.app.IntentService;
+import android.app.*;
+import android.support.v4.app.NotificationCompat;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.*;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
 import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -39,12 +42,10 @@ public class RunningService extends IntentService
     public static final String NOTIFICATION = "com.kostas.onlineHelp";
     public static final String IS_RUNNING = "is_running";
     public static final String COUNTDOWN_REMAINING = "countdown_remaining";
-//    public static final String SINGLE_UPDATE = "single_update";
-//    public static final String LOCATION_FOUND = "location_found";
+
 
     private TextToSpeech textToSpeech;
-    private String speechTextStart, speechTextFinish;
-
+    private String speechTextStart, speechTextFinish, speechFinal;
     private Handler mHandler = new Handler();
     public String latLonList;
     public float intervalDistance, currentDistance;
@@ -53,37 +54,37 @@ public class RunningService extends IntentService
     public Location lastLocation;
     SharedPreferences app_preferences;
     SharedPreferences.Editor editor;
-    boolean firstChange, noSound, noVibration;
-//    boolean singleUpdate;
+    boolean firstChange, hasSound, hasVibration;
     CountDownTimer countDownTimer;
-//    MediaPlayer mp = new MediaPlayer();
     ExtApplication application;
     GoogleApiClient mGoogleApiClient;
     LocationRequest mLocationRequest;
-
+    Gson gson;
+    Type listOfObjects;
     Vibrator v;
 
     //i need the list here. The app might be killed and user might complete several intervals
     private List<Interval> intervals = new ArrayList<Interval>();
 
     @Override
-    protected void onHandleIntent(Intent intent) {}
+    protected void onHandleIntent(Intent intent) {
+       Log.v("LATLNG", "HANLDE");
+    }
 
 
     @Override
     public void onCreate() {
         super.onCreate();
+
         application = (ExtApplication)getApplication();
         app_preferences = getApplication().getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
         editor = app_preferences.edit();
-
-
-
-//        Toast.makeText(application, "Connecting google", Toast.LENGTH_SHORT).show();
+        gson = new Gson();
+        listOfObjects = new TypeToken<List<Interval>>(){}.getType();
         buildGoogleApiClient();
 
-        noSound = app_preferences.getBoolean("noSound", false);
-        noVibration = app_preferences.getBoolean("noVibration", false);
+        hasSound = !app_preferences.getBoolean("noSound", false);
+        hasVibration = !app_preferences.getBoolean("noVibration", false);
         v = (Vibrator) application.getSystemService(Context.VIBRATOR_SERVICE);
 
         textToSpeech = new TextToSpeech(application, new TextToSpeech.OnInitListener() {
@@ -99,6 +100,10 @@ public class RunningService extends IntentService
                 }
             }
         });
+
+
+
+
 
     }
 
@@ -116,15 +121,6 @@ public class RunningService extends IntentService
         //if i request a single update i want only one within 20secs
         //else i want update every 8 secs with min 4 secs
         mLocationRequest = new LocationRequest();
-
-//        if (singleUpdate){
-//            lastLocation = LocationServices.FusedLocationApi.getLastLocation(
-//                    mGoogleApiClient);
-////            Toast.makeText(application, "single update", Toast.LENGTH_SHORT).show();
-//            mLocationRequest.setExpirationDuration(10000);
-//            mLocationRequest.setNumUpdates(1);
-//        }else {
-//            Toast.makeText(application, "multiple update", Toast.LENGTH_SHORT).show();
             mLocationRequest.setInterval(4000);
             mLocationRequest.setFastestInterval(3000);
             mLocationRequest.setSmallestDisplacement(10);
@@ -136,8 +132,13 @@ public class RunningService extends IntentService
         super("RunningService");
     }
 
+
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public void onStart(Intent intent, int startId) {
+
+
+        createForegroundNotification();
+
 
         //it will start two times:
         //the first is with intent values
@@ -145,97 +146,31 @@ public class RunningService extends IntentService
 
         if (intent!=null){//first
 
-//            if (intent.getBooleanExtra(SINGLE_UPDATE, false)){
-//                singleUpdate = true;
-//                mGoogleApiClient.connect();
-//            }
-//            else {
-//                singleUpdate = false;
+            intervalTime = intent.getLongExtra(INTERVAL_TIME, 0);
+            startCountDownForNextInterval(intervalTime);
+
                 intervals = new ArrayList<Interval>();
 
                 intervalDistance = intent.getFloatExtra(INTERVAL_DISTANCE, 0);
-                intervalTime = intent.getLongExtra(INTERVAL_TIME, 0);
+
                 intervalRounds = intent.getIntExtra(INTERVAL_ROUNDS, 0 );
 
-                editor.putFloat(INTERVAL_DISTANCE, intervalDistance);
-                editor.putLong(INTERVAL_TIME, intervalTime);
-                editor.putInt(INTERVAL_ROUNDS, intervalRounds);
-                editor.apply();
+            new PerformAsyncTask(0).execute();
 
-                startCountDownForNextInterval(intervalTime);
 //            }
 
-        }else{//second
-
-            Gson gson = new Gson();
-            Type listOfObjects = new TypeToken<List<Interval>>(){}.getType();
-            String intervalsGson = app_preferences.getString(INTERVALS,"");
-            intervals = (List<Interval>) gson.fromJson(intervalsGson, listOfObjects);
-
-            if (intervals==null){
-                intervals = new ArrayList<Interval>();
-            }
-
-            intervalDistance = app_preferences.getFloat(INTERVAL_DISTANCE, 0);
-            intervalTime = app_preferences.getLong(INTERVAL_TIME, 0);
-            intervalRounds = app_preferences.getInt(INTERVAL_ROUNDS, 0);
-
-
-
-            if (app_preferences.getBoolean(IS_RUNNING, false)) {
-
-                latLonList = app_preferences.getString(LATLONLIST, null);
-                currentDistance = app_preferences.getFloat(TOTAL_DIST, 0);
-                firstChange = true;
-                mStartTime = app_preferences.getLong(MSTART_TIME, SystemClock.uptimeMillis());
-
-//                singleUpdate= false;
-
-                if (!mGoogleApiClient.isConnected()) {
-                    mGoogleApiClient.connect();
-                }else{
-                    Toast.makeText(application, "was connected after killing app", Toast.LENGTH_SHORT).show();
-                    startReceiving();
-                }
-
-//               startReceiving();
-
-
-
-            }else{
-                latLonList = null;
-                currentDistance = 0;
-                firstChange = false;
-                long remainingTime = app_preferences.getLong(COUNTDOWN_REMAINING, 0);
-                startCountDownForNextInterval(remainingTime);
-            }
-
-
-            //Log.v("SERVICE", "Service restart");
         }
-
-        return START_STICKY;
     }
 
 
-
-
-
     @Override
-    public void onTaskRemoved(Intent rootIntent) {//killing the app here, store in shared prefs
-
-       // no need to store anything. onRefresh() & onFinish() have done this
-        //Log.v("SERVICE", "Task remove");
+    public void onTaskRemoved(Intent rootIntent) {
 
         super.onTaskRemoved(rootIntent);
     }
 
-
-
     @Override
     public boolean stopService(Intent name) {
-
-        //Log.v("SERVICE", "Service Stopped programmaticaly");
         stopLocationUpdates();
         return super.stopService(name);
     }
@@ -244,105 +179,121 @@ public class RunningService extends IntentService
     @Override
     public void onLocationChanged(Location location) {
 
-        //the loc fix can be of any accuracy
-//        if (singleUpdate){
-//
-//            lastLocation = location;
-//            mHandler.removeCallbacks(mExpiredRunnable);
-//            broadcastLocationOrSpeed();
-//            return;
-//        }
 
-        //the first update can be a max of 20m accurate
-        if (!firstChange && latLonList==null && location.getAccuracy() < 20){
+        if (!firstChange || lastLocation==null){
             firstChange = true;
 
-            //todo this results in accounting the first point we get
-            latLonList = String.valueOf(location.getLatitude()) + "," + String.valueOf(location.getLongitude());
-//            latLonList="";
             lastLocation = location;
             return;
         }
 
 
+        //the first update can be a max of 20m accurate
+        if ( latLonList==null && location.getAccuracy() < 20){
+
+            currentDistance = 0;
+            latLonList= String.valueOf(location.getLatitude()) + "," + String.valueOf(location.getLongitude());
+            lastLocation = location;
+            return;
+        }
+
         //every following update must be of at least 15m accurate
         if (location.getAccuracy() < 15){
-
 
         //if i have a last & new loc and a right accuracy
         if (lastLocation!=null && (location.getTime()>lastLocation.getTime())) {
 
-        float    newDistance = (float) distance_between(lastLocation, location);
+            float newDistance = lastLocation.distanceTo(location);
             currentDistance += newDistance;
 
-
-//            if (latLonList.equals("")) {
-//                latLonList = String.valueOf(location.getLatitude()) + "," + String.valueOf(location.getLongitude());
-//            } else {
-                latLonList += "," + String.valueOf(location.getLatitude()) + "," + String.valueOf(location.getLongitude());
-//            }
+            latLonList+="," + String.valueOf(location.getLatitude()) + "," + String.valueOf(location.getLongitude());
 
             if (currentDistance >= intervalDistance){
+                play( intervalRounds>0 && intervals.size()+1>=intervalRounds, false);
                 finishInterval();
             }else if (currentDistance > 0){
                 refreshInterval((location.getTime()-lastLocation.getTime())/ newDistance);
-//                play(application, R.raw.location_update);
-//                Toast.makeText(application, "Accuracy: "+location.getAccuracy(), Toast.LENGTH_SHORT).show();
             }
-
-
         }
 
           if (lastLocation==null || (location.getTime()>lastLocation.getTime()))  lastLocation = location;
 
         }
+    }
+
+
+    private void createForegroundNotification(){
+
+
+        final  int myID = 1234;
+
+        if (Build.VERSION.SDK_INT > 15) {
+
+            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(application);
+            mBuilder.setSmallIcon(R.drawable.interval_flag);
+            mBuilder.setContentTitle("Interval in progress");
+            mBuilder.setContentText("Click to get into");
+//            mBuilder.setOngoing(true);
+
+            Intent resultIntent = new Intent(application, MainActivity.class);
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(application);
+            stackBuilder.addParentStack(MainActivity.class);
+
+// Adds the Intent that starts the Activity to the top of the stack
+            stackBuilder.addNextIntent(resultIntent);
+            PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+            mBuilder.setContentIntent(resultPendingIntent);
+
+
+            Notification notification = mBuilder.build();
+
+            notification.ledARGB = getResources().getColor(R.color.interval_green);
+            notification.flags |= Notification.FLAG_SHOW_LIGHTS;
+            notification.flags |= Notification.FLAG_ONGOING_EVENT;
+            notification.ledOffMS = 1000;
+            notification.ledOnMS = 1500;
+
+
+//            NotificationManager notificationManager =
+//                    (NotificationManager) application.getSystemService(android.content.Context.NOTIFICATION_SERVICE);
+
+
+            // notificationID allows you to update the notification later on.
+            startForeground(myID, notification);
+//            notificationManager.notify(123, notification);
+        }else {
+
+
+//The intent to launch when the user clicks the expanded notification
+            Intent intent2 = new Intent(this, MainActivity.class);
+            intent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            PendingIntent pendIntent = PendingIntent.getActivity(this, 0, intent2, 0);
+
+//This constructor is deprecated. Use Notification.Builder instead
+            Notification notice = new Notification(R.drawable.interval_flag, "Interval in progress", System.currentTimeMillis());
+
+//This method is deprecated. Use Notification.Builder instead.
+            notice.setLatestEventInfo(this, "Click to get into", "Running", pendIntent);
+
+            notice.flags |= Notification.FLAG_NO_CLEAR;
+            startForeground(myID, notice);
+        }
 
 
     }
-
-    double distance_between(Location l1, Location l2)
-    {
-
-        double lat1=l1.getLatitude();
-        double lon1=l1.getLongitude();
-        double lat2=l2.getLatitude();
-        double lon2=l2.getLongitude();
-        double R = 6371; // km
-        double dLat = (lat2-lat1)*Math.PI/180;
-        double dLon = (lon2-lon1)*Math.PI/180;
-        lat1 = lat1*Math.PI/180;
-        lat2 = lat2*Math.PI/180;
-
-        double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-
-        return R * c * 1000;
-    }
-
-//    private void broadcastLocationOrSpeed(){
-//
-//        Intent intent = new Intent(NOTIFICATION);
-//
-////        if (forLocation) {
-//
-//            intent.putExtra(LOCATION_FOUND, true);
-//            intent.putExtra(SINGLE_UPDATE, lastLocation);
-//
-////        }
-////        else{
-////            intent.putExtra(SPEED_UPDATE, true);
-////            intent.putExtra("speed", lastLocation.getSpeed());
-////        }
-//        sendBroadcast(intent);
-//
-//    }
 
 
     private void finishInterval() {
 
         stopLocationUpdates();
+
+
+
+        if (!(intervalRounds>0 && intervals.size()+1>=intervalRounds)){
+            startCountDownForNextInterval(intervalTime);
+        }
+
+
 //        locationManager.removeUpdates(this);
 
         //user might complete several intervals when app killed
@@ -361,25 +312,17 @@ public class RunningService extends IntentService
 
             editor.putBoolean(INTERVAL_COMPLETED, true);
             intent.putExtra(INTERVAL_COMPLETED, true);
-            play( true, false);
-        }else{
-            play( false, false);
-            startCountDownForNextInterval(intervalTime);
+//            play( true, false);
         }
-
-        editor.putBoolean(IS_RUNNING, false);
-        editor.putFloat(TOTAL_DIST ,0);
-        editor.putFloat(TOTAL_TIME ,0);
-
-        Gson gson = new Gson();
-        Type listOfObjects = new TypeToken<List<Interval>>(){}.getType();
-        String json = gson.toJson(intervals, listOfObjects);
-        editor.putString(INTERVALS, json);
-        editor.apply();
-
 
 
         sendBroadcast(intent);
+
+
+        //todo async here
+
+       new PerformAsyncTask(3).execute();
+
     }
 
     private void refreshInterval(float pace){
@@ -388,20 +331,18 @@ public class RunningService extends IntentService
         long interval = (100*pace/6) > 3000 ? ( (100*pace/6) < 6000 ?  (long)(100*pace/6)  : 6000    ) : 3000;
 //        Toast.makeText(application,"Refresh rate of "+interval+" msecs", Toast.LENGTH_SHORT).show();
 
-        mLocationRequest.setInterval(interval);
-        mLocationRequest.setFastestInterval(interval - 1000);
+        mLocationRequest.setInterval(interval-1000);
+        mLocationRequest.setFastestInterval(interval - 2000);
 
-
-        //Log.v("SERVICE", currentDistance+"m  so far");
-        editor.putFloat(TOTAL_DIST, currentDistance);
-        editor.putLong(TOTAL_TIME, totalTime);
-        editor.putString(LATLONLIST, latLonList);
-        editor.apply();
 
         Intent intent = new Intent(NOTIFICATION);
         intent.putExtra(INTERVAL_DISTANCE, currentDistance);
         intent.putExtra(INTERVAL_SPEED, pace);
+        intent.putExtra(INTERVAL_TIME, totalTime);
+        intent.putExtra(LATLONLIST, latLonList);
         sendBroadcast(intent);
+
+        new PerformAsyncTask(2).execute();
 
     }
 
@@ -414,7 +355,6 @@ public class RunningService extends IntentService
         countDownTimer =   new CountDownTimer(remainingTime, 1000) {
             public void onTick(long millisUntilFinished) {
 
-//                //Log.v("SERVICE", millisUntilFinished/1000+"");
                 editor.putLong(COUNTDOWN_REMAINING, millisUntilFinished);
                 editor.apply();
             }
@@ -435,28 +375,12 @@ public class RunningService extends IntentService
                 //Log.v("SERVICE", "Timer expired");
             }
         }.start();
-
-
-
     }
 
     public void play(boolean completed, boolean starting) {
-//        stop();
-//
-//        mp = MediaPlayer.create(c, rid);
-//        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-//            @Override
-//            public void onCompletion(MediaPlayer mediaPlayer) {
-//                stop();
-//            }
-//        });
-//
-//        mp.start();
 
 
-//
-
-        if (!noVibration) {
+        if (hasVibration) {
 
             if (starting) {
                 v.vibrate(1000);
@@ -465,59 +389,39 @@ public class RunningService extends IntentService
         }
 
 
-        if (!noSound){
+        if (hasSound){
+
+            String finalFinish=speechTextFinish;
+
             if (starting) {
-                textToSpeech.speak(speechTextStart, TextToSpeech.QUEUE_FLUSH, null);
+                speechFinal = speechTextStart;
             } else{
 
                 if (completed){
-                    textToSpeech.speak("Completed", TextToSpeech.QUEUE_FLUSH, null);
+                    speechFinal = "Completed";
                 }else {
-                    textToSpeech.speak(speechTextFinish, TextToSpeech.QUEUE_FLUSH, null);
+                    if (intervalRounds>0) finalFinish = speechTextFinish+" . "+(intervalRounds-intervals.size()-1)+" rounds remaining";
+                    speechFinal = finalFinish;
                 }
 
             }
+
+            mSpeakText.run();
+
+
+
         }
 
     }
 
-//    public void stop() {
-//        if (mp != null) {
-//            mp.release();
-//            mp = null;
-//        }
-//    }
-
-
-
-
-//    public  void requestSingleUpdate(){
-//
-//        if (++updates < 6) {
-//            locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, this, null);
-//        }else{
-//            broadcastLocationOrSpeed(true);
-//            mHandler.removeCallbacks(singleUpdateTask);
-//        }
-//        //Log.v("SERVICE", "single_update..");
-//
-//
-//    }
 
     @Override
     public void onDestroy() {
 
-
-
-
-        //Log.v("SERVICE", "destroy");
-
         try {
             stopLocationUpdates();
-//            locationManager.removeUpdates(listener);
         }catch (Exception e){
-//            if (locationManager == null)  //Log.v("SERVICE", "null locationManager");
-//            if (listener == null)  //Log.v("SERVICE", "null listener");
+
         }
 
         if (countDownTimer!=null)
@@ -525,38 +429,40 @@ public class RunningService extends IntentService
         super.onDestroy();
     }
 
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 
 
     private Runnable mUpdateTimeTask = new Runnable(){
 
         public void run() {
 
-            final long start = mStartTime;
-            totalTime = SystemClock.uptimeMillis()- start;
-            mHandler.postDelayed(this, 3000);
-
+//            final long start = mStartTime;
+            totalTime = SystemClock.uptimeMillis()- mStartTime;
+            mHandler.postDelayed(this, 1000);
 
         }
     };
 
-//    private final Runnable mExpiredRunnable = new Runnable() {
-//        @Override
-//        public void run() {
-//            broadcastLocationOrSpeed();
-//        }
-//    };
+    private Runnable mSpeakText = new Runnable(){
+
+        public void run() {
+
+            textToSpeech.speak(speechFinal, TextToSpeech.QUEUE_FLUSH, null);
+
+
+        }
+    };
 
 
 
     @Override
     public void onConnected(Bundle bundle) {
 
-
-
         createLocationRequest();
-
         startReceiving();
-
 
     }
 
@@ -568,30 +474,12 @@ public class RunningService extends IntentService
             Toast.makeText(application, "google client not connected", Toast.LENGTH_SHORT).show();
 
 
-//        if (singleUpdate) {
-//            mHandler.removeCallbacks(mExpiredRunnable);
-//            mHandler.postDelayed(mExpiredRunnable, 10000);
-//        }else {
         mHandler.removeCallbacks(mUpdateTimeTask);
-        mHandler.postDelayed(mUpdateTimeTask, 3000);
-//        }
+        mHandler.postDelayed(mUpdateTimeTask, 1000);
 
     }
 
 
-    //will start receiving updates and if it is a single update it will stop in 10 secs
-//    protected void startLocationUpdates() {
-//
-//
-//        if (mGoogleApiClient.isConnected())
-//            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-//        else
-//            Toast.makeText(application, "google client not connected", Toast.LENGTH_SHORT).show();
-//
-//
-////        if (singleUpdate)
-////            mHandler.postDelayed(mExpiredRunnable, 10000);
-//    }
 
     protected void stopLocationUpdates() {
 
@@ -610,4 +498,62 @@ public class RunningService extends IntentService
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Toast.makeText(this,  "Google services api failed to connect", Toast.LENGTH_SHORT).show();
     }
+
+
+
+    private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        int type;
+
+
+
+        public PerformAsyncTask( int type) {
+            this.type = type;
+
+        }
+
+        protected void onPreExecute() {
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... unused) {
+
+            if (type==0){
+                editor.putFloat(INTERVAL_DISTANCE, intervalDistance);
+                editor.putLong(INTERVAL_TIME, intervalTime);
+                editor.putInt(INTERVAL_ROUNDS, intervalRounds);
+                editor.apply();
+
+            }
+
+            else if (type==2){
+
+                editor.putFloat(TOTAL_DIST, currentDistance);
+                editor.putLong(TOTAL_TIME, totalTime);
+                editor.putString(LATLONLIST, latLonList);
+                editor.apply();
+            }else if (type==3){
+                editor.putBoolean(IS_RUNNING, false);
+                editor.putFloat(TOTAL_DIST, 0);
+                editor.putFloat(TOTAL_TIME ,0);
+                editor.putString(LATLONLIST,null);
+
+                String json = gson.toJson(intervals, listOfObjects);
+                editor.putString(INTERVALS, json);
+                editor.apply();
+            }
+
+            return null;
+
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+
+        }
+
+    }
+
+
 }

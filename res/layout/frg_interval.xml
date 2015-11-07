@@ -223,7 +223,7 @@
                           android:layout_alignParentTop="true"
                           android:textSize="@dimen/medium_text"
                           android:textColor="@color/drawer_black"
-                          android:textStyle="bold|italic"
+                          android:textStyle="bold"
                           android:id="@+id/roundsText"
                           android:text="@string/text_rounds"
                         />
