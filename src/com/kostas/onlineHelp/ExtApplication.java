@@ -32,6 +32,7 @@ public class ExtApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        FontsOverride.setDefaultFont(this, "MONOSPACE",  "fonts/Roboto-BoldCondensed.ttf");
 
         ACRA.init(this);
         MyAcraSender mySender = new MyAcraSender(this);
