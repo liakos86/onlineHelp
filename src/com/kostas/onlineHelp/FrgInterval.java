@@ -257,7 +257,6 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
         buttonStart.setVisibility(View.INVISIBLE);
         buttonStop.setVisibility(View.VISIBLE);
         buttonBack.setVisibility(View.INVISIBLE);
-        completedIntervalsListView.setVisibility(View.VISIBLE);
 
 
         //from resume
@@ -381,8 +380,6 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
                     timerProgressWheel.setVisibility(View.INVISIBLE);
                     timerProgressWheel.setProgress(0);
                     distanceProgressWheel.setVisibility(View.VISIBLE);
-//                getUpdates(false);
-                    completedIntervalsListView.setVisibility(View.VISIBLE);
                 }
             }.start();
 
@@ -873,6 +870,8 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
         else if (coveredDist>0 && coveredMillis>0){
             intervalsList.add(new Interval(latLonList, coveredMillis, coveredDist));
         }
+
+        completedIntervalsListView.setVisibility(View.VISIBLE);
 
         coveredMillis =0;
         coveredDist=0;

@@ -93,8 +93,8 @@ public class RunningService extends IntentService
                 if(status != TextToSpeech.ERROR) {
                     textToSpeech.setLanguage(Locale.UK);
                     textToSpeech.setSpeechRate(1.2f);
-                    String textStart = app_preferences.getString("speechStart", "Started");
-                    String textFinish = app_preferences.getString("speechFinish", "Stopped");
+                    String textStart = app_preferences.getString("speechStart", "Interval Started");
+                    String textFinish = app_preferences.getString("speechFinish", "Interval Stopped");
                     speechTextStart = textStart.trim().equals("") ? "Started" : textStart ;
                     speechTextFinish = textFinish.trim().equals("") ? "Stopped" : textFinish ;
                 }
@@ -287,17 +287,12 @@ public class RunningService extends IntentService
 
         stopLocationUpdates();
 
+        intervals.add(new Interval(latLonList, totalTime, intervalDistance));
 
-
-        if (!(intervalRounds>0 && intervals.size()+1>=intervalRounds)){
+        if (!(intervalRounds>0 && intervals.size()>=intervalRounds)){
             startCountDownForNextInterval(intervalTime);
         }
 
-
-//        locationManager.removeUpdates(this);
-
-        //user might complete several intervals when app killed
-        intervals.add(new Interval(latLonList, totalTime, intervalDistance));
         Intent intent = new Intent(NOTIFICATION);
         intent.putExtra(INTERVAL_TIME, totalTime);
         intent.putExtra(LATLONLIST, latLonList);
@@ -363,14 +358,16 @@ public class RunningService extends IntentService
                 play( false, true);
 //                startReceiving();
 
+                editor.putBoolean(IS_RUNNING, true);
+                editor.putLong(MSTART_TIME, mStartTime);
+                editor.apply();
+
                 if (!mGoogleApiClient.isConnected()) {
                     mGoogleApiClient.connect();
                 }else{
                     startReceiving();
                 }
-                editor.putBoolean(IS_RUNNING, true);
-                editor.putLong(MSTART_TIME, mStartTime);
-                editor.apply();
+
 
                 //Log.v("SERVICE", "Timer expired");
             }
