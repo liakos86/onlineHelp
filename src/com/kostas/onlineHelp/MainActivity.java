@@ -144,7 +144,6 @@ public class MainActivity extends BaseDrawer {
             switch (position) {
                 case 0: {
                     return FrgInterval.init(0);
-
                 }
                 case 1: {
                     return FrgShowRuns.init(1);
@@ -152,15 +151,11 @@ public class MainActivity extends BaseDrawer {
                 case 2: {
                     return FrgPlans.init(2);
                 }
-
                 default: return FrgInterval.init(position);
-
-
             }
         }
 
     }
-
 
     @Override
     public void onBackPressed() {
@@ -178,6 +173,7 @@ public class MainActivity extends BaseDrawer {
             mPager.setCurrentItem(0, true);
             setTitle(drawerTitles[0]);
            mDrawerList.setItemChecked(0, true);
+            closeDrawer();
         }
     }
 

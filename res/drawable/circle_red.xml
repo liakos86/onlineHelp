@@ -226,7 +226,7 @@
             <!-- Green button -->
             <item>
                 <shape android:shape="oval">
-                    <solid android:color="@color/runner_red"/>
+                    <solid android:color="@color/interval_red"/>
                 </shape>
             </item>
         </layer-list>

@@ -197,6 +197,7 @@ public class ProgressWheel extends View {
         textPaint.setAntiAlias(true);
         textPaint.setTextSize(textSize);
 
+
 //        contourPaint.setColor(contourColor);
 //        contourPaint.setAntiAlias(true);
 //        contourPaint.setStyle(Style.STROKE);
@@ -319,8 +320,7 @@ public class ProgressWheel extends View {
             Paint blackPaint = new Paint();
             blackPaint.setColor(0xFF000000);
             blackPaint.setTextSize((int) 3*textSize / 5);
-//            Typeface tf = Typeface.create("Helvetica", Typeface.BOLD);
-//            Typeface tf=Typeface.createFromAsset(getContext().getAssets(),"fonts/roboto_boldItalic.ttf");
+//            Typeface tf=Typeface.createFromAsset(getContext().getAssets(),"fonts/OpenSans-Semibold.ttf");
 
 //            textPaint.setTypeface(tf);
 //            blackPaint.setTypeface(tf);

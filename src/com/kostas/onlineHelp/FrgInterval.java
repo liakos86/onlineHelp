@@ -2,7 +2,6 @@ package com.kostas.onlineHelp;
 
 import android.app.*;
 import android.content.*;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.location.Address;
 import android.location.Geocoder;
@@ -10,7 +9,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.*;
 import android.provider.Settings;
-import android.text.Html;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
@@ -20,9 +18,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -50,7 +46,7 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
     Button buttonSetIntervalValues, buttonSavePlan, buttonDismiss, buttonSave;
     ImageButton buttonStart, buttonStop, buttonBack;
     LinearLayout layoutBottomButtons;
-    TextView roundsText, myAddress, timeText; //, paceText, paceAvgText;
+    TextView roundsText, myAddress, timeText;
     float intervalDistance, coveredDist;
     ViewFlipper flipper;
     private Handler mHandler = new Handler();
@@ -65,7 +61,6 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
     AdView adView, adView2;
     AdRequest adRequest, adRequest2;
     String latLonList;
-    Location lastLocation;
     private BroadcastReceiver receiver;
 
     @Override
@@ -202,8 +197,6 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
 
         myAddress = (TextView) v.findViewById(R.id.myAddressText);
         roundsText = (TextView) v.findViewById(R.id.roundsText);
-//        paceText = (TextView) v.findViewById(R.id.paceText);
-//        paceAvgText = (TextView) v.findViewById(R.id.avgPaceText);
         timeText = (TextView) v.findViewById(R.id.timeText);
         buttonSetIntervalValues = (Button) v.findViewById(R.id.buttonSetIntervalValues);
         buttonSavePlan = (Button) v.findViewById(R.id.buttonSavePlan);
@@ -211,7 +204,6 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
         buttonStop = (ImageButton) v.findViewById(R.id.buttonStop);
         buttonBack = (ImageButton) v.findViewById(R.id.buttonBack);
         flipper = (ViewFlipper) v.findViewById(R.id.flipper);
-//        noGps = (LinearLayout) v.findViewById(R.id.noGps);
         intervalTimePicker = (NumberPickerKostas) v.findViewById(R.id.intervalTimePicker);
         intervalTimePicker.setValue(10);
         intervalDistancePicker = (NumberPickerKostas) v.findViewById(R.id.intervalDistancePicker);
@@ -290,11 +282,9 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
                     startTimeMillis = SystemClock.uptimeMillis();
                     mHandler.postDelayed(mUpdateTimeTask, 1000);
 
-                    lastLocation = null;
-
-
                 }
             }.start();
+
 
         }
         //from resume(isCompleted=true)
@@ -315,46 +305,17 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
 
     }
 
-//    private void setPaceText(boolean avg, float pace, long milliseconds){
-//
-//
-//        float distance = app_preferences.getFloat(RunningService.TOTAL_DIST, 1);
-//        if (avg)
-//           pace =  milliseconds / distance;
-//
-//        int paceMinutes = (int)(pace/60);
-//        int paceSeconds = (int)(pace - (paceMinutes*60));
-//
-//        String text = paceMinutes < 20 ? String.format("%02d", paceMinutes)+"m "+String.format("%02d", paceSeconds)+"s  / km" : "00m 00s / km";
-//
-//        if (avg && distance>1)
-//                paceAvgText.setText("Pace avg: "+text);
-//        else if (!avg)
-//                paceText.setText("Pace: "+text);
-//
-//
-//    }
-
 
     private void prepareForNextInterval(boolean completed){
 
 
         coveredDist=0;
-//        coveredMillis=0;
-//        latLonList=null;
         mHandler.removeCallbacks(mUpdateTimeTask);
-//        paceAvgText.setText("Pace avg: 00m 00s / km");
-//
-//        paceText.setText("Pace: 00m 00s / km");
         timeText.setText("00 : 00 : 00");
+
         if (completed){
-
             doStop();
-
         }else {
-
-
-//        stopRunningService(false);
             setRoundsText(intervalRoundsPicker.getValue());
             distanceProgressWheel.setVisibility(View.INVISIBLE);
             distanceProgressWheel.setProgress(0);
@@ -413,8 +374,6 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
 
     private void clear(){
 
-//        new PerformAsyncTask(getActivity(),1).execute();
-
         ((ExtApplication)getActivity().getApplication()).setInRunningMode(false);
         myAddress.setVisibility(View.INVISIBLE);
         completedIntervalsListView.setVisibility(View.GONE);
@@ -431,9 +390,7 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
 
     private void setInitialTextInfo(){
         timeText.setText("00 : 00 : 00");
-//        paceAvgText.setText("Pace avg: 00m 00s / km");
         roundsText.setText("0 / 0");
-//        paceText.setText("Pace: 00m 00s / km");
     }
 
     public void setListeners(View v){
@@ -616,15 +573,10 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
 
         intervalDistance = intervalDistancePicker.getValue();
         intervalTime = intervalTimePicker.getValue();
-//        rounds = intervalRoundsPicker.getValue();
-
         Database db = new Database(getActivity());
         db.addPlan(new Plan(-1, desc, (int)intervalDistance, (int)intervalTime, intervalRoundsPicker.getValue()));
-
         getPlansFromDb(getActivity(), false);
         plansSpinner.setVisibility(View.VISIBLE);
-
-
 
         Toast.makeText(getActivity(), "Plan saved", Toast.LENGTH_SHORT).show();
     }
@@ -649,18 +601,6 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
                 editor.putBoolean("noSound", !soundOn);
                 editor.putBoolean("noVibration", !vibrationOn);
                 editor.apply();
-//            rounds = intervalRoundsPicker.getValue();
-
-//            timerProgressWheel.setStartAngle(30);
-
-//            if (intervalDistance < 100){
-//                Toast.makeText(getActivity(),"Enter a valid distance in meters >= 50", Toast.LENGTH_SHORT).show();
-//                return false;
-//            }else if (intervalTime<10){
-//                Toast.makeText(getActivity(),"Interval time cannot be less than 10", Toast.LENGTH_SHORT).show();
-//                intervalTimePicker.clearFocus();
-//                return false;
-//            }
 
         }catch (Exception e){
             Toast.makeText(getActivity(),"wrong data", Toast.LENGTH_LONG).show();
@@ -704,8 +644,6 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
         //service is on and i am running
         if (isMyServiceRunning() && receiver==null){
 
-//            Toast.makeText(getActivity(), intervalTime+" time "+intervalDistance+" dist",Toast.LENGTH_SHORT).show();
-
             setBroadcastReceiver();
 
             intervalDistance = app_preferences.getFloat(RunningService.INTERVAL_DISTANCE, 0);
@@ -723,24 +661,12 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
                         app_preferences.getLong(RunningService.MSTART_COUNTDOWN_TIME, SystemClock.uptimeMillis()),
                        coveredDist);
 
-
-
-            if (lastLocation!=null && googleMap!=null)
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 16));
-
-
         }
-
 
         }
 
 
     public void drawMap(String latLonList){
-
-
-
-//        String[] pointsList = latLonList.split(",");
-
 
         List<LatLng>locationList= new ArrayList<LatLng>();
 
@@ -804,10 +730,10 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
         super.onStart();
     }
 
-    private void setAddressText(Location lastLocation){
+    private void setAddressText(Location loc){
         if (myAddress.getVisibility() == View.INVISIBLE) {
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 16));
-            myAddress.setText("Currently near " + getMyLocationAddress(lastLocation.getLatitude(), lastLocation.getLongitude()));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.getLatitude(), loc.getLongitude()), 16));
+            myAddress.setText("Currently near " + getMyLocationAddress(loc.getLatitude(), loc.getLongitude()));
             myAddress.setVisibility(View.VISIBLE);
         }
     }
@@ -837,8 +763,9 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
 
     private void showFrame(){
 
-        if (lastLocation!=null)
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 16));
+
+        if (googleMap!=null)
+        addRemoveMyLocListener();
 
         flipper.setDisplayedChild(1);
 
@@ -884,10 +811,6 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
 
             fixListAndAdapter(intervals);
 
-
-
-
-
         setInitialTextInfo();
 
         timerProgressWheel.setProgress(0);
@@ -914,8 +837,6 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
             completedIntervalsListView.setVisibility(View.VISIBLE);
         }
 
-
-//        coveredMillis =0;
         coveredDist=0;
 
     }
@@ -985,16 +906,11 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
                 for(int i=0; i<fetchedAddress.getMaxAddressLineIndex(); i++) {
                     strAddress.append(fetchedAddress.getAddressLine(i)).append("\n");
                 }
-
-
-                //Log.v("LATLNG","I am at: " +strAddress.toString());
                 return strAddress.toString() ;
 
             }
 
-            else
-                //Log.v("LATLNG", "No location found..!");
-            return "No address for this location";
+            else return "No address for this location";
 
         }
         catch (IOException e) {
@@ -1034,9 +950,6 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
         googleMap.setIndoorEnabled(false);
         googleMap.setMyLocationEnabled(true);
 
-
-
-
         if (latLonList==null && app_preferences.getBoolean(RunningService.IS_RUNNING, false)) {
              latLonList = app_preferences.getString(RunningService.LATLONLIST, "");
 
@@ -1046,12 +959,21 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
         }
 
 
+     addRemoveMyLocListener();
+
+    }
+
+
+    public void addRemoveMyLocListener(){
+
         googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
             @Override
             public void onMyLocationChange(Location location) {
 
                 setAddressText(location);
-                lastLocation=location;
+
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 16));
+
                 googleMap.setOnMyLocationChangeListener(null);
 
 
@@ -1059,8 +981,6 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
         });
 
     }
-
-
 
     class CustomOnItemSelectedListener implements AdapterView.OnItemSelectedListener {
 
@@ -1139,13 +1059,6 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
             } else {
                 holder = (planViewHolder) convertView.getTag();
             }
-
-             if (plansSpinner.isActivated()){
-                 holder.arrow.setImageDrawable(getResources().getDrawable(R.drawable.arrow_collapse));
-             }else{
-                 holder.arrow.setImageDrawable(getResources().getDrawable(R.drawable.arrow_down));
-             }
-
             holder.description.setText(data.get(position).getDescription());
             return convertView;
         }
@@ -1153,7 +1066,6 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
 
     private class planViewHolder{
         TextView description;
-//        TextView info;
         ImageView arrow;
     }
 
@@ -1207,15 +1119,8 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
     private Runnable mUpdateTimeTask = new Runnable(){
 
         public void run() {
-
             setTimerText();
-//            long totalMillis = SystemClock.uptimeMillis()-startTimeMillis;
-
-//            if (((int)totalMillis/1000)%4 ==0 )
-//            setPaceText(true, 0 , totalMillis );
             mHandler.postDelayed(this, 1000);
-
-
         }
     };
 

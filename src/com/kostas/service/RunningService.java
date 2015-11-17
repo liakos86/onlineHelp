@@ -44,12 +44,9 @@ public class RunningService extends IntentService
     public static final String INTERVALS = "intervals";
     public static final String NOTIFICATION = "com.kostas.onlineHelp";
     public static final String IS_RUNNING = "is_running";
-//    public static final String COUNTDOWN_REMAINING = "countdown_remaining";
-
 
     private TextToSpeech textToSpeech;
     private String speechFinal;
-//    private Handler mHandler = new Handler();
     public String latLonList, lastString;
     public float intervalDistance, currentDistance;
     private long mStartTime, totalTime,  intervalTime, interval=5000;
@@ -96,17 +93,9 @@ public class RunningService extends IntentService
                 if(status != TextToSpeech.ERROR) {
                     textToSpeech.setLanguage(Locale.UK);
                     textToSpeech.setSpeechRate(1f);
-//                    String textStart = app_preferences.getString("speechStart", "Interval Started");
-//                    String textFinish = app_preferences.getString("speechFinish", "Interval Stopped");
-//                    speechTextStart = textStart.trim().equals("") ? "Started" : textStart ;
-//                    speechTextFinish = textFinish.trim().equals("") ? "Stopped" : textFinish ;
                 }
             }
         });
-
-
-
-
 
     }
 
@@ -142,11 +131,6 @@ public class RunningService extends IntentService
 
         createForegroundNotification();
 
-
-        //it will start two times:
-        //the first is with intent values
-        //the second is with null intent and values from shared prefs
-
         if (intent!=null){//first
 
             intervalTime = intent.getLongExtra(INTERVAL_TIME, 0);
@@ -159,8 +143,6 @@ public class RunningService extends IntentService
                 intervalRounds = intent.getIntExtra(INTERVAL_ROUNDS, 0 );
 
             new PerformAsyncTask(0).execute();
-
-//            }
 
         }
     }
@@ -439,10 +421,6 @@ public class RunningService extends IntentService
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         else
             Toast.makeText(application, "google client not connected", Toast.LENGTH_SHORT).show();
-
-//        mHandler.removeCallbacks(mUpdateTimeTask);
-//        mHandler.postDelayed(mUpdateTimeTask, 1000);
-
     }
 
     protected void stopLocationUpdates() {

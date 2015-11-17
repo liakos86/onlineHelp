@@ -40,12 +40,7 @@ public class FrgPlans extends BaseFragment{
 
         View v = inflater.inflate(R.layout.frg_plans, container, false);
 
-
-
-
         setList(v);
-
-
 
         return  v;
     }
@@ -157,9 +152,9 @@ public class FrgPlans extends BaseFragment{
 
 
             if (position%2==0)
-                convertView.setBackgroundColor(getResources().getColor(R.color.drawer_black));
+                convertView.setBackgroundDrawable(getResources().getDrawable(R.drawable.plan_even_row));
             else
-                convertView.setBackgroundColor(getResources().getColor(R.color.drawer_grey));
+                convertView.setBackgroundDrawable(getResources().getDrawable(R.drawable.plan_odd_row));
 
 
             convertView.setOnLongClickListener(new View.OnLongClickListener() {

@@ -74,24 +74,21 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
         // object item based on the position
         final long intervalTime = data.get(position).getMilliseconds();
 
-
-        holder.distance.setText((int)data.get(position).getDistance()+"m completed");
-
         int hours = (int)(intervalTime/3600000);
         int mins = (int)((intervalTime - (hours*3600000))/60000);
         int secs = (int)((intervalTime - (hours*3600000) - (mins*60000))/1000);
 
-        String timeText = hours+"hr " + mins+"min "+secs+"sec";
-
+        String timeText = String.format("%02d",hours)+":" + String.format("%02d",mins)+":"+String.format("%02d",secs);
+        holder.distance.setText((int)data.get(position).getDistance()+"m completed  in  "+timeText);
 
         float pace =  intervalTime / data.get(position).getDistance();
 
         int paceMinutes = (int)(pace/60);
         int paceSeconds = (int)(pace - (paceMinutes*60));
 
-        String paceText =  String.format("%02d", paceMinutes)+"m "+String.format("%02d", paceSeconds)+"s";
+        String paceText = paceMinutes<60 ?   String.format("%02d", paceMinutes)+"m "+String.format("%02d", paceSeconds)+"s" : "over 1 hour";
 
-        holder.time.setText(timeText+
+        holder.time.setText(
                 "  Speed: "+  String.format("%1$,.2f", ((double) ((data.get(position).getDistance()/intervalTime)  *3600)))+"km/h " +
                 "  Pace: "+paceText);
 
