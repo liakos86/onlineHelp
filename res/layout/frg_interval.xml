@@ -7,18 +7,15 @@
             android:id="@+id/flipper" 
             android:layout_width="fill_parent" 
             android:layout_height="fill_parent" 
-            android:background="@color/drawer_black">
-
-        <LinearLayout android:layout_width="fill_parent" android:layout_height="fill_parent"
-                android:orientation="vertical">
+            android:background="@color/drawer_black"
+            >
 
 
         <RelativeLayout
 
-
-                android:layout_weight="5"
+                android:padding="@dimen/eight"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:background="@color/drawer_black"
                 >
@@ -27,14 +24,12 @@
 
 
                 <com.kostas.onlineHelp.NumberPickerKostas
-                        android:layout_marginTop="@dimen/eight"
-                        android:layout_marginLeft="@dimen/twenty"
-                        android:layout_marginRight="@dimen/twenty"
+
                         android:layout_alignParentTop="true"
-                    app:minValue="50"
+                    app:minValue="100"
                     app:maxValue="5000"
                     app:step="50"
-                    app:textName="Distance"
+                    app:textName="@string/distance"
                     android:layout_gravity="center_horizontal"
                     android:id="@+id/intervalDistancePicker"
                     android:orientation="horizontal"
@@ -44,13 +39,12 @@
             </com.kostas.onlineHelp.NumberPickerKostas>
 
                 <com.kostas.onlineHelp.NumberPickerKostas
-                        android:layout_marginLeft="@dimen/twenty"
-                        android:layout_marginRight="@dimen/twenty"
+
                         android:layout_below="@+id/intervalDistancePicker"
                     app:minValue="10"
                     app:maxValue="300"
                     app:step="5"
-                    app:textName="Seconds"
+                    app:textName="@string/seconds"
                     android:layout_centerHorizontal="true"
                     android:id="@+id/intervalTimePicker"
                     android:orientation="horizontal"
@@ -60,14 +54,13 @@
             </com.kostas.onlineHelp.NumberPickerKostas>
 
                 <com.kostas.onlineHelp.NumberPickerKostas
-                        android:layout_marginLeft="@dimen/twenty"
-                        android:layout_marginRight="@dimen/twenty"
-                        android:layout_marginBottom="@dimen/eight"
+
+                        android:layout_marginBottom="@dimen/twenty"
                         android:layout_below="@+id/intervalTimePicker"
                         app:minValue="0"
                         app:maxValue="99"
                         app:step="1"
-                        app:textName="Rounds"
+                        app:textName="@string/rounds"
                         android:layout_centerHorizontal="true"
                         android:id="@+id/intervalRoundsPicker"
                         android:orientation="horizontal"
@@ -78,29 +71,55 @@
                 <Spinner
                         android:id="@+id/plansSpinner"
                         android:layout_width="match_parent"
-                        android:layout_height="38dp"
+                        android:layout_height="@dimen/standard_view_height"
                         android:layout_below="@+id/intervalRoundsPicker"
                         android:drawSelectorOnTop="true"
-                        android:layout_marginBottom="6dp"
+                        android:layout_marginBottom="@dimen/twenty"
                         android:visibility="invisible"
                         style="@style/spinner_style"
 
 
                         />
 
-                <com.google.android.gms.ads.AdView
+            <LinearLayout android:layout_width="match_parent" android:layout_below="@+id/plansSpinner"
+                          android:layout_height="@dimen/standard_view_height">
+
+            <CheckBox android:paddingLeft="@dimen/margin10" android:layout_weight="1" android:layout_marginRight="@dimen/eight" android:background="@drawable/checkbox_selector" android:button="@drawable/checkbox_sound_design" android:textColor="@color/white_back" android:id="@+id/checkbox_sound" android:layout_width="0dp" android:layout_height="fill_parent" android:text="@string/sound"/>
+
+            <CheckBox android:paddingLeft="@dimen/margin10" android:layout_weight="1" android:background="@drawable/checkbox_selector" android:button="@drawable/checkbox_vibrate_design" android:textColor="@color/white_back" android:id="@+id/checkbox_vibration" android:layout_width="0dp" android:layout_height="fill_parent" android:text="@string/vibrate"/>
+            </LinearLayout>
+
+            <com.google.android.gms.ads.AdView
 
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/adViewInterval"
                 app:adSize="BANNER"
                 app:adUnitId="@string/adId1"
-                android:layout_below="@+id/plansSpinner"
+                android:layout_above="@+id/myAddressText"
                 />
 
+            <TextView
+                    android:id="@+id/myAddressText"
+                    android:textSize="12sp"
+                    android:textStyle="italic"
+                    android:layout_above="@+id/setButtons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:textColor="@color/white_back"
+                    android:visibility="invisible"
+                    android:layout_marginTop="@dimen/margin10"
+                    android:maxLines="1"
+                    android:singleLine="true"/>
 
-                <LinearLayout android:layout_below="@+id/adViewInterval" android:id="@+id/setButtons" android:layout_width="match_parent"
-                                android:layout_height="wrap_content" android:layout_marginRight="@dimen/twenty" android:layout_marginLeft="@dimen/twenty" android:layout_marginTop="@dimen/twenty" android:layout_marginBottom="0dp">
+
+                <LinearLayout android:layout_alignParentBottom="true"
+                              android:id="@+id/setButtons"
+                              android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                              android:layout_marginTop="@dimen/margin10"
+                              android:layout_marginBottom="@dimen/twenty">
 
                 <Button
                         android:layout_marginRight="@dimen/eight"
@@ -112,9 +131,9 @@
                         android:paddingLeft="@dimen/twenty"
                         android:text="@string/start"
                         android:textStyle="bold"
-                        android:textSize="@dimen/xmedium_text"
+                        android:textSize="@dimen/large_text"
                         android:textColor="@color/white_back"
-                        android:background="@drawable/plus_minus_selector"
+                        android:background="@drawable/close_button_selector"
                         android:id="@+id/buttonSetIntervalValues"
                        />
 
@@ -133,39 +152,29 @@
 
                 </LinearLayout>
 
-                <TextView
-                        android:id="@+id/myAddressText"
-                        android:textSize="12sp"
-                        android:textStyle="italic"
-                        android:layout_below="@+id/setButtons"
-                        android:layout_width="wrap_content"
-                        android:layout_alignParentBottom="true"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:textColor="@color/white_back"
-                        android:visibility="invisible"
-                        android:maxLines="1"
-                        android:singleLine="true"/>
+
 
 
             </RelativeLayout>
+
+
+
+        <!--</LinearLayout>-->
+
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                     android:layout_width="match_parent"
+                     android:layout_height="match_parent"
+                >
 
 
             <fragment
                     android:id="@+id/mapFrgKostas"
                     android:name="com.google.android.gms.maps.SupportMapFragment"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="2"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_above="@+id/timerProgressWheel"
                     />
-
-
-        </LinearLayout>
-
-        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                     android:layout_width="match_parent"
-                     android:layout_height="match_parent"
-                >
 
             <ListView android:id="@+id/completedIntervals"
                       android:layout_alignParentTop="true"
@@ -216,52 +225,62 @@
                     android:layout_centerInParent="true"/>
 
 
-            <RelativeLayout android:layout_marginRight="@dimen/eight" android:layout_marginLeft="@dimen/eight" android:background="@drawable/info_back" android:padding="10dp" android:id="@+id/textsInfoRun" android:layout_below="@+id/buttonStart" android:layout_width="fill_parent" android:layout_height="wrap_content">
-                <TextView android:layout_width="wrap_content"
+            <RelativeLayout   android:id="@+id/textsInfoRun" android:layout_below="@+id/buttonStart" android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+               <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+                <TextView android:layout_width="0dp"
+                          android:layout_marginRight="@dimen/margin10"
+                          android:layout_weight="1"
                           android:layout_height="wrap_content"
-                          android:layout_alignParentLeft="true"
-                          android:layout_alignParentTop="true"
-                          android:textSize="@dimen/medium_text"
-                          android:textColor="@color/drawer_black"
+                          android:gravity="center"
+                          android:textSize="@dimen/xlarge_text"
+                          android:textColor="@color/white_back"
                           android:textStyle="bold"
                           android:id="@+id/roundsText"
                           android:text="@string/text_rounds"
+                          android:background="@drawable/rounds_back"
                         />
 
-                <TextView android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_alignParentLeft="true"
-                          android:layout_below="@+id/roundsText"
-                          android:textSize="@dimen/medium_text"
-                          android:textColor="@color/drawer_black"
-                          android:textStyle="bold"
-                          android:id="@+id/paceText"
-                          android:text="@string/text_pace"
-                        />
+                <!--</RelativeLayout>-->
 
-                <TextView android:layout_width="wrap_content"
+                <!--<TextView android:layout_width="wrap_content"-->
+                          <!--android:layout_height="wrap_content"-->
+                          <!--android:layout_alignParentLeft="true"-->
+                          <!--android:layout_below="@+id/roundsText"-->
+                          <!--android:textSize="@dimen/medium_text"-->
+                          <!--android:textColor="@color/drawer_black"-->
+                          <!--android:textStyle="bold"-->
+                          <!--android:id="@+id/paceText"-->
+                          <!--android:text="@string/text_pace"-->
+                        <!--/>-->
+
+
+            <!--<RelativeLayout android:layout_alignParentRight="true" android:layout_marginRight="@dimen/eight"  android:background="@drawable/time_back" android:padding="10dp" android:id="@+id/textsInfoRun" android:layout_below="@+id/buttonStart" android:layout_width="fill_parent" android:layout_height="wrap_content">-->
+
+            <TextView android:layout_width="0dp"
+                      android:layout_weight="1"
                           android:layout_height="wrap_content"
-                          android:layout_alignParentRight="true"
-                          android:layout_alignParentTop="true"
-                          android:textSize="@dimen/medium_text"
-                          android:textColor="@color/drawer_black"
+                          android:gravity="center"
+                          android:textSize="@dimen/xlarge_text"
+                          android:textColor="@color/white_back"
                           android:textStyle="bold"
                           android:id="@+id/timeText"
                           android:text="@string/text_time"
+                          android:background="@drawable/time_back"
                         />
 
-                <TextView android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_alignParentRight="true"
-                          android:layout_below="@+id/timeText"
-                          android:textSize="@dimen/medium_text"
-                          android:textColor="@color/drawer_black"
-                          android:textStyle="bold"
-                          android:id="@+id/avgPaceText"
-                          android:text="@string/text_avg_pace"
-                        />
+                <!--<TextView android:layout_width="wrap_content"-->
+                          <!--android:layout_height="wrap_content"-->
+                          <!--android:layout_alignParentRight="true"-->
+                          <!--android:layout_below="@+id/timeText"-->
+                          <!--android:textSize="@dimen/medium_text"-->
+                          <!--android:textColor="@color/drawer_black"-->
+                          <!--android:textStyle="bold"-->
+                          <!--android:id="@+id/avgPaceText"-->
+                          <!--android:text="@string/text_avg_pace"-->
+                        <!--/>-->
 
-
+               </LinearLayout>
             </RelativeLayout>
             
             <ImageButton
@@ -304,8 +323,8 @@
 
             <LinearLayout android:baselineAligned="false" android:layout_alignParentBottom="true"  android:orientation="horizontal" android:visibility="gone" android:id="@+id/layoutBottomButtons" android:layout_gravity="center_horizontal|bottom" android:layout_width="fill_parent" android:layout_height="wrap_content" android:padding="@dimen/eight">
 
-                <Button android:text="Delete" android:layout_marginRight="@dimen/four" android:textColor="@color/white_back" android:textStyle="bold" android:id="@+id/buttonDismissInterval" android:background="@drawable/close_button_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height"/>
-                <Button android:text="Save" android:textColor="@color/white_back" android:textStyle="bold" android:id="@+id/buttonSaveRunWithIntervals" android:background="@drawable/plus_minus_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height"/>
+                <Button android:text="@string/delete" android:layout_marginRight="@dimen/four" android:textColor="@color/white_back" android:textStyle="bold" android:id="@+id/buttonDismissInterval" android:background="@drawable/close_button_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height"/>
+                <Button android:text="@string/save" android:textColor="@color/white_back" android:textStyle="bold" android:id="@+id/buttonSaveRunWithIntervals" android:background="@drawable/plus_minus_selector" android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height"/>
 
             </LinearLayout>
 

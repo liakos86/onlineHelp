@@ -38,7 +38,7 @@ public class MainActivity extends BaseDrawer {
      */
 
     private NonSwipeableViewPager mPager;
-    static final int PAGER_SIZE = 4;
+    static final int PAGER_SIZE = 3;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,7 +57,7 @@ public class MainActivity extends BaseDrawer {
     private void getPager() {
         mPager = (NonSwipeableViewPager) findViewById(R.id.pager);
 
-        mPager.setOffscreenPageLimit(3);
+        mPager.setOffscreenPageLimit(2);
 
         mPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(),  PAGER_SIZE));
 
@@ -152,9 +152,7 @@ public class MainActivity extends BaseDrawer {
                 case 2: {
                     return FrgPlans.init(2);
                 }
-                case 3: {
-                    return FrgSettings.init(3);
-                }
+
                 default: return FrgInterval.init(position);
 
 

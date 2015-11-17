@@ -83,7 +83,17 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
 
         String timeText = hours+"hr " + mins+"min "+secs+"sec";
 
-        holder.time.setText(timeText+"   Speed avg: "+  String.format("%1$,.2f", ((double) ((data.get(position).getDistance()/intervalTime)  *3600)))+"km/h");
+
+        float pace =  intervalTime / data.get(position).getDistance();
+
+        int paceMinutes = (int)(pace/60);
+        int paceSeconds = (int)(pace - (paceMinutes*60));
+
+        String paceText =  String.format("%02d", paceMinutes)+"m "+String.format("%02d", paceSeconds)+"s";
+
+        holder.time.setText(timeText+
+                "  Speed: "+  String.format("%1$,.2f", ((double) ((data.get(position).getDistance()/intervalTime)  *3600)))+"km/h " +
+                "  Pace: "+paceText);
 
         return convertView;
 

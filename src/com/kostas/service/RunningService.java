@@ -34,22 +34,25 @@ public class RunningService extends IntentService
     public static final String INTERVAL_TIME = "intervalTime";
     public static final String INTERVAL_ROUNDS = "intervalRounds";
     public static final String INTERVAL_COMPLETED = "intervalCompleted";
+    public static final String LAST_LOCATION = "lastLocation";
     public static final String LATLONLIST = "latLonList";
+    public static final String COMPLETED_NUM = "completed_num";
     public static final String TOTAL_DIST = "totalDist";
     public static final String TOTAL_TIME = "totalTime";
     public static final String MSTART_TIME = "mStartTime";
+    public static final String MSTART_COUNTDOWN_TIME = "mStartCountdownTime";
     public static final String INTERVALS = "intervals";
     public static final String NOTIFICATION = "com.kostas.onlineHelp";
     public static final String IS_RUNNING = "is_running";
-    public static final String COUNTDOWN_REMAINING = "countdown_remaining";
+//    public static final String COUNTDOWN_REMAINING = "countdown_remaining";
 
 
     private TextToSpeech textToSpeech;
-    private String speechTextStart, speechTextFinish, speechFinal;
-    private Handler mHandler = new Handler();
-    public String latLonList;
+    private String speechFinal;
+//    private Handler mHandler = new Handler();
+    public String latLonList, lastString;
     public float intervalDistance, currentDistance;
-    private long mStartTime, totalTime,  intervalTime;
+    private long mStartTime, totalTime,  intervalTime, interval=5000;
     private int intervalRounds;
     public Location lastLocation;
     SharedPreferences app_preferences;
@@ -92,11 +95,11 @@ public class RunningService extends IntentService
             public void onInit(int status) {
                 if(status != TextToSpeech.ERROR) {
                     textToSpeech.setLanguage(Locale.UK);
-                    textToSpeech.setSpeechRate(1.2f);
-                    String textStart = app_preferences.getString("speechStart", "Interval Started");
-                    String textFinish = app_preferences.getString("speechFinish", "Interval Stopped");
-                    speechTextStart = textStart.trim().equals("") ? "Started" : textStart ;
-                    speechTextFinish = textFinish.trim().equals("") ? "Stopped" : textFinish ;
+                    textToSpeech.setSpeechRate(1f);
+//                    String textStart = app_preferences.getString("speechStart", "Interval Started");
+//                    String textFinish = app_preferences.getString("speechFinish", "Interval Stopped");
+//                    speechTextStart = textStart.trim().equals("") ? "Started" : textStart ;
+//                    speechTextFinish = textFinish.trim().equals("") ? "Stopped" : textFinish ;
                 }
             }
         });
@@ -197,8 +200,14 @@ public class RunningService extends IntentService
             return;
         }
 
+
+
+
         //every following update must be of at least 15m accurate
         if (location.getAccuracy() < 15){
+
+            mLocationRequest.setFastestInterval(10000);
+            mLocationRequest.setInterval(10000);
 
         //if i have a last & new loc and a right accuracy
         if (lastLocation!=null && (location.getTime()>lastLocation.getTime())) {
@@ -208,15 +217,21 @@ public class RunningService extends IntentService
 
             latLonList+="," + String.valueOf(location.getLatitude()) + "," + String.valueOf(location.getLongitude());
 
+
+            totalTime = SystemClock.uptimeMillis() - mStartTime;
             if (currentDistance >= intervalDistance){
                 play( intervalRounds>0 && intervals.size()+1>=intervalRounds, false);
                 finishInterval();
             }else if (currentDistance > 0){
+                lastString = lastLocation.getLatitude()+","+lastLocation.getLongitude()+","+location.getLatitude()+","+location.getLongitude();
                 refreshInterval((location.getTime()-lastLocation.getTime())/ newDistance);
             }
         }
 
           if (lastLocation==null || (location.getTime()>lastLocation.getTime()))  lastLocation = location;
+
+            mLocationRequest.setFastestInterval(interval-1000);
+            mLocationRequest.setInterval(interval);
 
         }
     }
@@ -293,28 +308,10 @@ public class RunningService extends IntentService
             startCountDownForNextInterval(intervalTime);
         }
 
-        Intent intent = new Intent(NOTIFICATION);
-        intent.putExtra(INTERVAL_TIME, totalTime);
-        intent.putExtra(LATLONLIST, latLonList);
-
-        mHandler.removeCallbacks(mUpdateTimeTask);
         totalTime = 0;
         currentDistance = 0;
         latLonList = null;
         firstChange = false;
-
-        if (intervalRounds>0 && intervals.size()>=intervalRounds){
-
-            editor.putBoolean(INTERVAL_COMPLETED, true);
-            intent.putExtra(INTERVAL_COMPLETED, true);
-//            play( true, false);
-        }
-
-
-        sendBroadcast(intent);
-
-
-        //todo async here
 
        new PerformAsyncTask(3).execute();
 
@@ -322,20 +319,7 @@ public class RunningService extends IntentService
 
     private void refreshInterval(float pace){
 
-
-        long interval = (100*pace/6) > 3000 ? ( (100*pace/6) < 6000 ?  (long)(100*pace/6)  : 6000    ) : 3000;
-//        Toast.makeText(application,"Refresh rate of "+interval+" msecs", Toast.LENGTH_SHORT).show();
-
-        mLocationRequest.setInterval(interval-1000);
-        mLocationRequest.setFastestInterval(interval - 2000);
-
-
-        Intent intent = new Intent(NOTIFICATION);
-        intent.putExtra(INTERVAL_DISTANCE, currentDistance);
-        intent.putExtra(INTERVAL_SPEED, pace);
-        intent.putExtra(INTERVAL_TIME, totalTime);
-        intent.putExtra(LATLONLIST, latLonList);
-        sendBroadcast(intent);
+        interval = (100*pace/6) > 3000 ? ( (100*pace/6) < 6000 ?  (long)(100*pace/6)  : 6000    ) : 3000;
 
         new PerformAsyncTask(2).execute();
 
@@ -347,16 +331,13 @@ public class RunningService extends IntentService
         if (countDownTimer!=null)
             countDownTimer.cancel();
 
-        countDownTimer =   new CountDownTimer(remainingTime, 1000) {
-            public void onTick(long millisUntilFinished) {
+        editor.putLong(MSTART_COUNTDOWN_TIME, SystemClock.uptimeMillis());
 
-                editor.putLong(COUNTDOWN_REMAINING, millisUntilFinished);
-                editor.apply();
-            }
+        countDownTimer =   new CountDownTimer(remainingTime, 1000) {
+            public void onTick(long millisUntilFinished) {}
             public void onFinish() {
                 mStartTime = SystemClock.uptimeMillis();
                 play( false, true);
-//                startReceiving();
 
                 editor.putBoolean(IS_RUNNING, true);
                 editor.putLong(MSTART_TIME, mStartTime);
@@ -368,8 +349,6 @@ public class RunningService extends IntentService
                     startReceiving();
                 }
 
-
-                //Log.v("SERVICE", "Timer expired");
             }
         }.start();
     }
@@ -388,24 +367,21 @@ public class RunningService extends IntentService
 
         if (hasSound){
 
-            String finalFinish=speechTextFinish;
 
             if (starting) {
-                speechFinal = speechTextStart;
+                speechFinal = "   Started";
             } else{
 
                 if (completed){
-                    speechFinal = "Completed";
+                    speechFinal = "   Completed";
                 }else {
-                    if (intervalRounds>0) finalFinish = speechTextFinish+" . "+(intervalRounds-intervals.size()-1)+" rounds remaining";
-                    speechFinal = finalFinish;
+                    if (intervalRounds>0) speechFinal = "   Stopped . "+(intervalRounds-intervals.size()-1)+" rounds remaining";
+                    else speechFinal = "   Stopped";
                 }
 
             }
-
-            mSpeakText.run();
-
-
+            textToSpeech.speak(speechFinal, TextToSpeech.QUEUE_FLUSH, null);
+//            mSpeakText.run();
 
         }
 
@@ -432,26 +408,20 @@ public class RunningService extends IntentService
     }
 
 
-    private Runnable mUpdateTimeTask = new Runnable(){
+//    private Runnable mUpdateTimeTask = new Runnable(){
+//
+//        public void run() {
+//            totalTime = SystemClock.uptimeMillis()- mStartTime;
+//            mHandler.postDelayed(this, 1000);
+//        }
+//    };
 
-        public void run() {
-
-//            final long start = mStartTime;
-            totalTime = SystemClock.uptimeMillis()- mStartTime;
-            mHandler.postDelayed(this, 1000);
-
-        }
-    };
-
-    private Runnable mSpeakText = new Runnable(){
-
-        public void run() {
-
-            textToSpeech.speak(speechFinal, TextToSpeech.QUEUE_FLUSH, null);
-
-
-        }
-    };
+//    private Runnable mSpeakText = new Runnable(){
+//
+//        public void run() {
+//            textToSpeech.speak(speechFinal, TextToSpeech.QUEUE_FLUSH, null);
+//        }
+//    };
 
 
 
@@ -470,21 +440,15 @@ public class RunningService extends IntentService
         else
             Toast.makeText(application, "google client not connected", Toast.LENGTH_SHORT).show();
 
-
-        mHandler.removeCallbacks(mUpdateTimeTask);
-        mHandler.postDelayed(mUpdateTimeTask, 1000);
+//        mHandler.removeCallbacks(mUpdateTimeTask);
+//        mHandler.postDelayed(mUpdateTimeTask, 1000);
 
     }
 
-
-
     protected void stopLocationUpdates() {
-
-//        Toast.makeText(application, "stopping updates", Toast.LENGTH_SHORT).show();
         LocationServices.FusedLocationApi.removeLocationUpdates(
                 mGoogleApiClient, this);
     }
-
 
     @Override
     public void onConnectionSuspended(int i) {
@@ -496,13 +460,9 @@ public class RunningService extends IntentService
         Toast.makeText(this,  "Google services api failed to connect", Toast.LENGTH_SHORT).show();
     }
 
-
-
     private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
 
         int type;
-
-
 
         public PerformAsyncTask( int type) {
             this.type = type;
@@ -517,20 +477,35 @@ public class RunningService extends IntentService
         protected Void doInBackground(Void... unused) {
 
             if (type==0){
+
                 editor.putFloat(INTERVAL_DISTANCE, intervalDistance);
                 editor.putLong(INTERVAL_TIME, intervalTime);
                 editor.putInt(INTERVAL_ROUNDS, intervalRounds);
-                editor.apply();
 
             }
-
             else if (type==2){
+
+                Intent intent = new Intent(NOTIFICATION);
+                intent.putExtra(INTERVAL_DISTANCE, currentDistance);
+                intent.putExtra(INTERVAL_TIME, totalTime);
+                intent.putExtra(LAST_LOCATION, lastString);
+                sendBroadcast(intent);
 
                 editor.putFloat(TOTAL_DIST, currentDistance);
                 editor.putLong(TOTAL_TIME, totalTime);
                 editor.putString(LATLONLIST, latLonList);
-                editor.apply();
+
             }else if (type==3){
+
+                Intent intent = new Intent(NOTIFICATION);
+                boolean completed = intervalRounds>0 && intervals.size()>=intervalRounds;
+
+                editor.putBoolean(INTERVAL_COMPLETED, completed);
+                editor.putInt(COMPLETED_NUM ,intervals.size());
+                intent.putExtra(INTERVAL_COMPLETED, completed);
+
+                sendBroadcast(intent);
+
                 editor.putBoolean(IS_RUNNING, false);
                 editor.putFloat(TOTAL_DIST, 0);
                 editor.putFloat(TOTAL_TIME ,0);
@@ -538,8 +513,9 @@ public class RunningService extends IntentService
 
                 String json = gson.toJson(intervals, listOfObjects);
                 editor.putString(INTERVALS, json);
-                editor.apply();
             }
+
+            editor.commit();
 
             return null;
 

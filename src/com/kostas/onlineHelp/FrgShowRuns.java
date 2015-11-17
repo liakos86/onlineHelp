@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -167,12 +168,21 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
 
         int right = (int) (getResources().getDisplayMetrics().widthPixels - TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics()));
 
+        DisplayMetrics metrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        int width = metrics.widthPixels;
 
         //placing the indicator 'right' pixels from the right of the view
         if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            runsExpListView.setIndicatorBounds(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
+            runsExpListView.setIndicatorBounds(width-GetPixelFromDips(40), width-GetPixelFromDips(20));
+
+//            runsExpListView.setIndicatorBounds(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
         } else {
-            runsExpListView.setIndicatorBoundsRelative(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
+
+
+            runsExpListView.setIndicatorBoundsRelative(width-GetPixelFromDips(40), width-GetPixelFromDips(20));
+
+//            runsExpListView.setIndicatorBoundsRelative(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
         }
 
 
@@ -212,6 +222,13 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
             }
         });
         
+    }
+
+    public int GetPixelFromDips(float pixels) {
+        // Get the screen's density scale
+        final float scale = getResources().getDisplayMetrics().density;
+        // Convert the dps to pixels, based on density scale
+        return (int) (pixels * scale + 0.5f);
     }
 
     public void getRunsFromDb(Activity activity, boolean fromAsync){
@@ -263,8 +280,10 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
                 childItems.add(monthRuns);
             }
 
-            if (adapterExp!=null&& !fromAsync) adapterExp.notifyDataSetChanged();
-//            adapterRunning.notifyDataSetChanged();
+            if (adapterExp!=null&& !fromAsync) {
+                adapterExp.notifyDataSetChanged();
+                runsExpListView.expandGroup(0);
+            }
 
         }
     }
@@ -343,27 +362,26 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
             }
 
 
-            googleMap.addMarker(new MarkerOptions()
+            if (currSize>0) {
+                googleMap.addMarker(new MarkerOptions()
 //                        .infoWindowAnchor(0.48f, 4.16f)
-                            .position(locationList.get(currSize))
-                            .title(String.valueOf(Html.fromHtml("<b>Interval " + (i + 1) + "</b>")))
-                            .snippet("Speed: " + String.format("%1$,.2f", ((double) ((current.getDistance() / current.getMilliseconds()) * 3600))) + " km/h")
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_stop))
-            );
+                                .position(locationList.get(0))
+                                .title(String.valueOf(Html.fromHtml("<b>Interval " + (i + 1) + "</b>")))
+                                .snippet("Speed: " + String.format("%1$,.2f", ((double) ((current.getDistance() / current.getMilliseconds()) * 3600))) + " km/h")
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start2))
+                );
 
+
+                googleMap.addMarker(new MarkerOptions()
+//                        .infoWindowAnchor(0.48f, 4.16f)
+                                .position(locationList.get(currSize))
+                                .title(String.valueOf(Html.fromHtml("<b>Interval " + (i + 1) + "</b>")))
+                                .snippet("Speed: " + String.format("%1$,.2f", ((double) ((current.getDistance() / current.getMilliseconds()) * 3600))) + " km/h")
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_stop2))
+                );
+            }
 
         }
-
-//        int zoom = 20;
-//        boolean allVisible=false;
-//        while (zoom>8 && !allVisible) {
-//
-//
-
-//            zoomPoint = midPoint(northPoint, westPoint, southPoint, eastPoint);
-//            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(zoomPoint, zoom));
-//            googleMap.animateCamera(CameraUpdateFactory.zoomTo(zoom), 1, null);
-//            LatLngBounds bounds =  googleMap.getProjection().getVisibleRegion().latLngBounds;
 
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             builder.include(top);
@@ -379,15 +397,6 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
             }catch (Exception e){
                 //Log.v("LATLNG", "MAP CRASH");
             }
-
-
-
-//            if (bounds.contains(top)&& bounds.contains(bottom)&& bounds.contains(left)&& bounds.contains(right)){
-//                allVisible=true;
-//            }
-//            --zoom;
-//
-//        }
 
     }
 
@@ -474,7 +483,7 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
     public void onMapReady(GoogleMap gMap) {
 
             googleMap = gMap;
-            googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+            googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
             googleMap.setIndoorEnabled(false);
         googleMap.getUiSettings().setZoomControlsEnabled(true);
 
@@ -547,7 +556,7 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
 
             }
 
-            holder.description.setText(child.get(childPosition).getDistance()+" meters with "+((int)(child.get(childPosition).getTime()/1000))+" secs rest");
+            holder.description.setText((int)child.get(childPosition).getDistance()+" meters with "+((int)(child.get(childPosition).getTime()/1000))+" secs rest");
             holder.date.setText( child.get(childPosition).getDate() );
             holder.intervalCount.setText(String.valueOf(child.get(childPosition).getIntervals().size())+" sessions");
 
