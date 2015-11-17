@@ -18,5 +18,6 @@
     <dimen name="twenty">20dp</dimen>
     <dimen name="eight">8dp</dimen>
     <dimen name="standard_view_height">48dp</dimen>
+    <dimen name="list_view_height">64dp</dimen>
 
 </resources>

@@ -20,8 +20,6 @@
     <color name="vodafone_red_disable">#88fbfbfb</color>
     <color name="back_swipe">#f4f4f4</color>
     <color name="logincheckbox_color">#666666</color>
-    <color name="store_name">#383939</color>
-    <color name="store_dist">#3e3e3e</color>
     <color name="white_back">#f6f5f5</color>
     <color name="dark_grey_button_selector_color">#666666</color>
     <color name="pressed_background_stores">#00869e</color>
