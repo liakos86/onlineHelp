@@ -27,12 +27,11 @@ import java.util.logging.SocketHandler;
 public class BaseDrawer extends BaseFragmentActivity {
 //    private static final String TAG = Thread.currentThread().getStackTrace()[2].getClassName();
 
-
     static final int POSITION_NEW_INTERVAL = 0;
     static final int POSITION_MY_DIARY = 1;
     static final int POSITION_MY_PLANS = 2;
-    static final int POSITION_MY_SETTINGS = 3;
-    static final int POSITION_EXIT = 4;
+//    static final int POSITION_MY_SETTINGS = 3;
+    static final int POSITION_EXIT = 3;
 
 //    static final String POSITION = "pos";
 //    private static final Long EXIT_CODE = -99L;
@@ -122,9 +121,9 @@ public class BaseDrawer extends BaseFragmentActivity {
             else if (i == POSITION_MY_PLANS) {
                 imgRes = getResources().getDrawable(R.drawable.plan_32);
             }
-            else if (i == POSITION_MY_SETTINGS) {
-                imgRes = getResources().getDrawable(R.drawable.settings_32);
-            }
+//            else if (i == POSITION_MY_SETTINGS) {
+//                imgRes = getResources().getDrawable(R.drawable.settings_32);
+//            }
             else if (i == POSITION_NEW_INTERVAL) {
                 imgRes = getResources().getDrawable(R.drawable.interval_32);
             }
