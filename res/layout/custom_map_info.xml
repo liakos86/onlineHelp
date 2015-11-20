@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+<LinearLayout android:layout_centerInParent="true"
+              android:layout_marginTop="25dp"
+              android:orientation="vertical"
+              android:layout_width="250dp"
+              android:layout_height="wrap_content">
+
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+       <RelativeLayout
+               android:layout_width="fill_parent"
+               android:layout_height="wrap_content">
+
+        <Button
+                android:background="@drawable/ic_info_item_background2"
+                android:layout_centerInParent="true"
+                android:layout_width="@dimen/map_icon_size"
+                android:layout_height="@dimen/map_icon_size"
+                android:textColor="@color/white_back"
+                android:id="@+id/element_top"
+                android:textSize="@dimen/small_text"
+                android:scaleType="centerInside"/>
+
+       </RelativeLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp">
+
+
+        <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+            <Button
+                    android:background="@drawable/ic_info_item_background2"
+                    android:layout_alignParentLeft="true"
+                    android:layout_width="@dimen/map_icon_size"
+                    android:layout_height="@dimen/map_icon_size"
+                    android:textColor="@color/white_back"
+                    android:scaleType="centerInside"
+                    android:textSize="@dimen/small_text"
+                    android:id="@+id/element_left"/>
+            <Button
+                    android:background="@drawable/ic_info_item_background2"
+                    android:layout_alignParentRight="true"
+                    android:layout_width="@dimen/map_icon_size"
+                    android:layout_height="@dimen/map_icon_size"
+                    android:textSize="@dimen/small_text"
+                    android:scaleType="centerInside"
+                    android:textColor="@color/white_back"
+                    android:id="@+id/element_right"/>
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+        <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <Button
+                    android:background="@drawable/ic_info_item_background2"
+                    android:layout_centerInParent="true"
+                    android:layout_width="@dimen/map_icon_size"
+                    android:layout_height="@dimen/map_icon_size"
+                    android:id="@+id/element_bottom"
+                    android:textColor="@color/white_back"
+                    android:textSize="@dimen/small_text"
+                    android:scaleType="centerInside"/>
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
+
+    </RelativeLayout>

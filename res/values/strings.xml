@@ -19,24 +19,14 @@
     <string name="text_rounds">0 / 0</string>
     <string name="adId1">ca-app-pub-1164456313108704/9576922674</string>
     <string name="adId2">ca-app-pub-1164456313108704/6586430278</string>
-    <string name="seconds">Seconds</string>
+    <string name="adId3">ca-app-pub-1164456313108704/8546000271</string>
+    <string name="seconds">Rest secs</string>
     <string name="rounds">Rounds</string>
     <string name="distance">Distance</string>
     <string name="delete">Delete</string>
     <string name="save">Save</string>
     <string name="sound">Sound</string>
     <string name="vibrate">Vibrate</string>
-
-    <!--<string name="nice_html">-->
-        <!--<![CDATA[-->
-
-        <!--<p>-->
-       <!--&#8226;  <b>Step 1:</b> Pick your desired distance to run intervals <br/><br/>-->
-       <!--&#8226;   <b>Step 2:</b> Pick your rest periods in seconds between intervals <br/><br/>-->
-       <!--&#8226;  <b>Step 3:</b> Pick the number of times/rounds to repeat<br/><br/>-->
-       <!--&#8226;  <b>Step 4:</b> Save this plan with a name of your choice for future use<br/>-->
-       <!--</p>-->
-<!--]]>-->
-    <!--</string>-->
+    <string name="click">Click start markers for info</string>
 
 </resources>

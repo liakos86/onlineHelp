@@ -145,7 +145,15 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
     private void placeAds() {
 
         String android_id = Settings.Secure.getString(getActivity().getContentResolver(), Settings.Secure.ANDROID_ID);
-        String deviceId = md5(android_id).toUpperCase();
+
+        String deviceId = app_preferences.getString("deviceId", null);
+
+        if (deviceId==null) {
+            deviceId = md5(android_id).toUpperCase();
+            SharedPreferences.Editor editor = app_preferences.edit();
+            editor.putString("deviceId", deviceId);
+            editor.apply();
+        }
 
          adRequest = new AdRequest.Builder()
                 .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
@@ -309,6 +317,7 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
     private void prepareForNextInterval(boolean completed){
 
 
+        if (googleMap!=null) googleMap.clear();
         coveredDist=0;
         mHandler.removeCallbacks(mUpdateTimeTask);
         timeText.setText("00 : 00 : 00");
@@ -382,7 +391,7 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
         intervalTime = 0;
         intervalsList.clear();
         buttonBack.setVisibility(View.VISIBLE);
-        googleMap.clear();
+        if (googleMap!=null) googleMap.clear();
         clearViews();
         hideFrame();
     }
@@ -418,7 +427,7 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
             @Override
             public void onClick(View view) {
 
-                clear();
+                confirmStopOrDelete(false);
 
 
             }
@@ -457,7 +466,7 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
         buttonStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                confirmStop();
+                confirmStopOrDelete(true);
             }
         });
 
@@ -642,9 +651,9 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
         super.onResume();
 
         //service is on and i am running
-        if (isMyServiceRunning() && receiver==null){
+        if (isMyServiceRunning()){
 
-            setBroadcastReceiver();
+            if (receiver==null) setBroadcastReceiver();
 
             intervalDistance = app_preferences.getFloat(RunningService.INTERVAL_DISTANCE, 0);
             intervalTime = app_preferences.getLong(RunningService.INTERVAL_TIME, 0);
@@ -706,20 +715,29 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
     @Override
     public void onStop() {
 
+
+        try {
+            if (isMyServiceRunning())
+                getActivity().unregisterReceiver(receiver);
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
         super.onStop();
     }
 
     @Override
     public void onDestroy() {
 
-        try {
-            if (isMyServiceRunning())
-                getActivity().unregisterReceiver(receiver);
-                receiver=null;
-        }catch(Exception e){
-            //Log.v("LATLNG", "Exception: Receiver not registered");
-            e.printStackTrace();
-        }
+//        try {
+//            if (isMyServiceRunning())
+//                getActivity().unregisterReceiver(receiver);
+//                receiver=null;
+//        }catch(Exception e){
+//            //Log.v("LATLNG", "Exception: Receiver not registered");
+//            e.printStackTrace();
+//        }
 
         super.onDestroy();
     }
@@ -769,6 +787,9 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
 
         flipper.setDisplayedChild(1);
 
+        buttonSave.setClickable(true);
+        buttonDismiss.setClickable(true);
+
         setRoundsText(intervalRoundsPicker.getValue());
         textsInfoRun.setVisibility(View.VISIBLE);
 
@@ -779,21 +800,28 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
         textsInfoRun.setVisibility(View.INVISIBLE);
     }
 
-    private void confirmStop(){
+    private void confirmStopOrDelete(final boolean isStop){
+
+        String title = isStop ? "Quit Interval" : "Delete Interval";
+        String message = isStop ? "Stop running now?" : "Delete current progress?";
+
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 getActivity());
-        alertDialogBuilder.setTitle("Quit Interval")
-                .setMessage("Stop running now?")
+        alertDialogBuilder.setTitle(title)
+                .setMessage(message)
                 .setCancelable(false)
                 .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
                     }
                 })
-                .setNegativeButton("Stop", new DialogInterface.OnClickListener() {
+                .setNegativeButton("Confirm", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 
-                        doStop();
+                        if (isStop)
+                            doStop();
+                        else
+                            clear();
 
                     }
 
@@ -818,12 +846,12 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
         distanceProgressWheel.setProgress(0);
         distanceProgressWheel.setVisibility(View.GONE);
 
-        if (intervalsList.size()==0&&coveredDist==0) buttonDismiss.performClick();
+        if (intervalsList.size()==0&&coveredDist==0) clear();
         else if (coveredDist>0){
 
             if (app_preferences.getString(RunningService.LATLONLIST,"").length()<2)
                 Toast.makeText(getActivity(), "WILL CRUSH EMPTY LIST", Toast.LENGTH_LONG).show();
-            intervalsList.add(new Interval(app_preferences.getString(RunningService.LATLONLIST,""), SystemClock.uptimeMillis() - startTimeMillis, coveredDist));
+            intervalsList.add(new Interval(-1, app_preferences.getString(RunningService.LATLONLIST,""), SystemClock.uptimeMillis() - startTimeMillis, coveredDist));
         }
 
         new PerformAsyncTask(getActivity(), 1).execute();
@@ -842,6 +870,9 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
     }
 
     private void saveRunWithIntervalsDB(){
+
+        buttonDismiss.setClickable(false);
+        buttonSave.setClickable(false);
 
         Running running = new Running(-1, "", intervalTime,  new SimpleDateFormat("dd/MM/yyyy, hh:mm a").format(new Date()), intervalDistance, intervalsList );
         Database db = new Database(getActivity().getApplicationContext());
@@ -953,7 +984,7 @@ public class FrgInterval extends BaseFragment implements OnMapReadyCallback{
         if (latLonList==null && app_preferences.getBoolean(RunningService.IS_RUNNING, false)) {
              latLonList = app_preferences.getString(RunningService.LATLONLIST, "");
 
-            if (latLonList != null && latLonList.length() > 1) {
+            if (latLonList != null && latLonList.length() > 1 && googleMap!=null) {
                 drawMap(latLonList);
             }
         }

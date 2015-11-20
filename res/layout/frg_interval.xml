@@ -180,9 +180,10 @@
 
             <ListView android:id="@+id/completedIntervals"
                       android:layout_alignParentTop="true"
-                      android:layout_above="@+id/timerProgressWheel"
+                      android:layout_above="@+id/adViewInterval2"
                       android:layout_width="fill_parent"
                       android:layout_height="wrap_content"
+                      android:layout_marginBottom="@dimen/eight"
                       android:visibility="gone"/>
 
             <com.kostas.onlineHelp.ProgressWheel

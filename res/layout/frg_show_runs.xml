@@ -2,6 +2,7 @@
 
 
     <ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
+                 xmlns:app="http://schemas.android.com/apk/res/com.kostas.onlineHelp"
             android:id="@+id/viewFlipper"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -12,10 +13,24 @@
 
         <ExpandableListView
                 android:id="@+id/listExpRunning"
-                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_height="wrap_content"
                 android:layout_width="match_parent"
+                android:layout_above="@+id/adViewInterval3"
                 android:groupIndicator="@drawable/group_indicator"
                 />
+
+            <com.google.android.gms.ads.AdView
+
+                    android:layout_margin="@dimen/eight"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/adViewInterval3"
+                    app:adSize="BANNER"
+                    app:adUnitId="@string/adId3"
+                    android:layout_alignParentBottom="true"
+
+                    />
 
 
 
@@ -48,6 +63,10 @@
 
         </RelativeLayout>
 
+        <com.kostas.onlineHelp.MapWrapperLayout
+            android:id="@+id/mapWrapperRuns"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
         <FrameLayout
                  android:layout_width="match_parent"
@@ -62,6 +81,17 @@
             android:layout_height="match_parent"
 
             />
+
+            <TextView
+                    android:layout_margin="@dimen/margin10"
+                    android:text="@string/click"
+                    android:singleLine="true"
+                    android:gravity="center"
+                    android:textColor="@color/white_back"
+                    android:layout_width="match_parent"
+                    android:background="@drawable/inactive_button"
+                    android:layout_gravity="top|center"
+                    android:layout_height="@dimen/standard_view_height"/>
 
             <ImageButton
                     android:layout_margin="15dp"
@@ -78,6 +108,10 @@
 
 
         </FrameLayout>
+
+    </com.kostas.onlineHelp.MapWrapperLayout>
+
+
     </ViewFlipper>
 
 

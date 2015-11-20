@@ -29,6 +29,8 @@ import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class MainActivity extends BaseDrawer {
 
@@ -49,9 +51,6 @@ public class MainActivity extends BaseDrawer {
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
     }
-
-
-
 
 
     private void getPager() {

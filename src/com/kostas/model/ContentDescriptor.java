@@ -143,6 +143,10 @@ public class ContentDescriptor {
             public static final String MILLISECONDS = "milliseconds";
             public static final String LATLONLIST = "latlonlist";
             public static final String DISTANCE = "distance";
+            public static final String ALT_START = "alt_start";
+            public static final String ALT_FINISH = "alt_finish";
+            public static final String ALT_MAX = "alt_max";
+            public static final String ALT_MIN = "alt_min";
 
 
 
@@ -164,6 +168,10 @@ public class ContentDescriptor {
                     + String.format(sFrmTextNotNull, Cols.MILLISECONDS) + " , "
                     + String.format(sFrmTextNotNull, Cols.LATLONLIST) + " , "
                     + String.format(sFrmTextNotNull, Cols.DISTANCE) + " , "
+                    + String.format(sFrmTextNotNull, Cols.ALT_START) + " , "
+                    + String.format(sFrmTextNotNull, Cols.ALT_FINISH) + " , "
+                    + String.format(sFrmTextNotNull, Cols.ALT_MAX) + " , "
+                    + String.format(sFrmTextNotNull, Cols.ALT_MIN) + " , "
                     + String.format(sFrmPrimaryKey, Cols.ID) + ")";
         }
     }

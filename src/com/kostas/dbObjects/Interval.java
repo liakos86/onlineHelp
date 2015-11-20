@@ -25,6 +25,7 @@ public class Interval implements Serializable{
     private long milliseconds;
     private float distance;
     private boolean isFastest;
+    private int altitudeStart, altitudeFinish, altitudeMax, altitudeMin;
     
     public Interval(){}
 
@@ -33,11 +34,11 @@ public class Interval implements Serializable{
         this.latLonList = latLonList;
     }
 
-    public Interval (String latLonList, long milliseconds, float distance){
-        this.milliseconds = milliseconds;
-        this.latLonList = latLonList;
-        this.distance = distance;
-    }
+//    public Interval (long interval_id, String latLonList, long milliseconds, float distance){
+//        this.milliseconds = milliseconds;
+//        this.latLonList = latLonList;
+//        this.distance = distance;
+//    }
 
     public Interval (long interval_id, String latLonList, long milliseconds){
         this.interval_id = interval_id;
@@ -51,6 +52,19 @@ public class Interval implements Serializable{
         this.latLonList = latLonList;
         this.distance = distance;
     }
+
+    public Interval (long interval_id, String latLonList, long milliseconds, float distance, int altitudeStart, int altitudeFinish, int altitudeMax, int altitudeMin){
+        this.interval_id = interval_id;
+        this.milliseconds = milliseconds;
+        this.latLonList = latLonList;
+        this.distance = distance;
+        this.altitudeStart = altitudeStart;
+        this.altitudeFinish = altitudeFinish;
+        this.altitudeMax = altitudeMax;
+        this.altitudeMin = altitudeMin;
+
+    }
+
 
     public boolean isFastest() {
         return isFastest;
@@ -104,6 +118,22 @@ public class Interval implements Serializable{
         this.distance = distance;
     }
 
+    public int getAltitudeStart() {
+        return altitudeStart;
+    }
+
+    public int getAltitudeFinish() {
+        return altitudeFinish;
+    }
+
+    public int getAltitudeMax() {
+        return altitudeMax;
+    }
+
+    public int getAltitudeMin() {
+        return altitudeMin;
+    }
+
     public static Interval getFromId(Context context, long id) {
         //Log.v(TAG, String.format("Requesting item [%d]", id));
         synchronized (context) {
@@ -132,6 +162,10 @@ public class Interval implements Serializable{
             toRet.put(ContentDescriptor.Interval.Cols.MILLISECONDS, item.milliseconds);
             toRet.put(ContentDescriptor.Interval.Cols.LATLONLIST, item.latLonList);
             toRet.put(ContentDescriptor.Interval.Cols.DISTANCE, item.distance);
+            toRet.put(ContentDescriptor.Interval.Cols.ALT_START, item.altitudeStart);
+            toRet.put(ContentDescriptor.Interval.Cols.ALT_FINISH, item.altitudeFinish);
+            toRet.put(ContentDescriptor.Interval.Cols.ALT_MAX, item.altitudeMax);
+            toRet.put(ContentDescriptor.Interval.Cols.ALT_MIN, item.altitudeMin);
 
             return toRet;
         }
@@ -149,6 +183,10 @@ public class Interval implements Serializable{
             toRet.latLonList = cursor.getString(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.LATLONLIST));
             toRet.milliseconds = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.MILLISECONDS));
             toRet.distance = cursor.getFloat(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.DISTANCE));
+            toRet.altitudeStart = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.ALT_START));
+            toRet.altitudeFinish = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.ALT_FINISH));
+            toRet.altitudeMax = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.ALT_MAX));
+            toRet.altitudeMin = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.ALT_MIN));
             return toRet;
         }
     }

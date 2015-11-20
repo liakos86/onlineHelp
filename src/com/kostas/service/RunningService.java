@@ -49,7 +49,7 @@ public class RunningService extends IntentService
     private String speechFinal;
     public String latLonList, lastString;
     public float intervalDistance, currentDistance;
-    private long mStartTime, totalTime,  intervalTime, interval=5000;
+    private long mStartTime, totalTime,  intervalTime, interval=5000, vibrationMillis;
     private int intervalRounds;
     public Location lastLocation;
     SharedPreferences app_preferences;
@@ -62,6 +62,7 @@ public class RunningService extends IntentService
     Gson gson;
     Type listOfObjects;
     Vibrator v;
+    int altStart, altFinish, altMax, altMin;
 
     //i need the list here. The app might be killed and user might complete several intervals
     private List<Interval> intervals = new ArrayList<Interval>();
@@ -172,9 +173,15 @@ public class RunningService extends IntentService
             return;
         }
 
+        int altCurrent = (int) location.getAltitude();
+
 
         //the first update can be a max of 20m accurate
         if ( latLonList==null && location.getAccuracy() < 20){
+
+            altStart = altCurrent;
+            altMax = altCurrent;
+            altMin = altCurrent;
 
             currentDistance = 0;
             latLonList= String.valueOf(location.getLatitude()) + "," + String.valueOf(location.getLongitude());
@@ -201,12 +208,18 @@ public class RunningService extends IntentService
 
 
             totalTime = SystemClock.uptimeMillis() - mStartTime;
+
+
+            if (altCurrent>altMax) altMax = altCurrent;
+            else if (altCurrent<altMin) altMin = altCurrent;
+
             if (currentDistance >= intervalDistance){
                 play( intervalRounds>0 && intervals.size()+1>=intervalRounds, false);
+                altFinish = (int)location.getAltitude();
                 finishInterval();
             }else if (currentDistance > 0){
                 lastString = lastLocation.getLatitude()+","+lastLocation.getLongitude()+","+location.getLatitude()+","+location.getLongitude();
-                refreshInterval((location.getTime()-lastLocation.getTime())/ newDistance);
+                refreshInterval((location.getTime() - lastLocation.getTime())/ newDistance);
             }
         }
 
@@ -284,7 +297,7 @@ public class RunningService extends IntentService
 
         stopLocationUpdates();
 
-        intervals.add(new Interval(latLonList, totalTime, intervalDistance));
+        intervals.add(new Interval(-1,latLonList, totalTime, intervalDistance, altStart, altFinish, altMax, altMin));
 
         if (!(intervalRounds>0 && intervals.size()>=intervalRounds)){
             startCountDownForNextInterval(intervalTime);
@@ -335,37 +348,38 @@ public class RunningService extends IntentService
         }.start();
     }
 
+
     public void play(boolean completed, boolean starting) {
 
 
-        if (hasVibration) {
+        if (hasSound||hasVibration){
 
-            if (starting) {
-                v.vibrate(1000);
-            } else
-                v.vibrate(2000);
+        if (hasVibration) {
+            vibrationMillis = starting ? 1500 : 2500;
         }
 
 
-        if (hasSound){
-
+        if (hasSound) {
 
             if (starting) {
                 speechFinal = "   Started";
-            } else{
+            } else {
 
-                if (completed){
+                if (completed) {
                     speechFinal = "   Completed";
-                }else {
-                    if (intervalRounds>0) speechFinal = "   Stopped . "+(intervalRounds-intervals.size()-1)+" rounds remaining";
+                } else {
+                    if (intervalRounds > 0)
+                        speechFinal = "   Stopped . " + (intervalRounds - intervals.size() - 1) + " rounds remaining";
                     else speechFinal = "   Stopped";
                 }
 
             }
-            textToSpeech.speak(speechFinal, TextToSpeech.QUEUE_FLUSH, null);
-//            mSpeakText.run();
+
 
         }
+
+        mSpeakText.run();
+    }
 
     }
 
@@ -390,20 +404,16 @@ public class RunningService extends IntentService
     }
 
 
-//    private Runnable mUpdateTimeTask = new Runnable(){
-//
-//        public void run() {
-//            totalTime = SystemClock.uptimeMillis()- mStartTime;
-//            mHandler.postDelayed(this, 1000);
-//        }
-//    };
 
-//    private Runnable mSpeakText = new Runnable(){
-//
-//        public void run() {
-//            textToSpeech.speak(speechFinal, TextToSpeech.QUEUE_FLUSH, null);
-//        }
-//    };
+    private Runnable mSpeakText = new Runnable(){
+
+        public void run() {
+
+            if (hasVibration && vibrationMillis>0) v.vibrate(vibrationMillis);
+            if (hasSound) textToSpeech.speak(speechFinal, TextToSpeech.QUEUE_FLUSH, null);
+
+        }
+    };
 
 
 

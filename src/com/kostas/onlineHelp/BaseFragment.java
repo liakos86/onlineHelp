@@ -18,8 +18,7 @@ public class BaseFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-
-        ExtApplication application = (ExtApplication) getActivity().getApplication();
+//        ExtApplication application = (ExtApplication) getActivity().getApplication();
 
         return super.onCreateView(inflater, container, savedInstanceState);
     }
