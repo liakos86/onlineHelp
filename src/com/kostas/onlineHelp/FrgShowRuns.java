@@ -4,13 +4,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.text.Html;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +26,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.*;
 
 
@@ -53,7 +54,7 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
     private ViewGroup infoWindow, infoWindowEmpty;
     LatLngBounds bounds;
     ImageButton closeMapButton;
-    Button openMapButton, closeIntervalsButton;
+    Button openMapButton, closeIntervalsButton, shareButton;
     boolean alreadyDrawn;
 
 
@@ -94,7 +95,7 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
 
     private boolean placeAd() {
 
-        SharedPreferences app_preferences  = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences app_preferences  = getActivity().getSharedPreferences(IntervalActivity.PREFS_NAME, Context.MODE_PRIVATE);
         String deviceId = app_preferences.getString("deviceId", null);
 
         if (deviceId!=null) {
@@ -207,6 +208,8 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
         openMapButton = (Button) v.findViewById(R.id.buttonShowMap);
         closeMapButton = (ImageButton) v.findViewById(R.id.buttonCloseMap);
         closeIntervalsButton = (Button) v.findViewById(R.id.buttonCloseIntervals);
+
+        shareButton = (Button) v.findViewById(R.id.buttonShare);
 
         noRunsText = (TextView) v.findViewById(R.id.noRunsText);
 
@@ -328,6 +331,29 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
                 viewFlipper.setDisplayedChild(2);
             }
         });
+
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                Uri screenshotUri = Uri.parse("http://coins.silvercoinstoday.com/wp-content/uploads/2010/10/America-the-Beautiful-Silver-Coin-Obverse.jpg");
+
+                try {
+                    InputStream stream = getActivity().getContentResolver().openInputStream(screenshotUri);
+                }
+
+                catch (FileNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+                sharingIntent.setType("image/*");
+                sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
+                startActivity(Intent.createChooser(sharingIntent, "Share image using"));
+
+            }
+        });
         
     }
 
@@ -338,11 +364,11 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
         return (int) (pixels * scale + 0.5f);
     }
 
-    public List<Long> getRunsFromDb(Activity activity, boolean fromAsync){
+    public void getRunsFromDb(Activity activity, boolean fromAsync){
         Database db = new Database(activity);
         List <Running> newRuns = db.fetchRunsFromDb();
 
-        List<Long> err = new ArrayList<Long>();
+//        List<Long> err = new ArrayList<Long>();
 
 
         Collections.reverse(newRuns);
@@ -365,8 +391,8 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
 
                 if (rounds>0)
                 intervalsList.get(fastest).setFastest(true);
-                else
-                err.add(running.getRunning_id());
+//                else
+//                err.add(running.getRunning_id());
 
                 running.setIntervals(intervalsList);
 //                runs.add(running);
@@ -375,8 +401,6 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
 
                 if (!parentItems.contains(month)){
                     parentItems.add(month);
-
-
                 }
 
             }
@@ -400,7 +424,7 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
 
         }
 
-        return err;
+//        return null;
     }
 
 
@@ -420,76 +444,79 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
         int number = currentIntervals.size();
         double latPoint, lonPoint;
         //for each interval
-        for (int i=0; i<number; i++){
+        for (int i=0; i<number; i++) {
 
             Interval current = currentIntervals.get(i);
-            int color = i%2==0 ? getResources().getColor(R.color.interval_red) : getResources().getColor(R.color.interval_green);
+            int color = i % 2 == 0 ? getResources().getColor(R.color.interval_red) : getResources().getColor(R.color.interval_green);
 
             locationList.clear();
 
-            String [] latStringList =  current.getLatLonList().split(",");
-            int listLength = latStringList.length-1;
-            for (int j=0; j< listLength; j+=2){
-
-                latPoint = Double.valueOf(latStringList[j]);
-                lonPoint = Double.parseDouble(latStringList[j + 1]);
+            String[] latStringList = current.getLatLonList().split(",");
+            int listLength = latStringList.length - 1;
 
 
+            if (latStringList[0].equals("null")) {
+                Toast.makeText(getActivity(),(i+1)+" : "+ current.getLatLonList(), Toast.LENGTH_SHORT).show();
+            } else {
+                for (int j = 0; j < listLength; j += 2) {
 
-                if (latPoint>northPoint) {
-                    northPoint = latPoint;
-                    top = new LatLng(latPoint, lonPoint);
-                }
-                if (latPoint< southPoint) {
-                    southPoint = latPoint;
-                    bottom = new LatLng(latPoint, lonPoint);
-                }
+                    latPoint = Double.valueOf(latStringList[j]);
+                    lonPoint = Double.parseDouble(latStringList[j + 1]);
 
-                if (lonPoint>eastPoint) {
-                    eastPoint = lonPoint;
-                    right = new LatLng(latPoint, lonPoint);
-                }
-                if (lonPoint< westPoint) {
-                    westPoint = lonPoint;
-                    left = new LatLng(latPoint, lonPoint);
-                }
 
+                    if (latPoint > northPoint) {
+                        northPoint = latPoint;
+                        top = new LatLng(latPoint, lonPoint);
+                    }
+                    if (latPoint < southPoint) {
+                        southPoint = latPoint;
+                        bottom = new LatLng(latPoint, lonPoint);
+                    }
+
+                    if (lonPoint > eastPoint) {
+                        eastPoint = lonPoint;
+                        right = new LatLng(latPoint, lonPoint);
+                    }
+                    if (lonPoint < westPoint) {
+                        westPoint = lonPoint;
+                        left = new LatLng(latPoint, lonPoint);
+                    }
 
 
 //               if (j%2==0)
-                   locationList.add(new LatLng(latPoint, lonPoint));
-            }
+                    locationList.add(new LatLng(latPoint, lonPoint));
+                }
 
-            int currSize = locationList.size()-1;
+                int currSize = locationList.size() - 1;
 
-            for (int k=0; k<currSize; k++){
-                        googleMap.addPolyline(new PolylineOptions().add(locationList.get(k), locationList.get(k + 1)).width(6).color(color));
-            }
+                for (int k = 0; k < currSize; k++) {
+                    googleMap.addPolyline(new PolylineOptions().add(locationList.get(k), locationList.get(k + 1)).width(6).color(color));
+                }
 
 
-            if (currSize>0) {
-                markers.add(googleMap.addMarker(new MarkerOptions()
-                                        .infoWindowAnchor(0.48f, 6.16f)
-                                        .position(locationList.get(0))
-                                        .title(String.valueOf(current.getInterval_id()))
+                if (currSize > 0) {
+                    markers.add(googleMap.addMarker(new MarkerOptions()
+                                            .infoWindowAnchor(0.48f, 6.16f)
+                                            .position(locationList.get(0))
+                                            .title(String.valueOf(current.getInterval_id()))
 //                                .title(String.valueOf(Html.fromHtml("<b>Interval " + (i + 1) + "</b>")))
 //                                .snippet("Speed: " + String.format("%1$,.2f", ((double) ((current.getDistance() / current.getMilliseconds()) * 3600))) + " km/h")
-                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start2))
-                        )
-                );
+                                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start2))
+                            )
+                    );
 
 
-                googleMap.addMarker(new MarkerOptions()
+                    googleMap.addMarker(new MarkerOptions()
 //                        .infoWindowAnchor(0.48f, 4.16f)
-                                .position(locationList.get(currSize))
+                                    .position(locationList.get(currSize))
 //                                .title(String.valueOf(Html.fromHtml("<b>Interval " + (i + 1) + "</b>")))
-                                .snippet("Speed: " + String.format("%1$,.2f", ((double) ((current.getDistance() / current.getMilliseconds()) * 3600))) + " km/h")
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_stop2))
+                                    .snippet("Speed: " + String.format("%1$,.2f", ((double) ((current.getDistance() / current.getMilliseconds()) * 3600))) + " km/h")
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_stop2))
 
-                );
+                    );
+                }
+
             }
-
-        }
 
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             builder.include(top);
@@ -499,12 +526,13 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
 
             bounds = builder.build();
 
-            try{
+            try {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 200));
 
-            }catch (Exception e){
+            } catch (Exception e) {
                 //Log.v("LATLNG", "MAP CRASH");
             }
+        }
 
     }
 
@@ -667,27 +695,28 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
 
             }
 
-            holder.description.setText((int)child.get(childPosition).getDistance()+" meters with "+((int)(child.get(childPosition).getTime()/1000))+" secs rest");
-            holder.date.setText( child.get(childPosition).getDate()+"  id = "+child.get(childPosition).getRunning_id() );
-            holder.intervalCount.setText(String.valueOf(child.get(childPosition).getIntervals().size())+" sessions");
+                holder.description.setText((int) child.get(childPosition).getDistance() + " meters with " + ((int) (child.get(childPosition).getTime() / 1000)) + " secs rest");
+                holder.date.setText(child.get(childPosition).getDate() + "  id = " + child.get(childPosition).getRunning_id());
+                holder.intervalCount.setText(String.valueOf(child.get(childPosition).getIntervals().size()) + " sessions");
 
-        convertView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                confirmDelete(child.get(childPosition).getRunning_id(),groupPosition, childPosition);
-                return false;
-            }
-        });
+                convertView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        confirmDelete(child.get(childPosition).getRunning_id(), groupPosition, childPosition);
+                        return false;
+                    }
+                });
 //
 //
-        convertView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+                convertView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
 
-                currentRun = child.get(childPosition);
-                showIntervalsForRun(child.get(childPosition));
-            }
-        });
+                        currentRun = child.get(childPosition);
+                        showIntervalsForRun(child.get(childPosition));
+                    }
+                });
+
 
             return convertView;
 
@@ -819,7 +848,6 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
             }
         }
 
-
         if (empty){
             runsExpListView.setVisibility(View.GONE);
             noRunsText.setVisibility(View.VISIBLE);
@@ -834,7 +862,7 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
     private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
         private Activity activity;
         private boolean shouldPlaceAd;
-        List<Long>err;
+//        List<Long>err;
 
 
         public PerformAsyncTask(Activity activity) {
@@ -849,7 +877,7 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
         protected Void doInBackground(Void... unused) {
 
 
-            err = getRunsFromDb(activity, true);
+             getRunsFromDb(activity, true);
             shouldPlaceAd = placeAd();
 
             return null;
@@ -863,11 +891,11 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
             if (adapterExp!=null) adapterExp.notifyDataSetChanged();
             if (shouldPlaceAd) adView.loadAd(adRequest);
 
-            if (err.size()>0){
-                for (long l:err){
-                    Toast.makeText(getActivity(), "id = "+l, Toast.LENGTH_SHORT).show();
-                }
-            }
+//            if (err.size()>0){
+//                for (long l:err){
+//                    Toast.makeText(getActivity(), "id = "+l, Toast.LENGTH_SHORT).show();
+//                }
+//            }
 
 
 
