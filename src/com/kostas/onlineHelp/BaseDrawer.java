@@ -3,12 +3,10 @@ package com.kostas.onlineHelp;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.view.MenuItem;
@@ -16,13 +14,10 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.SocketHandler;
 
 public class BaseDrawer extends BaseFragmentActivity {
 //    private static final String TAG = Thread.currentThread().getStackTrace()[2].getClassName();
@@ -232,7 +227,7 @@ public class BaseDrawer extends BaseFragmentActivity {
 
     private void startMainWhenNoPager(int position) {
         ((ExtApplication)getApplication()).setPosition(position);
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, IntervalActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
         startActivity(intent);
 //        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);

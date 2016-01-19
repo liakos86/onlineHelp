@@ -4,12 +4,14 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.location.Location;
 import android.net.Uri;
 //import android.util.Log;
 import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by liakos on 19/9/2015.
@@ -62,6 +64,27 @@ public class Interval implements Serializable{
         this.altitudeFinish = altitudeFinish;
         this.altitudeMax = altitudeMax;
         this.altitudeMin = altitudeMin;
+
+    }
+
+    public Interval (long interval_id, List<Location> locationList, long milliseconds, float distance, int altitudeStart, int altitudeFinish, int altitudeMax, int altitudeMin){
+        this.interval_id = interval_id;
+        this.milliseconds = milliseconds;
+
+        this.distance = distance;
+        this.altitudeStart = altitudeStart;
+        this.altitudeFinish = altitudeFinish;
+        this.altitudeMax = altitudeMax;
+        this.altitudeMin = altitudeMin;
+
+        StringBuilder sb = new StringBuilder(locationList.get(0).getLatitude()+","+locationList.get(0).getLongitude());
+        locationList.remove(0);
+        for (Location l : locationList){
+            sb.append("," +l.getLatitude()+","+l.getLongitude()+","+l.getLatitude()+","+l.getLongitude());
+        }
+
+        this.latLonList = sb.toString();
+
 
     }
 
