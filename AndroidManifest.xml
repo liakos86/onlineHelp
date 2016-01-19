@@ -24,7 +24,7 @@
            >
 
 
-        <activity android:name=".MainActivity"
+        <activity android:name=".IntervalActivity"
                   android:screenOrientation="portrait"
                   android:windowSoftInputMode="adjustPan"
                   android:launchMode="singleTask"

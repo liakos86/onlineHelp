@@ -1,38 +1,17 @@
 package com.kostas.onlineHelp;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.text.Html;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.Window;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
-import com.kostas.service.RunningService;
-import org.w3c.dom.Text;
-
-
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
-public class MainActivity extends BaseDrawer {
+
+public class IntervalActivity extends BaseDrawer {
 
     public static final String PREFS_NAME = "INTERVAL_PREFS";
     /**
@@ -185,54 +164,6 @@ public class MainActivity extends BaseDrawer {
     protected void onRestart() {
         super.onRestart();
     }
-
-//    public void doAsync(int position){
-//        new PerformAsyncTask(this, position).execute();
-//    }
-//
-//
-//    public class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
-//        private Activity activity;
-//        private int whichFragment;
-//
-//
-//
-//        public PerformAsyncTask(Activity activity, int whichFragment) {
-//            this.activity = activity;
-//            this.whichFragment = whichFragment;
-//
-//        }
-//
-//        protected void onPreExecute() {
-//
-//        }
-//
-//        @Override
-//        protected Void doInBackground(Void... unused) {
-//
-//             String name =
-//            "android:switcher:" + mPager.getId() + ":" + whichFragment;
-//
-//            if (whichFragment==0) {
-//                ((FrgInterval)getSupportFragmentManager().findFragmentByTag(name)).getPlansFromDb(activity);
-//
-//            }else  if (whichFragment==1) {
-//                ((FrgShowRuns)getSupportFragmentManager().findFragmentByTag(name)).getRunsFromDb(activity);
-//
-//            }else  if (whichFragment==2) {
-//                ((FrgPlans)getSupportFragmentManager().findFragmentByTag(name)).getPlansFromDb(activity);
-//
-//            }
-//            return null;
-//
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Void result) {
-//
-//        }
-//
-//    }
 
 
 }
