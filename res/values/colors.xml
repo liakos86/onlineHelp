@@ -27,6 +27,7 @@
     <color name="interval_green_pressed">#2ecc71</color>
     <color name="interval_red">#c0392b</color>
     <color name="interval_red_pressed">#e74c3c</color>
-    <color name="cyan">#00ffff</color>
+    <color name="interval_blue">#2980b9</color>
+    <color name="interval_blue_pressed">#3498db</color>
 
 </resources>
