@@ -1,23 +1,13 @@
 package com.kostas.onlineHelp;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
-import com.kostas.dbObjects.Plan;
-import com.kostas.model.ContentDescriptor;
-import com.kostas.model.Database;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by liakos on 10/10/2015.
@@ -57,7 +47,7 @@ public class FrgSettings extends BaseFragment{
         speechTextFinish = (EditText) v.findViewById(R.id.speechEditTextFinish);
         saveSettings = (Button) v.findViewById(R.id.saveSettingsButton);
         errorText = (TextView) v.findViewById(R.id.settingsError);
-        app_preferences = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
+        app_preferences = getActivity().getSharedPreferences(IntervalActivity.PREFS_NAME, Context.MODE_PRIVATE);
 
         sound = (CheckBox) v.findViewById(R.id.checkbox_sound);
         vibration = (CheckBox) v.findViewById(R.id.checkbox_vibration);
