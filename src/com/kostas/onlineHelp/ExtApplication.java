@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 //import com.parse.Parse;
 //import com.parse.PushService;
+import com.kostas.service.TTSManager;
 import org.acra.ACRA;
 import org.acra.ReportField;
 import org.acra.ReportingInteractionMode;
@@ -27,6 +28,7 @@ public class ExtApplication extends Application {
 
     private int position;
     private boolean inRunningMode;
+    private TTSManager ttsManager;
 
 
     @Override
@@ -37,6 +39,8 @@ public class ExtApplication extends Application {
         ACRA.init(this);
         MyAcraSender mySender = new MyAcraSender(this);
         ACRA.getErrorReporter().addReportSender(mySender);
+        ttsManager = new TTSManager();
+        ttsManager.init(this);
     }
 
     public int getPosition() {
@@ -53,5 +57,9 @@ public class ExtApplication extends Application {
 
     public void setInRunningMode(boolean inRunningMode) {
         this.inRunningMode = inRunningMode;
+    }
+
+    public TTSManager getTtsManager() {
+        return ttsManager;
     }
 }
