@@ -35,29 +35,29 @@ public class CustomDrawerAdapter extends ArrayAdapter<DrawerItem> {
     public boolean isEnabled(int position) {
         switch (position) {
 
-//            case BaseDrawer.EDIT_PROFILE_POSITION:
+//            case BaseFrgActivityWithBottomButtons.EDIT_PROFILE_POSITION:
 //                if (id!=null&&id==-1) return true;
 //                return context.getResources().getBoolean(R.bool.is_edit_profile_enabled);
-//            case BaseDrawer.MY_BILL_POSITION:
+//            case BaseFrgActivityWithBottomButtons.MY_BILL_POSITION:
 //                return context.getResources().getBoolean(R.bool.is_my_bill_enabled);
-//            case BaseDrawer.MY_USAGE_POSITION:
+//            case BaseFrgActivityWithBottomButtons.MY_USAGE_POSITION:
 //                if (id!=null&&id==-1) return false;
 //                return context.getResources().getBoolean(R.bool.is_my_usage_enabled);
-//            case BaseDrawer.MY_PLAN_POSITION:
+//            case BaseFrgActivityWithBottomButtons.MY_PLAN_POSITION:
 //                return context.getResources().getBoolean(R.bool.is_my_plan_enabled);
-//            case BaseDrawer.VODAFONE_OFFERS_POSITION:
+//            case BaseFrgActivityWithBottomButtons.VODAFONE_OFFERS_POSITION:
 //                return context.getResources().getBoolean(R.bool.is_vodafone_offers_enabled);
-//            case BaseDrawer.INOFFICE_POSITION:
+//            case BaseFrgActivityWithBottomButtons.INOFFICE_POSITION:
 //                return context.getResources().getBoolean(R.bool.is_inoffice_enabled);
-//            case BaseDrawer.VODAFONE_UCO_POSITION:
+//            case BaseFrgActivityWithBottomButtons.VODAFONE_UCO_POSITION:
 //                return context.getResources().getBoolean(R.bool.is_vodafone_uco_enabled);
-//            case BaseDrawer.TRACKING_POSITION:
+//            case BaseFrgActivityWithBottomButtons.TRACKING_POSITION:
 //                return context.getResources().getBoolean(R.bool.is_tracking_enabled);
-//            case BaseDrawer.ABROAD_POSITION:
+//            case BaseFrgActivityWithBottomButtons.ABROAD_POSITION:
 //                return context.getResources().getBoolean(R.bool.is_abroad_enabled);
-//            case BaseDrawer.STORE_LOCATOR_POSITION:
+//            case BaseFrgActivityWithBottomButtons.STORE_LOCATOR_POSITION:
 //                return context.getResources().getBoolean(R.bool.is_store_locator_enabled);
-//            case BaseDrawer.NETWORK_COVERAGE_POSITION:
+//            case BaseFrgActivityWithBottomButtons.NETWORK_COVERAGE_POSITION:
 //                return context.getResources().getBoolean(R.bool.is_network_coverage_enabled);
 //               return context.getResources().getBoolean(R.bool.is_log_out_enabled);
         }
@@ -115,7 +115,7 @@ public class CustomDrawerAdapter extends ArrayAdapter<DrawerItem> {
         }
 
             //we will prefetch the notifications from the db to set the num
-//            if (position == BaseDrawer.MY_NOTIFICATIONS_POSITION) {
+//            if (position == BaseFrgActivityWithBottomButtons.MY_NOTIFICATIONS_POSITION) {
 //
 //                Long id = null;
 //                if(application!=null){

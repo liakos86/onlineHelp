@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/bottomButtons"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+        <LinearLayout
+                android:id="@+id/btn_my_runs"
+                style="@style/BottomTab">
+            <ImageView
+                    android:src="@drawable/diary_32"
+                    style="@style/BottomTabImage"/>
+            <TextView
+                    android:text="Diary"
+                    style="@style/BottomTabText"/>
+        </LinearLayout>
+        <LinearLayout
+                android:id="@+id/btn_my_plans"
+                style="@style/BottomTab">
+            <ImageView
+                    android:src="@drawable/plan_32"
+                    style="@style/BottomTabImage"/>
+            <TextView
+                    android:text="Plans"
+                    style="@style/BottomTabText"/>
+        </LinearLayout>
+
+        <LinearLayout
+                android:id="@+id/btn_new_interval"
+                style="@style/BottomTab">
+            <ImageView
+                    android:src="@drawable/interval_32"
+                    style="@style/BottomTabImage"/>
+            <TextView
+                    android:text="Run"
+                    style="@style/BottomTabText"/>
+        </LinearLayout>
+
+        <!--<LinearLayout-->
+                <!--android:id="@+id/btn_exit"-->
+                <!--style="@style/BottomTab">-->
+            <!--<ImageView-->
+                    <!--android:src="@drawable/exit_32"-->
+                    <!--style="@style/BottomTabImage"/>-->
+            <!--<TextView-->
+                    <!--android:text="Exit"-->
+                    <!--style="@style/BottomTabText"/>-->
+        <!--</LinearLayout>-->
+
+
+    </LinearLayout>
+
+</LinearLayout>

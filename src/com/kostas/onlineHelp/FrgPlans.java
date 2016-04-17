@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,7 @@ import java.util.List;
 /**
  * Created by liakos on 10/10/2015.
  */
-public class FrgPlans extends BaseFragment{
+public class FrgPlans extends Fragment {
 
     ListView plansListView;
     List<Plan> plans = new ArrayList<Plan>();

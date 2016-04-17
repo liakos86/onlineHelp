@@ -2,28 +2,11 @@
 <resources>
 
     <!-- the theme applied to the application or activity -->
-    <style name="CustomActionBarTheme"
+    <style name="CustomIntervalTheme"
            parent="@android:style/Theme.Holo.Light">
-        <item name="android:actionBarStyle">@style/MyActionBar</item>
         <item name="android:typeface">monospace</item>
-
-        <!-- Support library compatibility -->
-        <!--<item name="actionBarStyle">@style/MyActionBar</item>-->
-    </style>
-
-    <!-- ActionBar styles -->
-    <style name="MyActionBar"
-     parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
-        <item name="android:background">@drawable/ab_solid_background</item>
-        <!--<item name="android:backgroundStacked">@drawable/ab_stacked_solid_vodafone</item>-->
-        <!--<item name="android:backgroundSplit">@drawable/ab_bottom_solid_vodafone</item>-->
-        <!--<item name="android:progressBarStyle">@style/ProgressBar.Vodafone</item>-->
-        <item name="android:icon">@android:color/transparent</item>
-        <item name="android:displayOptions">showHome|homeAsUp|showTitle</item>
-        <item name="android:titleTextStyle">@style/MyActionBar.Text</item>
-
-        <!-- Support library compatibility -->
-        <!--<item name="background">@drawable/ab_stacked_solid_bar</item>-->
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
     <style name="MyActionBar.Text" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
@@ -45,5 +28,33 @@
 
 
 
+    <style name="BottomTab">
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@drawable/bottom_button_background</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="BottomTabImage">
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">0.5</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="BottomTabImage.home">
+        <item name="android:layout_margin">11dp</item>
+    </style>
+
+    <style name="BottomTabText">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:layout_weight">0.5</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:textSize">@dimen/small_text</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 
 </resources>

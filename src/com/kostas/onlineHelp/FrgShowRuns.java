@@ -1,20 +1,20 @@
 package com.kostas.onlineHelp;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+//import com.facebook.share.model.SharePhoto;
+//import com.facebook.share.model.SharePhotoContent;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -26,15 +26,13 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.*;
 
 
 /**
  * Created by liakos on 11/4/2015.
  */
-public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
+public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
     List<Interval> intervals = new ArrayList<Interval>();
     private ArrayList<String> parentItems = new ArrayList<String>();
@@ -95,7 +93,7 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
 
     private boolean placeAd() {
 
-        SharedPreferences app_preferences  = getActivity().getSharedPreferences(IntervalActivity.PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences app_preferences  = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
         String deviceId = app_preferences.getString("deviceId", null);
 
         if (deviceId!=null) {
@@ -336,21 +334,38 @@ public class FrgShowRuns extends BaseFragment implements OnMapReadyCallback{
             @Override
             public void onClick(View view) {
 
-                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-                Uri screenshotUri = Uri.parse("http://coins.silvercoinstoday.com/wp-content/uploads/2010/10/America-the-Beautiful-Silver-Coin-Obverse.jpg");
+
+
+
+
+//                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+//                Uri screenshotUri = Uri.parse("http://coins.silvercoinstoday.com/wp-content/uploads/2010/10/America-the-Beautiful-Silver-Coin-Obverse.jpg");
 
                 try {
-                    InputStream stream = getActivity().getContentResolver().openInputStream(screenshotUri);
+//                    InputStream stream = getActivity().getContentResolver().openInputStream(screenshotUri);
+
+//                    final int w = 300;
+//                    final int h = 300;
+//
+//                    Bitmap image = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+//
+//
+//                    SharePhoto photo = new SharePhoto.Builder()
+//                            .setBitmap(image)
+//                            .build();
+//                    SharePhotoContent content = new SharePhotoContent.Builder()
+//                            .addPhoto(photo)
+//                            .build();
                 }
 
-                catch (FileNotFoundException e) {
+                catch (Exception e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
 
-                sharingIntent.setType("image/*");
-                sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
-                startActivity(Intent.createChooser(sharingIntent, "Share image using"));
+//                sharingIntent.setType("image/*");
+//                sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
+//                startActivity(Intent.createChooser(sharingIntent, "Share image using"));
 
             }
         });

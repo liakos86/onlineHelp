@@ -8,7 +8,7 @@
     <color name="disable_grey">#ffdedede</color>
     <color name="drawer_grey">#282828</color>
     <color name="death_grey">#666</color>
-    <color name="drawer_black">#212121</color>
+    <color name="drawer_black">#333333</color>
     <color name="drawer_highlight">#212121</color>
     <color name="map_icon_border">#006778</color>
     <color name="semitrans_white">#50ffffff</color>
@@ -29,5 +29,6 @@
     <color name="interval_red_pressed">#e74c3c</color>
     <color name="interval_blue">#2980b9</color>
     <color name="interval_blue_pressed">#3498db</color>
+    <color name="green">#008000</color>
 
 </resources>

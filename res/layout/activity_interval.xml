@@ -68,20 +68,49 @@
                         android:layout_height="@dimen/standard_view_height">
                 </com.kostas.onlineHelp.NumberPickerKostas>
 
+
+            <LinearLayout
+                    android:orientation="horizontal"
+                            android:id="@+id/spinner_and_save"
+                    android:layout_below="@+id/intervalRoundsPicker"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_marginTop="@dimen/margin10"
+                          android:layout_marginBottom="@dimen/twenty">
                 <Spinner
                         android:id="@+id/plansSpinner"
-                        android:layout_width="match_parent"
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
                         android:layout_height="@dimen/standard_view_height"
-                        android:layout_below="@+id/intervalRoundsPicker"
+
                         android:drawSelectorOnTop="true"
                         android:layout_marginBottom="@dimen/twenty"
-                        android:visibility="invisible"
+                        android:visibility="gone"
                         style="@style/spinner_style"
 
 
                         />
 
-            <LinearLayout android:layout_width="match_parent" android:layout_below="@+id/plansSpinner"
+
+            <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_marginLeft="@dimen/margin10"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/standard_view_height"
+            android:text="@string/save"
+            android:textSize="@dimen/medium_text"
+            android:textStyle="italic"
+            android:textColor="@color/white_back"
+
+            android:background="@drawable/plus_minus_selector"
+            android:id="@+id/buttonSavePlan"
+            />
+
+            </LinearLayout>
+
+
+            <LinearLayout android:layout_width="match_parent" android:layout_below="@+id/spinner_and_save"
                           android:layout_height="@dimen/standard_view_height">
 
             <CheckBox android:paddingLeft="@dimen/margin10" android:layout_weight="1" android:layout_marginRight="@dimen/eight" android:background="@drawable/checkbox_selector" android:button="@drawable/checkbox_sound_design" android:textColor="@color/white_back" android:id="@+id/checkbox_sound" android:layout_width="0dp" android:layout_height="fill_parent" android:text="@string/sound"/>
@@ -126,31 +155,28 @@
                         android:layout_weight="3"
                         android:layout_width="0dp"
                         android:layout_height="54dp"
-                        android:drawableStart="@drawable/arrow_right_v2"
-                        android:drawableLeft="@drawable/arrow_right_v2"
-                        android:paddingLeft="@dimen/twenty"
                         android:text="@string/start"
                         android:textStyle="bold"
-                        android:textSize="@dimen/large_text"
+                        android:textSize="@dimen/xlarge_text"
                         android:textColor="@color/white_back"
                         android:background="@drawable/close_button_selector"
                         android:id="@+id/buttonSetIntervalValues"
                        />
 
-                    <Button
-                            style="?android:attr/buttonBarButtonStyle"
-                            android:layout_marginLeft="@dimen/margin10"
-                            android:layout_weight="1"
-                            android:layout_width="0dp"
-                            android:layout_height="54dp"
-                            android:text="@string/save"
-                            android:textSize="@dimen/xmedium_text"
-                            android:textStyle="italic"
-                            android:textColor="@color/white_back"
+                    <!--<Button-->
+                            <!--style="?android:attr/buttonBarButtonStyle"-->
+                            <!--android:layout_marginLeft="@dimen/margin10"-->
+                            <!--android:layout_weight="1"-->
+                            <!--android:layout_width="0dp"-->
+                            <!--android:layout_height="54dp"-->
+                            <!--android:text="@string/save"-->
+                            <!--android:textSize="@dimen/xmedium_text"-->
+                            <!--android:textStyle="italic"-->
+                            <!--android:textColor="@color/white_back"-->
 
-                            android:background="@drawable/plus_minus_selector"
-                            android:id="@+id/buttonSavePlan"
-                            />
+                            <!--android:background="@drawable/plus_minus_selector"-->
+                            <!--android:id="@+id/buttonSavePlan"-->
+                            <!--/>-->
 
                 </LinearLayout>
 
@@ -160,23 +186,11 @@
             </RelativeLayout>
 
 
-
-        <!--</LinearLayout>-->
-
         <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                      android:layout_width="match_parent"
                      android:layout_height="match_parent"
                 >
 
-
-            <fragment
-                    android:id="@+id/mapFrgKostas"
-                    android:name="com.google.android.gms.maps.SupportMapFragment"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_above="@+id/timerProgressWheel"
-                    />
 
             <ListView android:id="@+id/completedIntervals"
                       android:layout_alignParentTop="true"

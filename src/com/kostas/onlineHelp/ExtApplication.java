@@ -28,6 +28,7 @@ public class ExtApplication extends Application {
 
     private int position;
     private boolean inRunningMode;
+    private boolean inRunningAct;
     private TTSManager ttsManager;
 
 
@@ -57,6 +58,14 @@ public class ExtApplication extends Application {
 
     public void setInRunningMode(boolean inRunningMode) {
         this.inRunningMode = inRunningMode;
+    }
+
+    public boolean isInRunningAct() {
+        return inRunningAct;
+    }
+
+    public void setInRunningAct(boolean inRunningAct) {
+        this.inRunningAct = inRunningAct;
     }
 
     public TTSManager getTtsManager() {

@@ -1,5 +1,6 @@
 package com.kostas.onlineHelp;
 
+//import com.facebook.FacebookSdk;
 import android.app.Activity;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -10,56 +11,58 @@ import android.widget.Toast;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
+/**
+ * The main activity that contains the pager to choose fragment or new interval
+ */
+public class MainActivity extends BaseFrgActivityWithBottomButtons {
 
-public class IntervalActivity extends BaseDrawer {
-
-    public static final String PREFS_NAME = "INTERVAL_PREFS";
     /**
-     * Called when the activity is first created.
+     * Shared prefs name
      */
+    public static final String PREFS_NAME = "INTERVAL_PREFS";
 
+    /**
+     * A NonSwipeableViewPager that does not allow swiping
+     */
     private NonSwipeableViewPager mPager;
+
+    /**
+     * The total size of the pager objects
+     */
     static final int PAGER_SIZE = 3;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        getPager();
-        setDrawer(mPager);
+        setupPager();
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
+//        FacebookSdk.sdkInitialize(getApplicationContext());
     }
 
-
-    private void getPager() {
+    /**
+     * Initializes the pager, sets adapter and listener
+     * Sets the bottom buttons.
+     */
+    private void setupPager() {
         mPager = (NonSwipeableViewPager) findViewById(R.id.pager);
 
         mPager.setOffscreenPageLimit(2);
 
         mPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(),  PAGER_SIZE));
 
-//        setBottomButtons(mPager);
-
-//        pagerTitles = getResources().getStringArray(R.array.pager_titles);
-
+        setBottomButtons(mPager);
 
         final Activity activity = this;
         mPager.setOnPageChangeListener(new NonSwipeableViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i2) {
-
-//                mPager.setCurrentItem(i);
-//                setSelectedBottomButton(bottomButtons,i);
-
             }
 
             @Override
             public void onPageSelected(int position) {
 
                 mPager.setCurrentItem(position);
-//                setSelectedBottomButton(bottomButtons,position);
-
 
                 if (getActiveFragment(getSupportFragmentManager(), position) instanceof FrgShowRuns) {
                     ((FrgShowRuns)getActiveFragment(getSupportFragmentManager(), position)).getRunsFromDb(activity, false);
@@ -67,11 +70,7 @@ public class IntervalActivity extends BaseDrawer {
                 }else  if (getActiveFragment(getSupportFragmentManager(), position) instanceof FrgPlans) {
                     ((FrgPlans)getActiveFragment(getSupportFragmentManager(), position)).getPlansFromDb(activity, false);
 
-                }else  if (getActiveFragment(getSupportFragmentManager(), position) instanceof FrgInterval) {
-                    ((FrgInterval)getActiveFragment(getSupportFragmentManager(), position)).getPlansFromDb(activity, false);
-
                 }
-
 
                 invalidateOptionsMenu();
             }
@@ -98,8 +97,10 @@ public class IntervalActivity extends BaseDrawer {
 
     }
 
-
-
+    /**
+     * Pager adapter class.
+     *
+     */
     private class MyPagerAdapter extends FragmentPagerAdapter {
 
         Fragment[] fragments;
@@ -121,15 +122,12 @@ public class IntervalActivity extends BaseDrawer {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0: {
-                    return FrgInterval.init(0);
+                    return FrgShowRuns.init(0);
                 }
                 case 1: {
-                    return FrgShowRuns.init(1);
+                    return FrgPlans.init(1);
                 }
-                case 2: {
-                    return FrgPlans.init(2);
-                }
-                default: return FrgInterval.init(position);
+                default: return FrgShowRuns.init(position);
             }
         }
 
@@ -150,8 +148,6 @@ public class IntervalActivity extends BaseDrawer {
         }else{
             mPager.setCurrentItem(0, true);
             setTitle(drawerTitles[0]);
-           mDrawerList.setItemChecked(0, true);
-            closeDrawer();
         }
     }
 

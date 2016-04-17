@@ -19,8 +19,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.kostas.dbObjects.Interval;
 import com.kostas.onlineHelp.ExtApplication;
-import com.kostas.onlineHelp.IntervalActivity;
+import com.kostas.onlineHelp.MainActivity;
 import com.kostas.onlineHelp.R;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,12 +46,12 @@ public class RunningService extends IntentService
 
     public StringBuilder lastStringBuilder;
     public float intervalDistance, currentDistance;
-    private long mStartTime, totalTime, intervalTime, interval = 5000, vibrationMillis;
+    private long mStartTime, totalTime, intervalTime, interval = 4000, vibrationMillis;
     private int intervalRounds;
     public Location lastLocation;
     SharedPreferences app_preferences;
     SharedPreferences.Editor editor;
-    boolean firstChange, hasSound;
+    boolean hasSound;//,firstChange;
     ExtApplication application;
     GoogleApiClient mGoogleApiClient;
     LocationRequest mLocationRequest;
@@ -81,9 +82,8 @@ public class RunningService extends IntentService
                 "MyWakelockTag");
 
         wl.acquire();
-
         application = (ExtApplication) getApplication();
-        app_preferences = getApplication().getSharedPreferences(IntervalActivity.PREFS_NAME, Context.MODE_PRIVATE);
+        app_preferences = getApplication().getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
         listOfObjects = new TypeToken<List<Interval>>(){}.getType();
         listOfLocations = new TypeToken<List<Location>>(){}.getType();
         locationList = new ArrayList<Location>();
@@ -108,16 +108,17 @@ public class RunningService extends IntentService
                 .build();
     }
 
+    /**
+     * Create a request for location updates
+     * setting the appropriate parameters
+     */
     protected void createLocationRequest() {
-
-        //if i request a single update i want only one within 20secs
-        //else i want update every 8 secs with min 4 secs
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(4000);
-        mLocationRequest.setFastestInterval(3000);
+        mLocationRequest.setInterval(3000);
+        mLocationRequest.setFastestInterval(2000);
         mLocationRequest.setSmallestDisplacement(10);
-//        }
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
     }
 
     public RunningService() {
@@ -128,10 +129,9 @@ public class RunningService extends IntentService
     @Override
     public void onStart(Intent intent, int startId) {
 
-
-        createForegroundNotification();
-
         if (intent!=null){//first
+
+            createForegroundNotification();
 
             intervalTime = intent.getLongExtra(INTERVAL_TIME, 0);
             startCountDownForNextInterval();
@@ -165,8 +165,9 @@ public class RunningService extends IntentService
     public void onLocationChanged(Location location) {
 
 
-            if (!firstChange || lastLocation == null) {
-                firstChange = true;
+//            if (!firstChange || lastLocation == null) {
+        if (lastLocation == null) {
+                //firstChange = true;
 
                 lastLocation = location;
                 locationList.add(location);
@@ -174,7 +175,6 @@ public class RunningService extends IntentService
             }
 
             int altCurrent = (int) location.getAltitude();
-
 
             //the first update can be a max of 20m accurate
             // if ( latLonList==null && location.getAccuracy() < 20){
@@ -192,7 +192,7 @@ public class RunningService extends IntentService
                 return;
             }
 
-            //every following update must be of at least 15m accurate or over 20 m distance to avoid a big straight line of many meters
+            //every following update must be of at least 15m accurate to avoid a big straight line of many meters
             if (location.getAccuracy() < 15) {
 
                 mLocationRequest.setFastestInterval(10000);
@@ -228,11 +228,17 @@ public class RunningService extends IntentService
                 mLocationRequest.setInterval(interval);
 
             }
-
-
     }
 
 
+    /**
+     * Create a notification with a title and a message
+     * that leads to my main activity when pressed
+     *
+     * If the sdk is >15 then I set flags like the
+     * color of the light to blink
+     *
+     */
     private void createForegroundNotification() {
 
 
@@ -246,9 +252,9 @@ public class RunningService extends IntentService
             mBuilder.setContentText("Click to get into");
 //            mBuilder.setOngoing(true);
 
-            Intent resultIntent = new Intent(application, IntervalActivity.class);
+            Intent resultIntent = new Intent(application, MainActivity.class);
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(application);
-            stackBuilder.addParentStack(IntervalActivity.class);
+            stackBuilder.addParentStack(MainActivity.class);
 
 // Adds the Intent that starts the Activity to the top of the stack
             stackBuilder.addNextIntent(resultIntent);
@@ -276,7 +282,7 @@ public class RunningService extends IntentService
 
 
 //The intent to launch when the user clicks the expanded notification
-            Intent intent2 = new Intent(this, IntervalActivity.class);
+            Intent intent2 = new Intent(this, MainActivity.class);
             intent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             PendingIntent pendIntent = PendingIntent.getActivity(this, 0, intent2, 0);
 
@@ -297,38 +303,39 @@ public class RunningService extends IntentService
     private void finishInterval() {
 
         stopLocationUpdates();
-
-
-//        intervals.add(new Interval(-1,latLonList, totalTime, intervalDistance, altStart, altFinish, altMax, altMin));
-
         intervals.add(new Interval(-1, locationList, totalTime, intervalDistance, altStart, altFinish, altMax, altMin));
-
-
-        totalTime = 0;
         currentDistance = 0;
-//        latLonList = null;
-
         locationList.clear();
-        firstChange = false;
-
-
-//        new PerformAsyncTask(3).execute();
-
         boolean completed = intervalRounds > 0 && intervals.size() >= intervalRounds;
+
+        int hours = (int)(totalTime/3600000);
+        int mins = (int)((totalTime - (hours*3600000))/60000);
+        int secs = (int)((totalTime - (hours*3600000) - (mins*60000))/1000);
+
+        speak(mins+" minutes and "+secs+" seconds");
+
+        if (!completed) {
+
+            startCountDownForNextInterval();
+            speak("STOPPED");
+
+        } else {
+
+            speak("COMPLETED "+intervalRounds+" intervals");
+
+        }
 
         editor.putBoolean(INTERVAL_COMPLETED, completed);
         editor.putInt(COMPLETED_NUM, intervals.size());
-
-
         editor.putBoolean(IS_RUNNING, false);
         editor.putFloat(TOTAL_DIST, 0);
         editor.putFloat(TOTAL_TIME, 0);
-//        editor.putString(LATLONLIST,null);
 
         String json = (new Gson()).toJson(intervals, listOfObjects);
         editor.putString(INTERVALS, json);
         editor.apply();
 
+        //todo Do i really need to care about my broadcast when no receivers?
         if (((PowerManager) getSystemService(Context.POWER_SERVICE)).isScreenOn()) {
 
             Intent intent = new Intent(NOTIFICATION);
@@ -337,30 +344,7 @@ public class RunningService extends IntentService
             sendBroadcast(intent);
         }
 
-
-        if (!completed) {
-
-            startCountDownForNextInterval();
-            speak("STOPPED");
-//            ttsManager.initQueue("STOPPED");
-//            textToSpeech.speak("STOPPED", TextToSpeech.QUEUE_FLUSH, null);
-
-//            while (textToSpeech.isSpeaking()){
-//
-//            }
-
-
-        } else {
-
-//            textToSpeech.speak("COMPLETED", TextToSpeech.QUEUE_FLUSH, null);
-            speak("COMPLETED");
-//            ttsManager.initQueue("COMPLETED");
-//            while (textToSpeech.isSpeaking()){
-//
-//            }
-        }
-
-
+        totalTime = 0;
     }
 
     private void speak(String textToSpeak) {
@@ -372,9 +356,7 @@ public class RunningService extends IntentService
 
     private void refreshInterval(float pace) {
 
-        interval = (100 * pace / 6) > 3000 ? ((100 * pace / 6) < 6000 ? (long) (100 * pace / 6) : 6000) : 3000;
-
-//        storeSharedPrefsValues(2);
+        interval = (100 * pace / 6) > 2000 ? ((100 * pace / 6) < 4000 ? (long) (100 * pace / 6) : 4000) : 2000;
         new PerformAsyncTask(2).execute();
 
     }
@@ -383,7 +365,6 @@ public class RunningService extends IntentService
     private void startCountDownForNextInterval() {
 
         mHandler.postDelayed(mStartRunnable, intervalTime);
-
         editor = app_preferences.edit();
         editor.putLong(MSTART_COUNTDOWN_TIME, SystemClock.uptimeMillis());
         editor.apply();
@@ -398,9 +379,9 @@ public class RunningService extends IntentService
             stopLocationUpdates();
            if (wl.isHeld()) wl.release();
 
-            if (ttsManager != null) {
-                ttsManager.shutDown();
-            }
+//            if (ttsManager != null) {
+//                ttsManager.shutDown();
+//            }
 
             mHandler.removeCallbacks(mStartRunnable);
 
@@ -452,6 +433,7 @@ public class RunningService extends IntentService
     private void startReceiving() {
 
         if (mGoogleApiClient.isConnected()) {
+
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         } else
             Toast.makeText(application, "google client not connected", Toast.LENGTH_SHORT).show();
@@ -523,35 +505,7 @@ public class RunningService extends IntentService
 
                 editor.apply();
 
-            } else if (type == 3) {
-
-
-                boolean completed = intervalRounds > 0 && intervals.size() >= intervalRounds;
-
-                editor.putBoolean(INTERVAL_COMPLETED, completed);
-                editor.putInt(COMPLETED_NUM, intervals.size());
-
-
-                editor.putBoolean(IS_RUNNING, false);
-                editor.putFloat(TOTAL_DIST, 0);
-                editor.putFloat(TOTAL_TIME, 0);
-                editor.putString(LATLONLIST, null);
-
-                String json = (new Gson()).toJson(intervals, listOfObjects);
-                editor.putString(INTERVALS, json);
-                editor.apply();
-
-                if (((PowerManager) getSystemService(Context.POWER_SERVICE)).isScreenOn()) {
-
-                    Intent intent = new Intent(NOTIFICATION);
-                    intent.putExtra(INTERVAL_COMPLETED, completed);
-
-                    sendBroadcast(intent);
-                }
-
             }
-
-//            editor.commit();
 
             return null;
 
