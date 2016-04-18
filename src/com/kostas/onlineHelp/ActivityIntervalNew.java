@@ -34,6 +34,11 @@ import java.util.*;
  */
 public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
 
+    /**
+     * The starting timer text
+     */
+    private final String ZERO_TIME = "00 : 00 : 00";
+
     CountDownTimer countDownTimer;
     private long intervalTime, startTimeMillis;
     SharedPreferences app_preferences;
@@ -157,11 +162,11 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     }
 
 
+    /**
+     * Initializes the drop down with the user saved plans
+     */
     private void setPlansSpinner() {
         plansSpinner = (Spinner) findViewById(R.id.plansSpinner);
-
-//        new PerformAsyncTask(getActivity()).execute();
-
         plansAdapter = new SpinnerAdapter(this, android.R.layout.simple_spinner_dropdown_item, plans);
         plansSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
         plansSpinner.setAdapter(plansAdapter);
@@ -215,6 +220,11 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         completedIntervalsListView.setAdapter(adapterInterval);
     }
 
+    /**
+     * Checks if RunningService is between the amount of the services running in the device
+     *
+     * @return
+     */
     private boolean isMyServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -226,128 +236,127 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     }
 
 
-    //the first time and every time we come back from resume
+    /**the first time and every time we come back from resume
+     *
+     * @param isRunning true if the app is in running/interval mode
+     * @param isCompleted true if user has achieved the number of intervals selected
+     * @param startOfCountdown the start time milliseconds of the interval
+     * @param distanceCovered the distance covered so far in the interval
+     */
     private void getInRunningMode(boolean isRunning, boolean isCompleted, long startOfCountdown, float distanceCovered) {
-
         ((ExtApplication) getApplication()).setInRunningMode(true);
-
         flipper.setDisplayedChild(1);
-
         setButtonVisibilities(true);
 
-        //from resume
-        if (isRunning && !isCompleted) {
+        if (isRunning && !isCompleted) {//from resume
             setDistanceProgress(distanceCovered);
             timerProgressWheel.setVisibility(View.INVISIBLE);
             distanceProgressWheel.setVisibility(View.VISIBLE);
             mHandler.post(mUpdateTimeTask);
-
-
         }
-        //from resume OR first time
-        else if (!isRunning && !isCompleted) {
+        else if (!isRunning && !isCompleted) {//from resume OR first time
             final int step = (int) (360000 / intervalTime);
             distanceProgressWheel.setVisibility(View.INVISIBLE);
             timerProgressWheel.setVisibility(View.VISIBLE);
             timerProgressWheel.setText((int) ((intervalTime - (SystemClock.uptimeMillis() - startOfCountdown)) / 1000) + " secs");
 
-            if (!(isMyServiceRunning()))
+            if (!(isMyServiceRunning())) {
                 startRunningService();
+            }
 
-            if (countDownTimer != null) countDownTimer.cancel();
+            if (countDownTimer != null) {
+                countDownTimer.cancel();
+            }
 
             countDownTimer = new CountDownTimer(intervalTime - (SystemClock.uptimeMillis() - startOfCountdown), 1000) {
                 public void onTick(long millisUntilFinished) {
                     onTickUpdate(millisUntilFinished, step);
                 }
-
                 public void onFinish() {
                     onFinishUpdate();
-
                 }
             }.start();
-
-
         }
-        //from resume(isCompleted=true)
-        else {
+        else {//from resume(isCompleted=true)
             doStop();
         }
     }
 
+    /**
+     * Sets the timer textView text based on the diff of the startTime and current time
+     */
     private void setTimerText() {
-
         long total = SystemClock.uptimeMillis() - startTimeMillis;
-
         int hours = (int) (total / 3600000);
         int mins = (int) ((total - (hours * 3600000)) / 60000);
         int secs = (int) ((total - (hours * 3600000) - (mins * 60000)) / 1000);
-
         timeText.setText(String.format("%02d", hours) + " : " + String.format("%02d", mins) + " : " + String.format("%02d", secs));
-
     }
 
-
+    /**
+     * Clears textfields and timers and starts countdown if there are more intervals
+     *
+     * @param completed indication if user has completed all interval sessions
+     */
     private void prepareForNextInterval(boolean completed) {
-
         coveredDist = 0;
         mHandler.removeCallbacks(mUpdateTimeTask);
-        timeText.setText("00 : 00 : 00");
-
+        timeText.setText(ZERO_TIME);
         countDownTimer.cancel();
 
         if (completed) {
             doStop();
-        } else {
-            setRoundsText(intervalRoundsPicker.getValue());
-            distanceProgressWheel.setVisibility(View.INVISIBLE);
-            timerProgressWheel.setVisibility(View.VISIBLE);
-            final int step = (int) (360000 / intervalTime);
-            countDownTimer = new CountDownTimer(intervalTime, 1000) {
-                public void onTick(long millisUntilFinished) {
-                    onTickUpdate(millisUntilFinished, step);
-                }
-
-                public void onFinish() {
-                    onFinishUpdate();
-                }
-            }.start();
+            return;
         }
 
+        setRoundsText(intervalRoundsPicker.getValue());
+        distanceProgressWheel.setVisibility(View.INVISIBLE);
+        timerProgressWheel.setVisibility(View.VISIBLE);
+        final int step = (int) (360000 / intervalTime);
+        countDownTimer = new CountDownTimer(intervalTime, 1000) {
+            public void onTick(long millisUntilFinished) {
+                onTickUpdate(millisUntilFinished, step);
+            }
+            public void onFinish() {
+                onFinishUpdate();
+            }
+        }.start();
     }
 
-
+    /**
+     * Actions performed when the countdown finishes and the interval will start.
+     */
     private void onFinishUpdate() {
-
-        distanceProgressWheel.setProgress(0);
         distanceProgressWheel.setText(0 + " / " + (int) intervalDistance);
-        distanceProgressWheel.setVisibility(View.VISIBLE);
-
         startTimeMillis = SystemClock.uptimeMillis();
         mHandler.post(mUpdateTimeTask);
-
-        timerProgressWheel.setVisibility(View.INVISIBLE);
-        timerProgressWheel.setProgress(0);
-
+        setProgressAndVisibilityTimerAndDistance(0, View.INVISIBLE, 0, View.VISIBLE);
     }
 
-
+    /**
+     * The ui updates after every tick of the countdown timer
+     *
+     * @param millis the milliseconds left for the interval to start
+     * @param step the step to decrease in degrees from the timer progress wheel
+     */
     private void onTickUpdate(long millis, int step) {
-
-        // if ((int)(millis/1000)==5) tts.speak("Five", TextToSpeech.QUEUE_FLUSH, null);
-
         timerProgressWheel.setText(millis / 1000 + " secs");
         timerProgressWheel.setProgress((int) (timerProgressWheel.getProgress() - step));
     }
 
+    /**
+     * The ui updates after every distance update received from service
+     *
+     * @param progress the meters covered so far in the interval
+     */
     private void setDistanceProgress(float progress) {
-
         distanceProgressWheel.setProgress(((int) ((progress / intervalDistance) * 360)));
         distanceProgressWheel.setText((int) progress + " / " + (int) intervalDistance);
-
     }
 
-
+    /**
+     * Clears the app prefs that where changed during the finished interval session
+     */
     public void resetAppPrefs() {
         SharedPreferences.Editor editor = app_preferences.edit();
         editor.remove(RunningService.LATLONLIST);
@@ -365,12 +374,13 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         editor.remove(RunningService.MSTART_TIME);
         editor.remove(RunningService.LAST_LOCATION);
         editor.remove(RunningService.COMPLETED_NUM);
-
         editor.apply();
     }
 
+    /**
+     * Clears views and values after finishing an interval session
+     */
     private void clear() {
-
         ((ExtApplication)getApplication()).setInRunningMode(false);
         myAddress.setVisibility(View.INVISIBLE);
         completedIntervalsListView.setVisibility(View.GONE);
@@ -382,39 +392,37 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         hideFrame();
     }
 
-
+    /**
+     * Default values for texts
+     */
     private void setInitialTextInfo() {
-        timeText.setText("00 : 00 : 00");
+        timeText.setText(ZERO_TIME);
         roundsText.setText("0 / 0");
     }
 
+    /**
+     * Assigns listeners for every button in the layout
+     */
     public void setListeners() {
 
         buttonSetIntervalValues.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && validateDistanceAndTime()) {
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && obtainUserInput()) {
                     if (isMyServiceRunning()) {
                         stopRunningService();
                     }
-
                     showFrame();
                 } else if (!(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)))
                     Toast.makeText(getApplication(), "Please enable GPS", Toast.LENGTH_SHORT).show();
             }
         });
 
-
         buttonDismiss.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 confirmStopOrDelete(false);
-
-
             }
         });
 
@@ -435,15 +443,11 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
 //            }
 //        });
 
-
         buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 getInRunningMode(false, false, SystemClock.uptimeMillis(), 0);
-
             }
-
         });
 
         buttonStop.setOnClickListener(new View.OnClickListener() {
@@ -459,152 +463,74 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
                 hideFrame();
             }
         });
-
-
     }
 
-
-    private void alertDialogPlan() {
-
-        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-// ...Irrelevant code for customizing the buttons and title
-        LayoutInflater inflater = this.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.new_plan_alert_dialog, null);
-        dialogBuilder.setView(dialogView);
-//        dialogBuilder.setTitle("Confirm new plan");
-
-        dialogBuilder
-                .setCancelable(false)
-                .setPositiveButton("Cancel", null)
-                .setNegativeButton("Save", null);
-
-        final AlertDialog alertDialog = dialogBuilder.create();
-
-
-        final EditText descText = (EditText) dialogView.findViewById(R.id.dialogDesc);
-        ((TextView) dialogView.findViewById(R.id.dialogMeters)).setText("Run " + intervalDistancePicker.getValue() + " meters");
-        ((TextView) dialogView.findViewById(R.id.dialogSeconds)).setText("With " + intervalTimePicker.getValue() + " secs rest");
-        final TextView error = ((TextView) dialogView.findViewById(R.id.dialogError));
-
-
-        if (intervalRoundsPicker.getValue() > 0)
-            ((TextView) dialogView.findViewById(R.id.dialogRounds)).setText("Repeat " + intervalRoundsPicker.getValue() + " times");
-        else (dialogView.findViewById(R.id.dialogRounds)).setVisibility(View.GONE);
-
-
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-
-            @Override
-            public void onShow(final DialogInterface dialog) {
-                Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-                b.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View view) {
-                        dialog.dismiss();
-
-                    }
-                });
-
-                b = alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-                b.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View view) {
-                        // TODO Do something
-
-                        if (descText.getText().toString().length() > 0 && descText.getText().length() < 21) {
-                            savePlan(descText.getText().toString());
-                            error.setVisibility(View.INVISIBLE);
-                            alertDialog.dismiss();
-
-                        } else
-                            error.setVisibility(View.VISIBLE);
-
-                    }
-                });
-            }
-        });
-
-        alertDialog.show();
-
-    }
-
-
+    /**
+     * Fetches the user plans from the db
+     *
+     * @param activity the activity instance
+     * @param fromAsync indicates if this call is from an asynctask
+     */
     public void getPlansFromDb(Activity activity, boolean fromAsync) {
         Database db = new Database(activity);
-
         plans.clear();
-
         List<Plan> newPlans = db.fetchPlansFromDb();
         plans.add(new Plan("Select a plan"));
-
         for (Plan plan : newPlans) {
             plans.add(plan);
         }
-
         if (!fromAsync) {
             setPlansVisibility();
         }
     }
 
-
+    /**
+     * Hides the plans spinner if there are no plans
+     */
     private void setPlansVisibility() {
-
-        if (plans.size() > 1) plansSpinner.setVisibility(View.VISIBLE);
-        else plansSpinner.setVisibility(View.GONE);
-
+        if (plans.size() > 1) {
+            plansSpinner.setVisibility(View.VISIBLE);
+        }
+        else {
+            plansSpinner.setVisibility(View.GONE);
+        }
         if (plansAdapter != null) {
             plansAdapter.notifyDataSetChanged();
-
         }
     }
 
-    private void savePlan(String desc) {
-
-        intervalDistance = intervalDistancePicker.getValue();
-        intervalTime = intervalTimePicker.getValue();
-        Database db = new Database(this);
-        db.addPlan(new Plan(-1, desc, (int) intervalDistance, (int) intervalTime, intervalRoundsPicker.getValue()));
-        getPlansFromDb(this, false);
-        plansSpinner.setVisibility(View.VISIBLE);
-
-        Toast.makeText(this, "Plan saved", Toast.LENGTH_SHORT).show();
-    }
-
-    private boolean validateDistanceAndTime() {
-
+    /**
+     * Obtains input values from user selections
+     *
+     * @return true if all values are retrieved successfully
+     */
+    private boolean obtainUserInput() {
         try {
-
             intervalDistance = ((float) intervalDistancePicker.getValue());
             intervalTime = intervalTimePicker.getValue() * 1000;
-
             CheckBox sound = (CheckBox) findViewById(R.id.checkbox_sound);
             CheckBox vibration = (CheckBox) findViewById(R.id.checkbox_vibration);
-
-
             Boolean soundOn = sound.isChecked();
             Boolean vibrationOn = vibration.isChecked();
-
-
             SharedPreferences.Editor editor = app_preferences.edit();
-
             editor.putBoolean("noSound", !soundOn);
             editor.putBoolean("noVibration", !vibrationOn);
             editor.apply();
-
         } catch (Exception e) {
             Toast.makeText(getApplication(), "wrong data", Toast.LENGTH_LONG).show();
             return false;
         }
-
         InputMethodManager imm = (InputMethodManager) getSystemService(
                 Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(buttonSetIntervalValues.getWindowToken(), 0);
-
         return true;
     }
 
+    /**
+     * Reenter every interval in the list and notify adapter
+     *
+     * @param intervals
+     */
     private void fixListAndAdapter(List<Interval> intervals) {
         if (intervals != null && intervals.size() > 0) {
             intervalsList.clear();
@@ -627,35 +553,31 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     }
 
 
-    /* Request updates at startup */
+    /**
+     *  If the service is running i need to start the receiver, get the values from app_prefs
+     *  and fix every ui element based on these.
+     *
+     **/
     @Override
     public void onResume() {
         super.onResume();
-
-        //service is on and i am running
-        if (isMyServiceRunning()) {
-
-            if (receiver == null) setBroadcastReceiver();
-
+        if (isMyServiceRunning()) {//service is on and i am running
+            if (receiver == null) {
+                setBroadcastReceiver();
+            }
             intervalDistance = app_preferences.getFloat(RunningService.INTERVAL_DISTANCE, 0);
             intervalTime = app_preferences.getLong(RunningService.INTERVAL_TIME, 0);
             startTimeMillis = app_preferences.getLong(RunningService.MSTART_TIME, SystemClock.uptimeMillis());
-
             mHandler.post(mUpdateTimeTask);
-
             coveredDist = app_preferences.getFloat(RunningService.TOTAL_DIST, 0);
-
             setRoundsText(app_preferences.getInt(RunningService.INTERVAL_ROUNDS, 0));
-
             registerReceiver(receiver, new IntentFilter(RunningService.NOTIFICATION));
-
             getInRunningMode(app_preferences.getBoolean(RunningService.IS_RUNNING, false),
                     app_preferences.getBoolean(RunningService.INTERVAL_COMPLETED, false),
                     app_preferences.getLong(RunningService.MSTART_COUNTDOWN_TIME, SystemClock.uptimeMillis()),
                     coveredDist);
 
         }
-
     }
 
 
@@ -797,29 +719,26 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         alertDialog.show();
     }
 
+    /**
+     * Stops the interval after user selection or after user has completed the selected
+     * amount of intervals.
+     *
+     */
     private void doStop() {
-
         Gson gson = new Gson();
-        Type listOfObjects = new TypeToken<List<Interval>>() {
-        }.getType();
+        Type listOfObjects = new TypeToken<List<Interval>>() {}.getType();
         String intervalsGson = app_preferences.getString(RunningService.INTERVALS, "");
         List<Interval> intervals = (List<Interval>) gson.fromJson(intervalsGson, listOfObjects);
-
         fixListAndAdapter(intervals);
-
         setInitialTextInfo();
-
-        timerProgressWheel.setProgress(0);
-        timerProgressWheel.setVisibility(View.GONE);
-        distanceProgressWheel.setProgress(0);
-        distanceProgressWheel.setVisibility(View.GONE);
-
-        if (intervalsList.size() == 0 && coveredDist == 0) clear();
+        setProgressAndVisibilityTimerAndDistance(0, View.GONE, 0, View.GONE);
+        if (intervalsList.size() == 0 && coveredDist == 0) {
+            clear();
+        }
         else if (coveredDist > 0) {
 
             if (app_preferences.getString(RunningService.LATLONLIST, "").length() < 2)
                 Toast.makeText(getApplication(), "WILL CRUSH EMPTY LIST", Toast.LENGTH_LONG).show();
-
 
             Type listOfLocation = new TypeToken<List<Location>>() {
             }.getType();
@@ -830,12 +749,9 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             for (Location l : locationList) {
                 sb.append("," + l.getLatitude() + "," + l.getLongitude() + "," + l.getLatitude() + "," + l.getLongitude());
             }
-
             intervalsList.add(new Interval(-1, sb.toString(), SystemClock.uptimeMillis() - startTimeMillis, coveredDist));
         }
-
         new PerformAsyncTask(this, 1).execute();
-
         if (intervalsList.size() > 0) {
             buttonStop.setVisibility(View.GONE);
             layoutBottomButtons.setVisibility(View.VISIBLE);
@@ -843,38 +759,43 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             textsInfoRun.setVisibility(View.GONE);
             completedIntervalsListView.setVisibility(View.VISIBLE);
         }
-
         coveredDist = 0;
-
     }
 
-    private void saveRunWithIntervalsDB() {
+    /**
+     *
+     * @param timeProg
+     * @param timeVis
+     * @param distProg
+     * @param distVis
+     */
+    private void setProgressAndVisibilityTimerAndDistance(int timeProg, int timeVis, int distProg, int distVis){
+        timerProgressWheel.setProgress(timeProg);
+        timerProgressWheel.setVisibility(timeVis);
+        distanceProgressWheel.setProgress(distProg);
+        distanceProgressWheel.setVisibility(distVis);
+    }
 
+    /**
+     * Save the run and every interval in the list in the db
+     */
+    private void saveRunWithIntervalsDB() {
         buttonDismiss.setClickable(false);
         buttonSave.setClickable(false);
-
         Running running = new Running(-1, "", intervalTime, new SimpleDateFormat("dd/MM/yyyy, hh:mm a").format(new Date()), intervalDistance, intervalsList);
         Database db = new Database(getApplicationContext());
-
         db.addRunning(running);
-
         Toast.makeText(getApplication(), "Saved in Diary", Toast.LENGTH_SHORT).show();
-
         clear();
     }
 
-
     private void stopRunningService() {
-
         try {
-
             stopService(new Intent(getBaseContext(), RunningService.class));
             unregisterReceiver(receiver);
-
         } catch (Exception e) {
             //Log.v("LATLNG", "Exception: Receiver was not registered");
         }
-
     }
 
 

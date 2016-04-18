@@ -91,22 +91,6 @@
 
                         />
 
-
-            <Button
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_marginLeft="@dimen/margin10"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/standard_view_height"
-            android:text="@string/save"
-            android:textSize="@dimen/medium_text"
-            android:textStyle="italic"
-            android:textColor="@color/white_back"
-
-            android:background="@drawable/plus_minus_selector"
-            android:id="@+id/buttonSavePlan"
-            />
-
             </LinearLayout>
 
 

@@ -63,22 +63,26 @@ public class FrgPlans extends Fragment {
 
     }
 
-    public  void getPlansFromDb(Activity activity, boolean fromAsync){
+    /**
+     * Fetches the plans from the db
+     *
+     * @param activity
+     * @param fromAsync
+     */
+    void getPlansFromDb(Activity activity, boolean fromAsync){
         Database db = new Database(activity);
-
         plans.clear();
-
         List<Plan> newPlans = db.fetchPlansFromDb();
-
         for (Plan plan : newPlans){
             plans.add(plan);
         }
-
         if (adapterPlans!=null && !fromAsync) adapterPlans.notifyDataSetChanged();
     }
 
+    /**
+     * Toggle list / empty_list_textview visibility
+     */
     private void showTextNoPlans(){
-
         if (plans.size()==0){
             plansListView.setVisibility(View.GONE);
             noPlansText.setVisibility(View.VISIBLE);
@@ -87,10 +91,6 @@ public class FrgPlans extends Fragment {
             noPlansText.setVisibility(View.GONE);
         }
     }
-
-
-
-
 
     static FrgPlans init(int val) {
         FrgPlans truitonList = new FrgPlans();
@@ -204,6 +204,17 @@ public class FrgPlans extends Fragment {
 
 
     }
+
+//    private void savePlan(String desc) {
+//
+//        intervalDistance = intervalDistancePicker.getValue();
+//        intervalTime = intervalTimePicker.getValue();
+//        Database db = new Database(this);
+//        db.addPlan(new Plan(-1, desc, (int) intervalDistance, (int) intervalTime, intervalRoundsPicker.getValue()));
+//        getPlansFromDb(getActivity(), false);
+//        Toast.makeText(getActivity(), "Plan saved", Toast.LENGTH_SHORT).show();
+//    }
+
 
     private void deletePlan(Long trId, int position){
         Database db = new Database(getActivity().getBaseContext());
