@@ -7,9 +7,11 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.util.Map;
 
 /**
  * The main activity that contains the pager to choose fragment or new interval
@@ -52,6 +54,7 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
         mPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(),  PAGER_SIZE));
 
         setBottomButtons(mPager);
+        setSelectedBottomButton(bottomButtons, 0);
 
         final Activity activity = this;
         mPager.setOnPageChangeListener(new NonSwipeableViewPager.OnPageChangeListener() {
@@ -63,6 +66,7 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
             public void onPageSelected(int position) {
 
                 mPager.setCurrentItem(position);
+                setSelectedBottomButton(bottomButtons, position);
 
                 if (getActiveFragment(getSupportFragmentManager(), position) instanceof FrgShowRuns) {
                     ((FrgShowRuns)getActiveFragment(getSupportFragmentManager(), position)).getRunsFromDb(activity, false);
@@ -150,6 +154,20 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
             setTitle(drawerTitles[0]);
         }
     }
+
+    /**
+     * Sets the state of the pressed button to 'selected'
+     *
+     * @param bottomButtons
+     * @param postion
+     */
+    private void setSelectedBottomButton(Map<Integer, Integer> bottomButtons, int postion) {
+        for (int key = 0; key < bottomButtons.size(); key++) {
+            LinearLayout btn = (LinearLayout) findViewById(bottomButtons.get(key));
+            btn.setSelected(key != postion ? false : true);
+        }
+    }
+
 
     @Override
     protected void onResume() {
