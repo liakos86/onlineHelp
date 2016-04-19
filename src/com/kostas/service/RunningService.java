@@ -31,6 +31,7 @@ public class RunningService extends IntentService
     public static final String INTERVAL_DISTANCE = "intervalDistance";
     public static final String INTERVAL_SPEED = "intervalSpeed";
     public static final String INTERVAL_TIME = "intervalTime";
+    public static final String INTERVAL_START_REST = "intervalStartRest";
     public static final String INTERVAL_ROUNDS = "intervalRounds";
     public static final String INTERVAL_COMPLETED = "intervalCompleted";
     public static final String LAST_LOCATION = "lastLocation";
@@ -46,7 +47,7 @@ public class RunningService extends IntentService
 
     public StringBuilder lastStringBuilder;
     public float intervalDistance, currentDistance;
-    private long mStartTime, totalTime, intervalTime, interval = 4000, vibrationMillis;
+    private long mStartTime, totalTime, intervalTime, intervalStartRest, interval = 4000, vibrationMillis;
     private int intervalRounds;
     public Location lastLocation;
     SharedPreferences app_preferences;
@@ -134,13 +135,16 @@ public class RunningService extends IntentService
             createForegroundNotification();
 
             intervalTime = intent.getLongExtra(INTERVAL_TIME, 0);
-            startCountDownForNextInterval();
+            intervalStartRest = intent.getLongExtra(INTERVAL_START_REST, 0);
+            startCountDownForNextInterval(intervalStartRest);
 
                 intervals = new ArrayList<Interval>();
 
                 intervalDistance = intent.getFloatExtra(INTERVAL_DISTANCE, 0);
 
                 intervalRounds = intent.getIntExtra(INTERVAL_ROUNDS, 0 );
+
+
 
             new PerformAsyncTask(0).execute();
 
@@ -316,7 +320,7 @@ public class RunningService extends IntentService
 
         if (!completed) {
 
-            startCountDownForNextInterval();
+            startCountDownForNextInterval(intervalTime);
             speak("STOPPED");
 
         } else {
@@ -362,9 +366,9 @@ public class RunningService extends IntentService
     }
 
 
-    private void startCountDownForNextInterval() {
+    private void startCountDownForNextInterval(long millis) {
 
-        mHandler.postDelayed(mStartRunnable, intervalTime);
+        mHandler.postDelayed(mStartRunnable, millis);
         editor = app_preferences.edit();
         editor.putLong(MSTART_COUNTDOWN_TIME, SystemClock.uptimeMillis());
         editor.apply();
@@ -477,6 +481,7 @@ public class RunningService extends IntentService
             if (type == 0) {
 
                 editor.putFloat(INTERVAL_DISTANCE, intervalDistance);
+                editor.putLong(INTERVAL_START_REST, intervalStartRest);
                 editor.putLong(INTERVAL_TIME, intervalTime);
                 editor.putInt(INTERVAL_ROUNDS, intervalRounds);
 

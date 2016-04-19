@@ -203,7 +203,8 @@ public class Database extends SQLiteOpenHelper {
                 ContentDescriptor.Plan.Cols.DESCRIPTION,
                 ContentDescriptor.Plan.Cols.METERS,
                 ContentDescriptor.Plan.Cols.SECONDS,
-                ContentDescriptor.Plan.Cols.ROUNDS
+                ContentDescriptor.Plan.Cols.ROUNDS,
+                ContentDescriptor.Plan.Cols.START_REST
 
         };
 
@@ -212,7 +213,7 @@ public class Database extends SQLiteOpenHelper {
         int sMetersPosition = 2;
         int sSecondsPosition = 3;
         int sRoundsPosition = 4;
-
+        int sStartRestPosition = 5;
 
         Cursor c = mContext.getContentResolver().query(ContentDescriptor.Plan.CONTENT_URI, FROM,
                 null,
@@ -230,7 +231,8 @@ public class Database extends SQLiteOpenHelper {
                         c.getString(sDescPosition),
                         c.getInt(sMetersPosition),
                         c.getInt(sSecondsPosition),
-                        c.getInt(sRoundsPosition)
+                        c.getInt(sRoundsPosition),
+                        c.getInt(sStartRestPosition)
                 ));
             }
         }

@@ -39,18 +39,30 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
      */
     private final String ZERO_TIME = "00 : 00 : 00";
 
+    /**
+     * Timer for counting down for the next interval round
+     */
     CountDownTimer countDownTimer;
-    private long intervalTime, startTimeMillis;
+
+    /**
+     * The time spent on the interval / start rest seconds / the start time of the interval
+     * I do not use the picker values everywhere because the app may get killed and i will retrieve from shared prefs
+     */
+    private long intervalTime, intervalStartRest, startTimeMillis;
     SharedPreferences app_preferences;
     RelativeLayout textsInfoRun;
-    Button buttonSetIntervalValues, buttonSavePlan, buttonDismiss, buttonSave;
+    Button buttonSetIntervalValues, buttonDismiss, buttonSave;
     ImageButton buttonStart, buttonStop, buttonBack;
     LinearLayout layoutBottomButtons;
     TextView roundsText, myAddress, timeText;
     float intervalDistance, coveredDist;
     ViewFlipper flipper;
     private Handler mHandler = new Handler();
-    NumberPickerKostas intervalTimePicker, intervalDistancePicker, intervalRoundsPicker;
+
+    /**
+     * Pickers for selecting distance, time between intervals, rest start and rounds of interval
+     */
+    NumberPickerKostas intervalTimePicker, intervalDistancePicker, intervalRoundsPicker, intervalStartRestPicker;
     ProgressWheel timerProgressWheel, distanceProgressWheel;
     ListView completedIntervalsListView;
     List<Interval> intervalsList;
@@ -60,22 +72,17 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     SpinnerAdapter plansAdapter;
     AdView adView, adView2;
     AdRequest adRequest, adRequest2;
-    String latLonList;
     private BroadcastReceiver receiver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         ((ExtApplication) getApplication()).setInRunningAct(true);
-
         setContentView(R.layout.activity_interval);
-
         setPlansSpinner();
         setViewsAndButtons();
         new PerformAsyncTask(this, 0).execute();
         setListeners();
-
     }
 
     /**
@@ -136,31 +143,23 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
      * Self explanatory
      */
     private void placeAds() {
-
         String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-
         String deviceId = app_preferences.getString("deviceId", null);
-
         if (deviceId == null) {
             deviceId = md5(android_id).toUpperCase();
             SharedPreferences.Editor editor = app_preferences.edit();
             editor.putString("deviceId", deviceId);
             editor.apply();
         }
-
         adRequest = new AdRequest.Builder()
                 .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
                 .addTestDevice(deviceId)
                 .build();
-
-
         adRequest2 = new AdRequest.Builder()
                 .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
                 .addTestDevice(deviceId)
                 .build();
-
     }
-
 
     /**
      * Initializes the drop down with the user saved plans
@@ -197,7 +196,6 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         roundsText = (TextView) findViewById(R.id.roundsText);
         timeText = (TextView) findViewById(R.id.timeText);
         buttonSetIntervalValues = (Button) findViewById(R.id.buttonSetIntervalValues);
-        //buttonSavePlan = (Button) v.findViewById(R.id.buttonSavePlan);
         buttonStart = (ImageButton) findViewById(R.id.buttonStart);
         buttonStop = (ImageButton) findViewById(R.id.buttonStop);
         buttonBack = (ImageButton) findViewById(R.id.buttonBack);
@@ -207,6 +205,8 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         intervalDistancePicker = (NumberPickerKostas) findViewById(R.id.intervalDistancePicker);
         intervalDistancePicker.setValue(50);
         intervalRoundsPicker = (NumberPickerKostas) findViewById(R.id.intervalRoundsPicker);
+        intervalStartRestPicker = (NumberPickerKostas) findViewById(R.id.intervalStartRestPicker);
+        intervalStartRestPicker.setValue(10);
         timerProgressWheel = (ProgressWheel) findViewById(R.id.timerProgressWheel);
         distanceProgressWheel = (ProgressWheel) findViewById(R.id.distanceProgressWheel);
         completedIntervalsListView = (ListView) findViewById(R.id.completedIntervals);
@@ -243,10 +243,12 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
      * @param startOfCountdown the start time milliseconds of the interval
      * @param distanceCovered the distance covered so far in the interval
      */
-    private void getInRunningMode(boolean isRunning, boolean isCompleted, long startOfCountdown, float distanceCovered) {
+    private void getInRunningMode(boolean isRunning, boolean isCompleted, boolean isFirst, long startOfCountdown, float distanceCovered) {
         ((ExtApplication) getApplication()).setInRunningMode(true);
         flipper.setDisplayedChild(1);
         setButtonVisibilities(true);
+
+        long millisecondsToCount = isFirst ? intervalStartRest : intervalTime;
 
         if (isRunning && !isCompleted) {//from resume
             setDistanceProgress(distanceCovered);
@@ -255,10 +257,10 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             mHandler.post(mUpdateTimeTask);
         }
         else if (!isRunning && !isCompleted) {//from resume OR first time
-            final int step = (int) (360000 / intervalTime);
+            final int step = (int) (360000 / millisecondsToCount);
             distanceProgressWheel.setVisibility(View.INVISIBLE);
             timerProgressWheel.setVisibility(View.VISIBLE);
-            timerProgressWheel.setText((int) ((intervalTime - (SystemClock.uptimeMillis() - startOfCountdown)) / 1000) + " secs");
+            timerProgressWheel.setText((int) ((millisecondsToCount - (SystemClock.uptimeMillis() - startOfCountdown)) / 1000) + " secs");
 
             if (!(isMyServiceRunning())) {
                 startRunningService();
@@ -268,7 +270,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
                 countDownTimer.cancel();
             }
 
-            countDownTimer = new CountDownTimer(intervalTime - (SystemClock.uptimeMillis() - startOfCountdown), 1000) {
+            countDownTimer = new CountDownTimer(millisecondsToCount - (SystemClock.uptimeMillis() - startOfCountdown), 1000) {
                 public void onTick(long millisUntilFinished) {
                     onTickUpdate(millisUntilFinished, step);
                 }
@@ -386,6 +388,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         completedIntervalsListView.setVisibility(View.GONE);
         intervalDistance = 0;
         intervalTime = 0;
+        intervalStartRest = 0 ;
         intervalsList.clear();
         buttonBack.setVisibility(View.VISIBLE);
         clearViews();
@@ -446,7 +449,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getInRunningMode(false, false, SystemClock.uptimeMillis(), 0);
+                getInRunningMode(false, false, true, SystemClock.uptimeMillis(), 0);
             }
         });
 
@@ -508,6 +511,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         try {
             intervalDistance = ((float) intervalDistancePicker.getValue());
             intervalTime = intervalTimePicker.getValue() * 1000;
+            intervalStartRest = intervalStartRestPicker.getValue() * 1000;
             CheckBox sound = (CheckBox) findViewById(R.id.checkbox_sound);
             CheckBox vibration = (CheckBox) findViewById(R.id.checkbox_vibration);
             Boolean soundOn = sound.isChecked();
@@ -567,6 +571,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             }
             intervalDistance = app_preferences.getFloat(RunningService.INTERVAL_DISTANCE, 0);
             intervalTime = app_preferences.getLong(RunningService.INTERVAL_TIME, 0);
+            intervalStartRest = app_preferences.getLong(RunningService.INTERVAL_START_REST, 0);
             startTimeMillis = app_preferences.getLong(RunningService.MSTART_TIME, SystemClock.uptimeMillis());
             mHandler.post(mUpdateTimeTask);
             coveredDist = app_preferences.getFloat(RunningService.TOTAL_DIST, 0);
@@ -574,6 +579,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             registerReceiver(receiver, new IntentFilter(RunningService.NOTIFICATION));
             getInRunningMode(app_preferences.getBoolean(RunningService.IS_RUNNING, false),
                     app_preferences.getBoolean(RunningService.INTERVAL_COMPLETED, false),
+                    app_preferences.getInt(RunningService.INTERVAL_ROUNDS, 0) == 0,
                     app_preferences.getLong(RunningService.MSTART_COUNTDOWN_TIME, SystemClock.uptimeMillis()),
                     coveredDist);
 
@@ -808,6 +814,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         Intent intent = new Intent(getBaseContext(), RunningService.class);
         intent.putExtra(RunningService.INTERVAL_DISTANCE, intervalDistance);
         intent.putExtra(RunningService.INTERVAL_TIME, intervalTime);
+        intent.putExtra(RunningService.INTERVAL_START_REST, intervalStartRest);
         intent.putExtra(RunningService.INTERVAL_ROUNDS, intervalRoundsPicker.getValue());
         startService(intent);
 
@@ -851,6 +858,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         intervalTimePicker.setValue(plan.getSeconds());
         intervalDistancePicker.setValue(plan.getMeters());
         intervalRoundsPicker.setValue(plan.getRounds());
+        intervalStartRestPicker.setValue(plan.getStartRest());
         intervalRoundsPicker.disableButtonColor(plan.getRounds() == 0);
 
         Toast.makeText(getApplication(), plan.getDescription() + " loaded", Toast.LENGTH_SHORT).show();

@@ -22,6 +22,7 @@ public class Plan {
     private int meters;
     private int seconds;
     private int rounds;
+    private int startRest;
 
     public Plan(){}
 
@@ -29,12 +30,13 @@ public class Plan {
         this.description = description;
     }
 
-    public Plan(long id, String description, int meters, int seconds, int rounds){
+    public Plan(long id, String description, int meters, int seconds, int rounds, int startRest){
         this.id = id;
         this.description = description;
         this.meters = meters;
         this.seconds = seconds;
         this.rounds = rounds;
+        this.startRest = startRest;
     }
 
 
@@ -78,6 +80,9 @@ public class Plan {
         this.rounds = rounds;
     }
 
+    public int getStartRest() {
+        return startRest;
+    }
 
     public static Plan getFromId(Context context, long id) {
         //Log.v(TAG, String.format("Requesting item [%d]", id));
@@ -107,6 +112,7 @@ public class Plan {
             toRet.put(ContentDescriptor.Plan.Cols.METERS, item.meters);
             toRet.put(ContentDescriptor.Plan.Cols.SECONDS, item.seconds);
             toRet.put(ContentDescriptor.Plan.Cols.ROUNDS, item.rounds);
+            toRet.put(ContentDescriptor.Plan.Cols.START_REST, item.startRest);
 
             return toRet;
         }

@@ -2,6 +2,8 @@ package com.kostas.onlineHelp;
 
 //import com.facebook.FacebookSdk;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,6 +11,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import com.kostas.service.RunningService;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Map;
@@ -168,10 +172,27 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
         }
     }
 
+    /**
+     * Checks if RunningService is between the amount of the services running in the device
+     *
+     * @return
+     */
+    private boolean isMyServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (RunningService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
+        if (isMyServiceRunning()) {//service is on
+                startNewInterval();
+        }
     }
 
     @Override

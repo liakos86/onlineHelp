@@ -55,18 +55,33 @@
 
                 <com.kostas.onlineHelp.NumberPickerKostas
 
-                        android:layout_marginBottom="@dimen/twenty"
+                        android:layout_marginBottom="@dimen/eight"
                         android:layout_below="@+id/intervalTimePicker"
-                        app:minValue="0"
-                        app:maxValue="99"
-                        app:step="1"
-                        app:textName="@string/rounds"
+                        app:minValue="10"
+                        app:maxValue="120"
+                        app:step="5"
+                        app:textName="@string/start_rest_secs"
                         android:layout_centerHorizontal="true"
-                        android:id="@+id/intervalRoundsPicker"
+                        android:id="@+id/intervalStartRestPicker"
                         android:orientation="horizontal"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/standard_view_height">
                 </com.kostas.onlineHelp.NumberPickerKostas>
+
+            <com.kostas.onlineHelp.NumberPickerKostas
+
+                    android:layout_marginBottom="@dimen/twenty"
+                    android:layout_below="@+id/intervalStartRestPicker"
+                    app:minValue="0"
+                    app:maxValue="99"
+                    app:step="1"
+                    app:textName="@string/rounds"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/intervalRoundsPicker"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/standard_view_height">
+            </com.kostas.onlineHelp.NumberPickerKostas>
 
 
             <LinearLayout

@@ -105,7 +105,7 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
         finish();
     }
 
-    private void startNewInterval() {
+    protected void startNewInterval() {
         if(!(this instanceof ActivityIntervalNew)){
             hideBottomButtons();
             Intent intent = new Intent(this, ActivityIntervalNew.class);
