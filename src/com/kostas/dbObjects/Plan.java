@@ -84,6 +84,10 @@ public class Plan {
         return startRest;
     }
 
+    public void setStartRest(int startRest) {
+        this.startRest = startRest;
+    }
+
     public static Plan getFromId(Context context, long id) {
         //Log.v(TAG, String.format("Requesting item [%d]", id));
         synchronized (context) {

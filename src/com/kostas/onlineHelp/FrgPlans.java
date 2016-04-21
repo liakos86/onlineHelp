@@ -27,8 +27,14 @@ public class FrgPlans extends Fragment {
     List<Plan> plans = new ArrayList<Plan>();
     PlansAdapterItem adapterPlans;
     TextView noPlansText;
+    ViewSwitcher plansSwitcher;
+    Button buttonNewPlan, buttonSavePlan;
+    EditText planDescription;
 
-
+    /**
+     * Pickers for selecting distance, time between planIntervals, rest start and rounds of planInterval
+     */
+    NumberPickerKostas planIntervalTimePicker, planIntervalDistancePicker, planIntervalRoundsPicker, planIntervalStartRestPicker;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,29 +44,49 @@ public class FrgPlans extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-
         View v = inflater.inflate(R.layout.frg_plans, container, false);
-
-        setList(v);
-
+        setViews(v);
         return  v;
     }
 
-
-
-    private void setList(View v){
+    private void setViews(View v){
         plansListView = (ListView) v.findViewById(R.id.plansList);
-
         new PerformAsyncTask(getActivity()).execute();
-
         noPlansText = (TextView) v.findViewById(R.id.noPlansText);
-
+        plansSwitcher = (ViewSwitcher) v.findViewById(R.id.plansSwitcher);
         adapterPlans = new PlansAdapterItem(getActivity().getApplicationContext(), R.layout.list_plan_row, plans);
-
         plansListView.setAdapter(adapterPlans);
 
+        planIntervalTimePicker = (NumberPickerKostas) v.findViewById(R.id.planIntervalTimePicker);
+        planIntervalTimePicker.setValue(10);
+        planIntervalDistancePicker = (NumberPickerKostas) v.findViewById(R.id.planIntervalDistancePicker);
+        planIntervalDistancePicker.setValue(50);
+        planIntervalRoundsPicker = (NumberPickerKostas) v.findViewById(R.id.planIntervalRoundsPicker);
+        planIntervalStartRestPicker = (NumberPickerKostas) v.findViewById(R.id.planIntervalStartRestPicker);
+        planIntervalStartRestPicker.setValue(10);
 
+        planDescription = (EditText) v.findViewById(R.id.planNewDescription);
 
+        buttonNewPlan = ((Button) v.findViewById(R.id.buttonNewPlan));
+        buttonSavePlan = ((Button) v.findViewById(R.id.buttonSavePlan));
+
+        buttonNewPlan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                plansSwitcher.setDisplayedChild(1);
+
+            }
+        });
+
+        buttonSavePlan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                    savePlan();
+
+            }
+        });
     }
 
     /**
@@ -205,15 +231,33 @@ public class FrgPlans extends Fragment {
 
     }
 
-//    private void savePlan(String desc) {
-//
-//        intervalDistance = intervalDistancePicker.getValue();
-//        intervalTime = intervalTimePicker.getValue();
-//        Database db = new Database(this);
-//        db.addPlan(new Plan(-1, desc, (int) intervalDistance, (int) intervalTime, intervalRoundsPicker.getValue()));
-//        getPlansFromDb(getActivity(), false);
-//        Toast.makeText(getActivity(), "Plan saved", Toast.LENGTH_SHORT).show();
-//    }
+    private void savePlan() {
+
+
+        String description = planDescription.getText().toString();
+
+        if (description == null || "".equals(description)){
+            Toast.makeText(getActivity(), "Please provide plan name", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
+        Plan newPlan = new Plan();
+        newPlan.setId(-1);
+        newPlan.setMeters(planIntervalDistancePicker.getValue());
+        newPlan.setSeconds(planIntervalTimePicker.getValue());
+        newPlan.setRounds(planIntervalRoundsPicker.getValue());
+        newPlan.setStartRest(planIntervalStartRestPicker.getValue());
+        newPlan.setDescription(description);
+
+        Database db = new Database(getActivity());
+        db.addPlan(newPlan);
+        getPlansFromDb(getActivity(), false);
+        Toast.makeText(getActivity(), "Plan saved", Toast.LENGTH_SHORT).show();
+
+
+        plansSwitcher.setDisplayedChild(0);
+    }
 
 
     private void deletePlan(Long trId, int position){

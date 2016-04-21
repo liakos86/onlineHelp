@@ -439,16 +439,6 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             }
         });
 
-
-//        buttonSavePlan.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//                alertDialogPlan();
-//
-//            }
-//        });
-
         buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

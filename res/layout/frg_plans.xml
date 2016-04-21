@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ViewSwitcher xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res/com.kostas.onlineHelp"
+              android:id="@+id/plansSwitcher"
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:background="@color/drawer_black"
               android:layout_height="match_parent"
         android:padding="@dimen/margin10">
 
-
+<RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
     <ListView android:id="@+id/plansList"
               android:layout_alignParentTop="true"
               android:layout_width="match_parent"
@@ -27,5 +29,91 @@
             android:layout_alignParentBottom="true"
             />
 
-
 </RelativeLayout>
+
+    <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
+
+        <com.kostas.onlineHelp.NumberPickerKostas
+
+                android:layout_alignParentTop="true"
+                app:minValue="100"
+                app:maxValue="5000"
+                app:step="50"
+                app:textName="@string/distance"
+                android:layout_gravity="center_horizontal"
+                android:id="@+id/planIntervalDistancePicker"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="@dimen/eight"
+                android:layout_height="@dimen/standard_view_height">
+        </com.kostas.onlineHelp.NumberPickerKostas>
+
+        <com.kostas.onlineHelp.NumberPickerKostas
+
+                android:layout_below="@+id/planIntervalDistancePicker"
+                app:minValue="10"
+                app:maxValue="300"
+                app:step="5"
+                app:textName="@string/seconds"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/planIntervalTimePicker"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="@dimen/eight"
+                android:layout_height="@dimen/standard_view_height">
+        </com.kostas.onlineHelp.NumberPickerKostas>
+
+        <com.kostas.onlineHelp.NumberPickerKostas
+
+                android:layout_marginBottom="@dimen/eight"
+                android:layout_below="@+id/planIntervalTimePicker"
+                app:minValue="10"
+                app:maxValue="120"
+                app:step="5"
+                app:textName="@string/start_rest_secs"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/planIntervalStartRestPicker"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/standard_view_height">
+        </com.kostas.onlineHelp.NumberPickerKostas>
+
+        <com.kostas.onlineHelp.NumberPickerKostas
+
+                android:layout_marginBottom="@dimen/eight"
+                android:layout_below="@+id/planIntervalStartRestPicker"
+                app:minValue="0"
+                app:maxValue="99"
+                app:step="1"
+                app:textName="@string/rounds"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/planIntervalRoundsPicker"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/standard_view_height">
+        </com.kostas.onlineHelp.NumberPickerKostas>
+
+        <EditText android:layout_width="match_parent" android:layout_height="@dimen/standard_view_height"
+                android:layout_below="@+id/planIntervalRoundsPicker" android:layout_marginBottom="@dimen/twenty"
+                android:background="@color/white_back"
+                android:id="@+id/planNewDescription"
+                android:padding="@dimen/four"
+                />
+
+
+        <Button
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/standard_view_height"
+                android:text="@string/save_plan"
+                android:textStyle="bold"
+                android:textSize="@dimen/large_text"
+                android:textColor="@color/white_back"
+                android:background="@drawable/close_button_selector"
+                android:id="@+id/buttonSavePlan"
+                android:layout_alignParentBottom="true"
+                />
+
+    </RelativeLayout>
+
+
+</ViewSwitcher>
