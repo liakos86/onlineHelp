@@ -67,7 +67,7 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
         bottomButtons.put(0, R.id.btn_my_runs);
         bottomButtons.put(1, R.id.btn_my_plans);
         bottomButtons.put(2, R.id.btn_new_interval);
-        for (int counter = 0; counter < MainActivity.PAGER_SIZE; counter++) {
+        for (int counter = 0; counter < MainActivity.PAGER_SIZE+1; counter++) {
             setBottomButtonListener(mPager, bottomButtons.get(counter), counter);
         }
     }
@@ -82,8 +82,6 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
      */
     private void startMain(NonSwipeableViewPager mPager, int position) {
 
-        ((ExtApplication)getApplication()).setPosition(position);
-
         if (null != mPager) {
             mPager.setCurrentItem(position);
         } else {
@@ -97,7 +95,6 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
      * @param position
      */
     private void startMainWhenNoPager(int position) {
-        ((ExtApplication)getApplication()).setPosition(position);
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
         startActivity(intent);

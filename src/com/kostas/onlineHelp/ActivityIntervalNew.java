@@ -7,8 +7,10 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.AudioManager;
 import android.os.*;
 import android.provider.Settings;
+import android.test.mock.MockApplication;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
@@ -77,6 +79,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
         ((ExtApplication) getApplication()).setInRunningAct(true);
         setContentView(R.layout.activity_interval);
         setPlansSpinner();
@@ -791,6 +794,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         Running running = new Running(-1, "", intervalTime, new SimpleDateFormat("dd/MM/yyyy, hh:mm a").format(new Date()), intervalDistance, intervalsList);
         Database db = new Database(getApplicationContext());
         db.addRunning(running);
+        ((ExtApplication) getApplication()).setNewIntervalInDb(true);
         Toast.makeText(getApplication(), "Saved in Diary", Toast.LENGTH_SHORT).show();
         clear();
     }

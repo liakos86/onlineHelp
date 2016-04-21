@@ -25,10 +25,21 @@ import org.apache.http.impl.client.DefaultHttpClient;
 public class ExtApplication extends Application {
 
     private static final String TAG = Thread.currentThread().getStackTrace()[2].getClassName();
-
-    private int position;
+    /**
+     * Is an interval in progress
+     */
     private boolean inRunningMode;
+    /**
+     * Is the running activity displayed
+     */
     private boolean inRunningAct;
+    /**
+     * Is there a new interval in db? I need to fetch again then
+     */
+    private boolean newIntervalInDb;
+    /**
+     * The text to speech manager, to vocalize the run info
+     */
     private TTSManager ttsManager;
 
 
@@ -44,12 +55,12 @@ public class ExtApplication extends Application {
         ttsManager.init(this);
     }
 
-    public int getPosition() {
-        return position;
+    public boolean isNewIntervalInDb() {
+        return newIntervalInDb;
     }
 
-    public void setPosition(int position) {
-        this.position = position;
+    public void setNewIntervalInDb(boolean newIntervalInDb) {
+        this.newIntervalInDb = newIntervalInDb;
     }
 
     public boolean isInRunningMode() {

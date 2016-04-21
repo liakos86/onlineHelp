@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.kostas.service.RunningService;
@@ -35,14 +36,14 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
     /**
      * The total size of the pager objects
      */
-    static final int PAGER_SIZE = 3;
+    static final int PAGER_SIZE = 2;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         setupPager();
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
 //        FacebookSdk.sdkInitialize(getApplicationContext());
     }
 
@@ -53,7 +54,7 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
     private void setupPager() {
         mPager = (NonSwipeableViewPager) findViewById(R.id.pager);
 
-        mPager.setOffscreenPageLimit(2);
+        mPager.setOffscreenPageLimit(1);
 
         mPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(),  PAGER_SIZE));
 
@@ -68,34 +69,30 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
 
             @Override
             public void onPageSelected(int position) {
-
                 mPager.setCurrentItem(position);
                 setSelectedBottomButton(bottomButtons, position);
-
-                if (getActiveFragment(getSupportFragmentManager(), position) instanceof FrgShowRuns) {
-                    ((FrgShowRuns)getActiveFragment(getSupportFragmentManager(), position)).getRunsFromDb(activity, false);
-
-                }else  if (getActiveFragment(getSupportFragmentManager(), position) instanceof FrgPlans) {
-                    ((FrgPlans)getActiveFragment(getSupportFragmentManager(), position)).getPlansFromDb(activity, false);
-
-                }
-
+//                Fragment current = ((MyPagerAdapter) mPager.getAdapter()).fragments[position];
+//                if (current instanceof FrgShowRuns) {
+//                    ((FrgShowRuns)current).getRunsFromDb(activity, false);
+//                }else  if (current instanceof FrgPlans) {
+//                    ((FrgPlans)current).getPlansFromDb(activity, false);
+//                }
                 invalidateOptionsMenu();
             }
 
-            public Fragment getActiveFragment(FragmentManager fragmentManager, int position) {
-                final String name = makeFragmentName(mPager.getId(), position);
-                final Fragment fragmentByTag = fragmentManager.findFragmentByTag(name);
-                if (fragmentByTag == null) {
-                    final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    fragmentManager.dump("", null, new PrintWriter(outputStream, true), null);
-                }
-                return fragmentByTag;
-            }
-
-            private String makeFragmentName(int viewId, int index) {
-                return "android:switcher:" + viewId + ":" + index;
-            }
+//            public Fragment getActiveFragment(FragmentManager fragmentManager, int position) {
+//                final String name = makeFragmentName(mPager.getId(), position);
+//                final Fragment fragmentByTag = fragmentManager.findFragmentByTag(name);
+//                if (fragmentByTag == null) {
+//                    final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//                    fragmentManager.dump("", null, new PrintWriter(outputStream, true), null);
+//                }
+//                return fragmentByTag;
+//            }
+//
+//            private String makeFragmentName(int viewId, int index) {
+//                return "android:switcher:" + viewId + ":" + index;
+//            }
 
             @Override
             public void onPageScrollStateChanged(int i) {
@@ -126,17 +123,24 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
             return fragments.length;
         }
 
-        @Override
+       @Override
         public Fragment getItem(int position) {
             switch (position) {
                 case 0: {
-                    return FrgShowRuns.init(0);
+
+                    if (fragments[position] == null){
+                        fragments[position] = FrgShowRuns.init(0);
+                    }
+                    break;
                 }
                 case 1: {
-                    return FrgPlans.init(1);
+                    if (fragments[position] == null){
+                        fragments[position] = FrgPlans.init(1);
+                    }
+                    break;
                 }
-                default: return FrgShowRuns.init(position);
             }
+           return fragments[position];
         }
 
     }
@@ -144,19 +148,20 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
     @Override
     public void onBackPressed() {
 
-        if  (getTitle().toString().equals(drawerTitles[0])) {
-
-            if (((ExtApplication) getApplicationContext()).isInRunningMode()) {
-                Toast.makeText(getApplication(), "Interval in progress", Toast.LENGTH_SHORT).show();
-            } else {
-                //todo check why it is not working
-                super.onBackPressed();
-//            finish();
-            }
-        }else{
-            mPager.setCurrentItem(0, true);
-            setTitle(drawerTitles[0]);
-        }
+        super.onBackPressed();
+//        if  (getTitle().toString().equals(drawerTitles[0])) {
+//
+//            if (((ExtApplication) getApplicationContext()).isInRunningMode()) {
+//                Toast.makeText(getApplication(), "Interval in progress", Toast.LENGTH_SHORT).show();
+//            } else {
+//                //todo check why it is not working
+//                super.onBackPressed();
+////            finish();
+//            }
+//        }else{
+//            mPager.setCurrentItem(0, true);
+//            setTitle(drawerTitles[0]);
+//        }
     }
 
     /**
@@ -192,6 +197,12 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
         super.onResume();
         if (isMyServiceRunning()) {//service is on
                 startNewInterval();
+        }else{
+            MyPagerAdapter adapter = (MyPagerAdapter) mPager.getAdapter();
+            if (((ExtApplication) getApplication()).isNewIntervalInDb()) {
+                ((FrgShowRuns)adapter.fragments[0]).getRunsFromDb(this, false);
+                ((ExtApplication) getApplication()).setNewIntervalInDb(false);
+            }
         }
     }
 

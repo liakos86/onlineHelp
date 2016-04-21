@@ -74,6 +74,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
         View v = inflater.inflate(R.layout.frg_show_runs, container, false);
 
         initializeViews(v);
