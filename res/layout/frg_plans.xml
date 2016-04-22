@@ -95,12 +95,26 @@
                 android:layout_height="@dimen/standard_view_height">
         </com.kostas.onlineHelp.NumberPickerKostas>
 
-        <EditText android:layout_width="match_parent" android:layout_height="@dimen/standard_view_height"
-                android:layout_below="@+id/planIntervalRoundsPicker" android:layout_marginBottom="@dimen/twenty"
-                android:background="@color/white_back"
-                android:id="@+id/planNewDescription"
-                android:padding="@dimen/four"
-                />
+        <!--<EditText android:layout_width="match_parent" android:layout_height="@dimen/standard_view_height"-->
+                <!--android:layout_below="@+id/planIntervalRoundsPicker" android:layout_marginBottom="@dimen/twenty"-->
+                <!--android:background="@color/white_back"-->
+                <!--android:id="@+id/planNewDescription"-->
+                <!--android:padding="@dimen/four"-->
+                <!--/>-->
+
+        <EditText
+                  android:textColorHint="@color/circle_grey"
+                  android:singleLine="true"
+                  android:ellipsize="end"
+                  android:textColor="@color/drawer_black"
+                  android:background="@drawable/edit_text_back"
+                  android:id="@+id/planNewDescription"
+                  android:layout_below="@+id/planIntervalRoundsPicker"
+                  android:paddingLeft="@dimen/eight"
+                  android:layout_width="match_parent"
+                  android:layout_height="@dimen/standard_view_height"
+                  android:hint="@string/description"/>
+
 
 
         <Button

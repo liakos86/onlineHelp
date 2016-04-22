@@ -84,8 +84,7 @@ public class FrgPlans extends Fragment {
             public void onClick(View view) {
 
                 savePlan();
-                clearViews();
-                plansSwitcher.setDisplayedChild(0);
+
 
             }
         });
@@ -244,10 +243,10 @@ public class FrgPlans extends Fragment {
     private void savePlan() {
 
 
-        String description = planDescription.getText().toString();
+        String description = planDescription.getText().toString().trim();
 
-        if (description == null || "".equals(description)){
-            Toast.makeText(getActivity(), "Please provide plan name", Toast.LENGTH_SHORT).show();
+        if (description.length() < 4 || description.length() > 30){
+            Toast.makeText(getActivity(), "Please provide plan name (4-30 chars)", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -266,6 +265,8 @@ public class FrgPlans extends Fragment {
         Toast.makeText(getActivity(), "Plan saved", Toast.LENGTH_SHORT).show();
 
 
+        clearViews();
+        plansSwitcher.setDisplayedChild(0);
 
     }
 
