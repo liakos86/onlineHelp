@@ -39,7 +39,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
     private ArrayList<Object> childItems = new ArrayList<Object>();
     private ExpandableListView runsExpListView;
     MyExpandableAdapter adapterExp;
-    TextView noRunsText;
     ProgressBar progressBarMap;
     Running currentRun;
     List<Interval> currentIntervals;
@@ -202,16 +201,12 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
         adView = (AdView) v.findViewById(R.id.adViewInterval3);
         progressBarMap = (ProgressBar) v.findViewById(R.id.progressBarMap);
-        viewFlipper = (ViewFlipper) v.findViewById(R.id.viewFlipper);
+        viewFlipper = (ViewFlipper) v.findViewById(R.id.viewFlipperRuns);
 
         openMapButton = (Button) v.findViewById(R.id.buttonShowMap);
         closeMapButton = (ImageButton) v.findViewById(R.id.buttonCloseMap);
         closeIntervalsButton = (Button) v.findViewById(R.id.buttonCloseIntervals);
-
         shareButton = (Button) v.findViewById(R.id.buttonShare);
-
-        noRunsText = (TextView) v.findViewById(R.id.noRunsText);
-
         runsExpListView = (ExpandableListView) v.findViewById(R.id.listExpRunning);
         intervalListView = (ListView) v.findViewById(R.id.listIntervals);
 
@@ -224,35 +219,24 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
     }
 
     private void showIntervalsForRun(Running running){
-
         intervals.clear();
-
         // DO NOT USE: intervals = running.getIntervals() !!!! IT WILL CHANGE THE OBJECT REFERENCED
         for (Interval interval : running.getIntervals()){
             intervals.add(interval);
         }
-        viewFlipper.setDisplayedChild(1);
-
+        viewFlipper.setDisplayedChild(2);
         adapterInterval.notifyDataSetChanged();
-
         if (googleMap!=null) {
             drawMap();
         }else{
             Toast.makeText(getActivity(), "Google maps not present...", Toast.LENGTH_SHORT).show();
         }
 //        new PerformAsyncTask(getActivity(), true).execute();
-
-
     }
     
     private void setList(){
 
-
         intervalListView.setDivider(null);
-
-//        adapterRunning = new RunningAdapterItem(getActivity().getApplicationContext(),
-//                R.layout.list_running_row, runs);
-//        runningListView.setAdapter(adapterRunning);
 
          new PerformAsyncTask(getActivity()).execute();
 
@@ -284,16 +268,11 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         //placing the indicator 'right' pixels from the right of the view
         if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
             runsExpListView.setIndicatorBounds(width-GetPixelFromDips(40), width-GetPixelFromDips(20));
-
 //            runsExpListView.setIndicatorBounds(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
         } else {
-
-
             runsExpListView.setIndicatorBoundsRelative(width-GetPixelFromDips(40), width-GetPixelFromDips(20));
-
 //            runsExpListView.setIndicatorBoundsRelative(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
         }
-
 
         adapterInterval = new IntervalAdapterItem(getActivity(), getActivity().getApplicationContext(),
                 R.layout.list_interval_row, intervals);
@@ -307,14 +286,14 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 //                    mapLines.clear();
                     alreadyDrawn = false;
                 }
-                viewFlipper.setDisplayedChild(0);
+                viewFlipper.setDisplayedChild(1);
             }
         });
 
         closeMapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                viewFlipper.setDisplayedChild(1);
+                viewFlipper.setDisplayedChild(2);
             }
         });
 
@@ -327,17 +306,13 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 //                else if (zoomPoint!=null)
 //                    zoomMap();
 
-                viewFlipper.setDisplayedChild(2);
+                viewFlipper.setDisplayedChild(3);
             }
         });
 
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
-
-
 
 //                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
 //                Uri screenshotUri = Uri.parse("http://coins.silvercoinstoday.com/wp-content/uploads/2010/10/America-the-Beautiful-Silver-Coin-Obverse.jpg");
@@ -383,10 +358,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
     public void getRunsFromDb(Activity activity, boolean fromAsync){
         Database db = new Database(activity);
         List <Running> newRuns = db.fetchRunsFromDb();
-
-//        List<Long> err = new ArrayList<Long>();
-
-
         Collections.reverse(newRuns);
         if (newRuns.size()>0) {
 //            runs.clear();
@@ -435,12 +406,10 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
             if (adapterExp!=null&& !fromAsync) {
                 adapterExp.notifyDataSetChanged();
+                showTextNoRuns();
                 runsExpListView.expandGroup(0);
             }
-
         }
-
-//        return null;
     }
 
 
@@ -628,6 +597,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
 //        runs.remove(position);
         adapterExp.notifyDataSetChanged();
+        showTextNoRuns();
 //        adapterRunning.notifyDataSetChanged();
     }
 
@@ -680,12 +650,12 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
             TextView month;
         }
 
-        @Override
-        public void notifyDataSetChanged() {
-
-            super.notifyDataSetChanged();
-            showTextNoRuns();
-        }
+//        @Override
+//        public void notifyDataSetChanged() {
+//
+//            super.notifyDataSetChanged();
+//            showTextNoRuns();
+//        }
 
         @Override
         public View getChildView(final int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
@@ -805,13 +775,10 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
         @Override
         public int getChildrenCount(int groupPosition) {
-
-            if (childtems.size()>0)
+            if (childtems.size()>0) {
                 return ((ArrayList<String>) childtems.get(groupPosition)).size();
-            else{
-                showTextNoRuns();
-                return 0;
             }
+            return 0;
         }
 
         @Override
@@ -865,11 +832,9 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         }
 
         if (empty){
-            runsExpListView.setVisibility(View.GONE);
-            noRunsText.setVisibility(View.VISIBLE);
+           viewFlipper.setDisplayedChild(4);
         }else{
-            runsExpListView.setVisibility(View.VISIBLE);
-            noRunsText.setVisibility(View.GONE);
+            viewFlipper.setDisplayedChild(1);
         }
     }
 
@@ -891,33 +856,19 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
         @Override
         protected Void doInBackground(Void... unused) {
-
-
-             getRunsFromDb(activity, true);
+            getRunsFromDb(activity, true);
             shouldPlaceAd = placeAd();
-
             return null;
-
         }
 
         @Override
         protected void onPostExecute(Void result) {
-
             runsExpListView.setClickable(true);
-            if (adapterExp!=null) adapterExp.notifyDataSetChanged();
+            if (adapterExp!=null) {
+                adapterExp.notifyDataSetChanged();
+                showTextNoRuns();
+            }
             if (shouldPlaceAd) adView.loadAd(adRequest);
-
-//            if (err.size()>0){
-//                for (long l:err){
-//                    Toast.makeText(getActivity(), "id = "+l, Toast.LENGTH_SHORT).show();
-//                }
-//            }
-
-
-
         }
-
     }
-
-
 }

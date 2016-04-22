@@ -3,11 +3,19 @@
 
     <ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
                  xmlns:app="http://schemas.android.com/apk/res/com.kostas.onlineHelp"
-            android:id="@+id/viewFlipper"
+            android:id="@+id/viewFlipperRuns"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:background="@color/drawer_black"
             >
+
+        <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
+
+        <ProgressBar android:layout_width="@dimen/standard_view_height"
+                     android:layout_height="@dimen/standard_view_height"
+                     android:layout_centerInParent="true"/>
+
+    </RelativeLayout>
 
         <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
 
@@ -34,7 +42,6 @@
 
 
 
-        <TextView android:id="@+id/noRunsText" android:textColor="@color/white_back" android:layout_centerInParent="true" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/no_runs" android:textSize="20dp" android:drawableBottom="@drawable/empty_100"/>
 
         </RelativeLayout>
 
@@ -113,6 +120,10 @@
 
     </com.kostas.onlineHelp.MapWrapperLayout>
 
+    <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
+        <TextView android:id="@+id/noRunsText" android:textColor="@color/white_back" android:layout_centerInParent="true"  android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/no_runs" android:textSize="20dp" android:drawableBottom="@drawable/empty_100"/>
+
+    </RelativeLayout>
 
     </ViewFlipper>
 

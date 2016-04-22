@@ -79,13 +79,19 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         ((ExtApplication) getApplication()).setInRunningAct(true);
         setContentView(R.layout.activity_interval);
+        flipper = (ViewFlipper) findViewById(R.id.flipper);
+        flipper.setDisplayedChild(2);
         setPlansSpinner();
         setViewsAndButtons();
         new PerformAsyncTask(this, 0).execute();
         setListeners();
+
+        flipper.setDisplayedChild(0);
     }
 
     /**
@@ -184,6 +190,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     }
 
     private void setViewsAndButtons() {
+
         app_preferences = this.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
 
         CheckBox sound = (CheckBox) findViewById(R.id.checkbox_sound);
@@ -202,7 +209,6 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         buttonStart = (ImageButton) findViewById(R.id.buttonStart);
         buttonStop = (ImageButton) findViewById(R.id.buttonStop);
         buttonBack = (ImageButton) findViewById(R.id.buttonBack);
-        flipper = (ViewFlipper) findViewById(R.id.flipper);
         intervalTimePicker = (NumberPickerKostas) findViewById(R.id.intervalTimePicker);
         intervalTimePicker.setValue(10);
         intervalDistancePicker = (NumberPickerKostas) findViewById(R.id.intervalDistancePicker);
