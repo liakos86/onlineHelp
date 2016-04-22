@@ -6,7 +6,7 @@
               android:layout_width="match_parent"
               android:background="@color/drawer_black"
               android:layout_height="match_parent"
-        android:padding="@dimen/margin10">
+       >
 
 <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
     <ListView android:id="@+id/plansList"
@@ -18,6 +18,7 @@
     <TextView android:id="@+id/noPlansText" android:textColor="@color/white_back" android:layout_centerInParent="true" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/no_plans" android:textSize="20dp" android:drawableBottom="@drawable/empty_100"/>
 
     <Button
+            android:layout_margin="@dimen/margin10"
             android:layout_width="fill_parent"
             android:layout_height="@dimen/standard_view_height"
             android:text="@string/new_plan"
@@ -31,7 +32,8 @@
 
 </RelativeLayout>
 
-    <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
+    <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent"
+            android:layout_margin="@dimen/margin10">
 
         <com.kostas.onlineHelp.NumberPickerKostas
 

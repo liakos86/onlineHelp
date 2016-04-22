@@ -83,10 +83,20 @@ public class FrgPlans extends Fragment {
             @Override
             public void onClick(View view) {
 
-                    savePlan();
+                savePlan();
+                clearViews();
+                plansSwitcher.setDisplayedChild(0);
 
             }
         });
+    }
+
+    private void clearViews(){
+        planDescription.setText("");
+        planIntervalDistancePicker.setValue(100);
+        planIntervalRoundsPicker.setValue(0);
+        planIntervalStartRestPicker.setValue(10);
+        planIntervalTimePicker.setValue(10);
     }
 
     /**
@@ -256,7 +266,7 @@ public class FrgPlans extends Fragment {
         Toast.makeText(getActivity(), "Plan saved", Toast.LENGTH_SHORT).show();
 
 
-        plansSwitcher.setDisplayedChild(0);
+
     }
 
 

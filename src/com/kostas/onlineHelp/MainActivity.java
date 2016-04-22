@@ -195,7 +195,7 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
     @Override
     protected void onResume() {
         super.onResume();
-        if (isMyServiceRunning()) {//service is on
+        if (isMyServiceRunning() || ((ExtApplication) getApplication()).isInRunningAct()) {//service is on
                 startNewInterval();
         }else{
             MyPagerAdapter adapter = (MyPagerAdapter) mPager.getAdapter();

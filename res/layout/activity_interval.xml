@@ -100,7 +100,6 @@
 
                         android:drawSelectorOnTop="true"
                         android:layout_marginBottom="@dimen/twenty"
-                        android:visibility="gone"
                         style="@style/spinner_style"
 
 

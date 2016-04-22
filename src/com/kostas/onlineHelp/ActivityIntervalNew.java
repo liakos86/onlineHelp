@@ -475,25 +475,26 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         for (Plan plan : newPlans) {
             plans.add(plan);
         }
-        if (!fromAsync) {
-            setPlansVisibility();
-        }
+        plansAdapter.notifyDataSetChanged();
+//        if (!fromAsync) {
+//            setPlansVisibility();
+//        }
     }
 
     /**
      * Hides the plans spinner if there are no plans
      */
-    private void setPlansVisibility() {
-        if (plans.size() > 1) {
-            plansSpinner.setVisibility(View.VISIBLE);
-        }
-        else {
-            plansSpinner.setVisibility(View.GONE);
-        }
-        if (plansAdapter != null) {
-            plansAdapter.notifyDataSetChanged();
-        }
-    }
+//    private void setPlansVisibility() {
+//        if (plans.size() > 1) {
+//            plansSpinner.setVisibility(View.VISIBLE);
+//        }
+//        else {
+//            plansSpinner.setVisibility(View.GONE);
+//        }
+//        if (plansAdapter != null) {
+//            plansAdapter.notifyDataSetChanged();
+//        }
+//    }
 
     /**
      * Obtains input values from user selections
@@ -985,7 +986,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             adView2.loadAd(adRequest2);
             adView.loadAd(adRequest);
             plansSpinner.setClickable(true);
-            setPlansVisibility();
+//            setPlansVisibility();
 
         }
 
