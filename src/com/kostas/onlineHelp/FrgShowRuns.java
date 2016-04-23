@@ -6,15 +6,12 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-//import com.facebook.share.model.SharePhoto;
-//import com.facebook.share.model.SharePhotoContent;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -34,8 +31,19 @@ import java.util.*;
  */
 public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCallback{
 
+    /**
+     * All the intervals together
+     */
     List<Interval> intervals = new ArrayList<Interval>();
+
+    /**
+     * The months grouped
+     */
     private ArrayList<String> parentItems = new ArrayList<String>();
+
+    /**
+     * The runs per month grouped
+     */
     private ArrayList<Object> childItems = new ArrayList<Object>();
     private ExpandableListView runsExpListView;
     MyExpandableAdapter adapterExp;
@@ -45,24 +53,38 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
     ArrayList<Marker> markers = new ArrayList<Marker>();
     ListView intervalListView;
     IntervalAdapterItem adapterInterval;
+
+    /**
+     * Parent view containing every layout
+     */
     ViewFlipper viewFlipper;
     GoogleMap googleMap;
     MapWrapperLayout mapWrapperLayout;
-    private ViewGroup infoWindow, infoWindowEmpty;
+
+    /**
+     * The bounds of the visible map area
+     */
     LatLngBounds bounds;
+
+    /**
+     * Close the map with the lines and return to intervals of run
+     */
     ImageButton closeMapButton;
-    Button openMapButton, closeIntervalsButton, shareButton;
+
+    /**
+     * Open the map for the interval, close the current interval and go to runs list
+     */
+    Button openMapButton, closeIntervalsButton;//, shareButton;
+
+    /**
+     * If the map is drawn we dont need to redraw
+     */
     boolean alreadyDrawn;
-
-
-
-    private Button element_top;
-    private Button element_bottom;
-    private Button element_left;
-    private Button element_right;
 
     AdView adView;
     AdRequest adRequest;
+
+    TextView mapIntervalDistanceText, mapIntervalTimeText, mapIntervalRoundsText, mapIntervalFastestText;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,11 +99,6 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
         setList();
         initializeMap();
         return  v;
-    }
-
-    public static int getPixelsFromDp(Context context, float dp) {
-        final float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (dp * scale + 0.5f);
     }
 
     private boolean placeAd() {
@@ -102,95 +119,124 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
 
     }
 
-
-
     private void setCustomMapInfoWindow(View v) {
 
          mapWrapperLayout = (MapWrapperLayout) v.findViewById(R.id.mapWrapperRuns);
 
-        mapWrapperLayout.init(googleMap, getPixelsFromDp(getActivity().getApplicationContext(), 39 - 134));
-
-        // We want to reuse the info window for all the markers,
-        // so let's create only one class member instance
-        infoWindow = (ViewGroup) getActivity().getLayoutInflater().inflate(R.layout.custom_map_info, null);
-
-        infoWindowEmpty = (ViewGroup) getActivity().getLayoutInflater().inflate(R.layout.custom_map_info_empty, null);
-
-        element_top = (Button) infoWindow.findViewById(R.id.element_top);
-        element_bottom = (Button) infoWindow.findViewById(R.id.element_bottom);
-        element_left = (Button) infoWindow.findViewById(R.id.element_left);
-        element_right = (Button) infoWindow.findViewById(R.id.element_right);
-
-        googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
-            public View getInfoWindow(Marker marker) {
-                // We must call this to set the current marker and infoWindow references
-                // to the MapWrapperLayout
-
-                mapWrapperLayout.setMarkerWithInfoWindow(marker, infoWindow);
-
-
-                if (marker.getTitle()==null)
-                    return infoWindowEmpty;
-                else {
-                    int size = currentIntervals.size();
-                    for (int i=0;i<size; i++){
-
-                        Interval interval = currentIntervals.get(i);
-                        if (marker.getTitle().equals(String.valueOf(interval.getInterval_id()))){
-                            element_top.setText(
-                                    "interval "+(i+1)+"\r\n"+
-                                    (int)interval.getDistance()+"m"
-
-                            );
-
-                            element_left.setText(
-                                    "Start: "+interval.getAltitudeStart()+"m \r\n"+
-                                            "Finish: "+interval.getAltitudeFinish()+"m \r\n"+
-                                            "Max: "+interval.getAltitudeMax()+"m \r\n"+
-                                            "Min: "+interval.getAltitudeMin()+"m"
-
-                            );
-
-                            long intervalTime = interval.getMilliseconds();
-
-                            int hours = (int)(intervalTime/3600000);
-                            int mins = (int)((intervalTime - (hours*3600000))/60000);
-                            int secs = (int)((intervalTime - (hours*3600000) - (mins*60000))/1000);
-                            String timeText = String.format("%02d",hours)+":" + String.format("%02d",mins)+":"+String.format("%02d",secs);
-                            String speedText =  String.format("%1$,.2f", ((double) ((interval.getDistance() / intervalTime) * 3600)));
-                            float pace =  intervalTime / interval.getDistance();
-                            int paceMinutes = (int)(pace/60);
-                            int paceSeconds = (int)(pace - (paceMinutes*60));
-                            String paceText = paceMinutes<60 ?   String.format("%02d", paceMinutes)+"m "+String.format("%02d", paceSeconds)+"s" : "over 1 hour";
-
-                            element_right.setText(
-                                    "Time: "+timeText+"\r\n"+
-                                            "Speed: "+speedText+"km/h\r\n"+
-                                            "Pace: "+paceText
-
-                            );
-
-
-                        }
-                    }
-                    return infoWindow;
-                }
-
-            }
-
-            @Override
-            public View getInfoContents(Marker marker) {
-                return null;
+            public boolean onMarkerClick(Marker marker) {
+                return true;
             }
         });
+
+        //mapWrapperLayout.init(googleMap, getPixelsFromDp(getActivity().getApplicationContext(), 39 - 134));
+
+//        googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+//            @Override
+//            public View getInfoWindow(Marker marker) {
+//                // We must call this to set the current marker and infoWindow references
+//                // to the MapWrapperLayout
+//
+//                mapWrapperLayout.setMarkerWithInfoWindow(marker, infoWindow);
+//
+//
+//                if (marker.getTitle()==null)
+//                    return infoWindowEmpty;
+//                else {
+//                    int size = currentIntervals.size();
+//                    for (int i=0;i<size; i++){
+//
+//                        Interval interval = currentIntervals.get(i);
+//                        if (marker.getTitle().equals(String.valueOf(interval.getInterval_id()))){
+//                            element_top.setText(
+//                                    "interval "+(i+1)+"\r\n"+
+//                                    (int)interval.getDistance()+"m"
+//
+//                            );
+//
+//                            element_left.setText(
+//                                    "Start: "+interval.getAltitudeStart()+"m \r\n"+
+//                                            "Finish: "+interval.getAltitudeFinish()+"m \r\n"+
+//                                            "Max: "+interval.getAltitudeMax()+"m \r\n"+
+//                                            "Min: "+interval.getAltitudeMin()+"m"
+//
+//                            );
+//
+//                            long intervalTime = interval.getMilliseconds();
+//
+//                            int hours = (int)(intervalTime/3600000);
+//                            int mins = (int)((intervalTime - (hours*3600000))/60000);
+//                            int secs = (int)((intervalTime - (hours*3600000) - (mins*60000))/1000);
+//                            String timeText = String.format("%02d",hours)+":" + String.format("%02d",mins)+":"+String.format("%02d",secs);
+//                            String speedText =  String.format("%1$,.2f", ((double) ((interval.getDistance() / intervalTime) * 3600)));
+//                            float pace =  intervalTime / interval.getDistance();
+//                            int paceMinutes = (int)(pace/60);
+//                            int paceSeconds = (int)(pace - (paceMinutes*60));
+//                            String paceText = paceMinutes<60 ?   String.format("%02d", paceMinutes)+"m "+String.format("%02d", paceSeconds)+"s" : "over 1 hour";
+//
+//                            element_right.setText(
+//                                    "Time: "+timeText+"\r\n"+
+//                                            "Speed: "+speedText+"km/h\r\n"+
+//                                            "Pace: "+paceText
+//
+//                            );
+//
+//
+//                        }
+//                    }
+//                    return infoWindow;
+//                }
+//
+//            }
+//
+//            @Override
+//            public View getInfoContents(Marker marker) {
+//                return null;
+//            }
+//        });
 
 
 
     }
 
+    private void setTextsOnMap(){
+        mapIntervalDistanceText.setText(String.valueOf((int)currentRun.getDistance())+"m intervals");
+
+        long fastestTime = 1l;
+        for (Interval interval : currentIntervals){
+            if (interval.isFastest()){
+                fastestTime = interval.getMilliseconds();
+                break;
+            }
+        }
+
+        mapIntervalFastestText.setText(getFastestTextFromMillis(fastestTime));
+        mapIntervalRoundsText.setText(currentIntervals.size()+" rounds");
+        mapIntervalTimeText.setText((int)currentRun.getTime()/1000+" secs rest");
+    }
+
+
+    public String getFastestTextFromMillis(long intervalTime) {
+        int hours = (int) (intervalTime / 3600000);
+        int mins = (int) ((intervalTime - (hours * 3600000)) / 60000);
+        int secs = (int) ((intervalTime - (hours * 3600000) - (mins * 60000)) / 1000);
+        return "Fastest "+String.format("%02d", hours) + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs);
+     //   String speedText = String.format("%1$,.2f", ((double) ((interval.getDistance() / intervalTime) * 3600)));
+//        float pace = intervalTime / interval.getDistance();
+//        int paceMinutes = (int) (pace / 60);
+//        int paceSeconds = (int) (pace - (paceMinutes * 60));
+//        String paceText = paceMinutes < 60 ? String.format("%02d", paceMinutes) + "m " + String.format("%02d", paceSeconds) + "s" : "over 1 hour";
+
+    }
+
+
     private void initializeViews(View v){
 
+        mapIntervalDistanceText = (TextView) v.findViewById(R.id.mapIntervalDistanceText);
+        mapIntervalFastestText = (TextView) v.findViewById(R.id.mapIntervalFastestText);
+        mapIntervalRoundsText = (TextView) v.findViewById(R.id.mapIntervalRoundsText);
+        mapIntervalTimeText = (TextView) v.findViewById(R.id.mapIntervalTimeText);
 
         adView = (AdView) v.findViewById(R.id.adViewInterval3);
         progressBarMap = (ProgressBar) v.findViewById(R.id.progressBarMap);
@@ -199,7 +245,7 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
         openMapButton = (Button) v.findViewById(R.id.buttonShowMap);
         closeMapButton = (ImageButton) v.findViewById(R.id.buttonCloseMap);
         closeIntervalsButton = (Button) v.findViewById(R.id.buttonCloseIntervals);
-        shareButton = (Button) v.findViewById(R.id.buttonShare);
+        //shareButton = (Button) v.findViewById(R.id.buttonShare);
         runsExpListView = (ExpandableListView) v.findViewById(R.id.listExpRunning);
         intervalListView = (ListView) v.findViewById(R.id.listIntervals);
 
@@ -228,12 +274,8 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
     }
     
     private void setList(){
-
         intervalListView.setDivider(null);
-
-         new PerformAsyncTask(getActivity()).execute();
-
-//        getRunsFromDb();
+        new PerformAsyncTask(getActivity()).execute();
         runsExpListView.setDividerHeight(2);
         runsExpListView.setClickable(true);
         adapterExp = new MyExpandableAdapter(parentItems, childItems, getActivity());
@@ -276,7 +318,6 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
             public void onClick(View view) {
                 if (googleMap != null) {
                     googleMap.clear();
-//                    mapLines.clear();
                     alreadyDrawn = false;
                 }
                 viewFlipper.setDisplayedChild(1);
@@ -293,49 +334,7 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
         openMapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-//                if (!alreadyDrawn)
-//                    drawMap();
-//                else if (zoomPoint!=null)
-//                    zoomMap();
-
                 viewFlipper.setDisplayedChild(3);
-            }
-        });
-
-        shareButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-//                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-//                Uri screenshotUri = Uri.parse("http://coins.silvercoinstoday.com/wp-content/uploads/2010/10/America-the-Beautiful-Silver-Coin-Obverse.jpg");
-
-                try {
-//                    InputStream stream = getActivity().getContentResolver().openInputStream(screenshotUri);
-
-//                    final int w = 300;
-//                    final int h = 300;
-//
-//                    Bitmap image = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-//
-//
-//                    SharePhoto photo = new SharePhoto.Builder()
-//                            .setBitmap(image)
-//                            .build();
-//                    SharePhotoContent content = new SharePhotoContent.Builder()
-//                            .addPhoto(photo)
-//                            .build();
-                }
-
-                catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-//                sharingIntent.setType("image/*");
-//                sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
-//                startActivity(Intent.createChooser(sharingIntent, "Share image using"));
-
             }
         });
         
@@ -468,13 +467,13 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
                 int currSize = locationList.size() - 1;
 
                 for (int k = 0; k < currSize; k++) {
-                    googleMap.addPolyline(new PolylineOptions().add(locationList.get(k), locationList.get(k + 1)).width(6).color(color));
+                    googleMap.addPolyline(new PolylineOptions().add(locationList.get(k), locationList.get(k + 1)).width(7).color(color));
                 }
 
 
                 if (currSize > 0) {
                     markers.add(googleMap.addMarker(new MarkerOptions()
-                                            .infoWindowAnchor(0.48f, 6.16f)
+                                            //.infoWindowAnchor(0.48f, 6.16f)
                                             .position(locationList.get(0))
                                             .title(String.valueOf(current.getInterval_id()))
 //                                .title(String.valueOf(Html.fromHtml("<b>Interval " + (i + 1) + "</b>")))
@@ -692,7 +691,9 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
                     public void onClick(View view) {
 
                         currentRun = child.get(childPosition);
+
                         showIntervalsForRun(child.get(childPosition));
+                        setTextsOnMap();
                     }
                 });
 
