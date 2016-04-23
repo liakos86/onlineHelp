@@ -21,13 +21,12 @@ import java.util.List;
 /**
  * Created by liakos on 10/10/2015.
  */
-public class FrgPlans extends Fragment {
+public class FrgPlans extends LoadingOnExitFragment {
 
     ListView plansListView;
     List<Plan> plans = new ArrayList<Plan>();
     PlansAdapterItem adapterPlans;
-    TextView noPlansText;
-    ViewSwitcher plansSwitcher;
+    ViewFlipper plansFlipper;
     Button buttonNewPlan, buttonSavePlan;
     EditText planDescription;
 
@@ -52,11 +51,9 @@ public class FrgPlans extends Fragment {
     private void setViews(View v){
         plansListView = (ListView) v.findViewById(R.id.plansList);
         new PerformAsyncTask(getActivity()).execute();
-        noPlansText = (TextView) v.findViewById(R.id.noPlansText);
-        plansSwitcher = (ViewSwitcher) v.findViewById(R.id.plansSwitcher);
+        plansFlipper = (ViewFlipper) v.findViewById(R.id.plansFlipper);
         adapterPlans = new PlansAdapterItem(getActivity().getApplicationContext(), R.layout.list_plan_row, plans);
         plansListView.setAdapter(adapterPlans);
-
         planIntervalTimePicker = (NumberPickerKostas) v.findViewById(R.id.planIntervalTimePicker);
         planIntervalTimePicker.setValue(10);
         planIntervalDistancePicker = (NumberPickerKostas) v.findViewById(R.id.planIntervalDistancePicker);
@@ -64,28 +61,21 @@ public class FrgPlans extends Fragment {
         planIntervalRoundsPicker = (NumberPickerKostas) v.findViewById(R.id.planIntervalRoundsPicker);
         planIntervalStartRestPicker = (NumberPickerKostas) v.findViewById(R.id.planIntervalStartRestPicker);
         planIntervalStartRestPicker.setValue(10);
-
         planDescription = (EditText) v.findViewById(R.id.planNewDescription);
-
         buttonNewPlan = ((Button) v.findViewById(R.id.buttonNewPlan));
         buttonSavePlan = ((Button) v.findViewById(R.id.buttonSavePlan));
 
         buttonNewPlan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                plansSwitcher.setDisplayedChild(1);
-
+                plansFlipper.setDisplayedChild(2);
             }
         });
 
         buttonSavePlan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 savePlan();
-
-
             }
         });
     }
@@ -119,11 +109,9 @@ public class FrgPlans extends Fragment {
      */
     private void showTextNoPlans(){
         if (plans.size()==0){
-            plansListView.setVisibility(View.GONE);
-            noPlansText.setVisibility(View.VISIBLE);
+            plansFlipper.setDisplayedChild(3);
         }else{
-            plansListView.setVisibility(View.VISIBLE);
-            noPlansText.setVisibility(View.GONE);
+            plansFlipper.setDisplayedChild(1);
         }
     }
 
@@ -207,8 +195,6 @@ public class FrgPlans extends Fragment {
 
     }
 
-
-
     private class planViewHolder{
         TextView description;
         TextView info;
@@ -266,7 +252,7 @@ public class FrgPlans extends Fragment {
 
 
         clearViews();
-        plansSwitcher.setDisplayedChild(0);
+        plansFlipper.setDisplayedChild(1);
 
     }
 
@@ -278,15 +264,11 @@ public class FrgPlans extends Fragment {
         adapterPlans.notifyDataSetChanged();
     }
 
-
     private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
         private Activity activity;
 
-
-
         public PerformAsyncTask(Activity activity) {
             this.activity = activity;
-
         }
 
         protected void onPreExecute() {
@@ -295,27 +277,25 @@ public class FrgPlans extends Fragment {
 
         @Override
         protected Void doInBackground(Void... unused) {
-
            getPlansFromDb(activity, true);
             return null;
-
         }
 
         @Override
         protected void onPostExecute(Void result) {
-
             plansListView.setClickable(true);
             if (adapterPlans!=null) adapterPlans.notifyDataSetChanged();
-
-
-
         }
-
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        showTextNoPlans();
+    }
 
-
-
-
-
+    @Override
+    void onExit() {
+        plansFlipper.setDisplayedChild(0);
+    }
 }

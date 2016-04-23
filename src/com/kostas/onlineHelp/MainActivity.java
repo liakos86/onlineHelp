@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.test.mock.MockApplication;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.kostas.service.RunningService;
@@ -69,6 +70,7 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
 
             @Override
             public void onPageSelected(int position) {
+                ((ExtApplication) getApplication()).setPosition(position);
                 mPager.setCurrentItem(position);
                 setSelectedBottomButton(bottomButtons, position);
 //                Fragment current = ((MyPagerAdapter) mPager.getAdapter()).fragments[position];
@@ -204,6 +206,15 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
                 ((ExtApplication) getApplication()).setNewIntervalInDb(false);
             }
         }
+    }
+
+    @Override
+    protected void onPause() {
+        int position = ((ExtApplication) getApplication()).getPosition();
+        MyPagerAdapter adapter = (MyPagerAdapter) mPager.getAdapter();
+        ((LoadingOnExitFragment) adapter.fragments[position]).onExit();
+
+        super.onPause();
     }
 
     @Override

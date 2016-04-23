@@ -42,6 +42,11 @@ public class ExtApplication extends Application {
      */
     private TTSManager ttsManager;
 
+    /**
+     * The position of the pager
+     */
+    private int position;
+
 
     @Override
     public void onCreate() {
@@ -53,6 +58,14 @@ public class ExtApplication extends Application {
         ACRA.getErrorReporter().addReportSender(mySender);
         ttsManager = new TTSManager();
         ttsManager.init(this);
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     public boolean isNewIntervalInDb() {

@@ -32,7 +32,7 @@ import java.util.*;
 /**
  * Created by liakos on 11/4/2015.
  */
-public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
+public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCallback{
 
     List<Interval> intervals = new ArrayList<Interval>();
     private ArrayList<String> parentItems = new ArrayList<String>();
@@ -64,8 +64,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
     AdView adView;
     AdRequest adRequest;
 
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,14 +73,9 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View v = inflater.inflate(R.layout.frg_show_runs, container, false);
-
         initializeViews(v);
-
         setList();
         initializeMap();
-
-
-
         return  v;
     }
 
@@ -870,5 +863,16 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
             }
             if (shouldPlaceAd) adView.loadAd(adRequest);
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        showTextNoRuns();
+    }
+
+    @Override
+    void onExit() {
+        viewFlipper.setDisplayedChild(0);
     }
 }

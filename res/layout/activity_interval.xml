@@ -320,13 +320,6 @@
 
         </RelativeLayout>
 
-    <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
-
-        <ProgressBar android:layout_width="@dimen/standard_view_height"
-                     android:layout_height="@dimen/standard_view_height"
-                android:layout_centerInParent="true"/>
-
-    </RelativeLayout>
 
     </ViewFlipper>
 
