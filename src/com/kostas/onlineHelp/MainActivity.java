@@ -1,6 +1,5 @@
 package com.kostas.onlineHelp;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Bundle;
@@ -34,7 +33,6 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         setupPager();
-
 //        FacebookSdk.sdkInitialize(getApplicationContext());
     }
 
@@ -44,15 +42,11 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
      */
     private void setupPager() {
         mPager = (NonSwipeableViewPager) findViewById(R.id.pager);
-
         mPager.setOffscreenPageLimit(1);
-
         mPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(),  PAGER_SIZE));
-
         setBottomButtons(mPager);
         setSelectedBottomButton(bottomButtons, 0);
 
-        final Activity activity = this;
         mPager.setOnPageChangeListener(new NonSwipeableViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i2) {
@@ -62,40 +56,14 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
             public void onPageSelected(int position) {
                 ((ExtApplication) getApplication()).setPosition(position);
                 mPager.setCurrentItem(position);
-
                 setSelectedBottomButton(bottomButtons, position);
-
                 invalidateOptionsMenu();
             }
 
-
             @Override
             public void onPageScrollStateChanged(int i) {
-
             }
         });
-
-    }
-
-
-
-    @Override
-    public void onBackPressed() {
-
-        super.onBackPressed();
-//        if  (getTitle().toString().equals(drawerTitles[0])) {
-//
-//            if (((ExtApplication) getApplicationContext()).isInRunningMode()) {
-//                Toast.makeText(getApplication(), "Interval in progress", Toast.LENGTH_SHORT).show();
-//            } else {
-//                //todo check why it is not working
-//                super.onBackPressed();
-////            finish();
-//            }
-//        }else{
-//            mPager.setCurrentItem(0, true);
-//            setTitle(drawerTitles[0]);
-//        }
     }
 
     /**
@@ -139,20 +107,4 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
             }
         }
     }
-
-//    @Override
-//    protected void onPause() {
-//        int position = ((ExtApplication) getApplication()).getPosition();
-//        MyPagerAdapter adapter = (MyPagerAdapter) mPager.getAdapter();
-//        ((LoadingOnExitFragment) adapter.fragments[position]).onExit();
-//
-//        super.onPause();
-//    }
-
-//    @Override
-//    protected void onRestart() {
-//        super.onRestart();
-//    }
-
-
 }
