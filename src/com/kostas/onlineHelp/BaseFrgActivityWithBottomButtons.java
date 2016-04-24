@@ -105,13 +105,16 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
      * Then hides bottom buttons and starts activity
      * @param mPager
      */
-    protected void startNewInterval(NonSwipeableViewPager mPager) {
+    protected void startNewInterval(NonSwipeableViewPager mPager, boolean shouldMakeFragmentLoading) {
         if(!(this instanceof ActivityIntervalNew)){
             Intent intent = new Intent(this, ActivityIntervalNew.class);
             startActivity(intent);
-            MyPagerAdapter adapter = (MyPagerAdapter) mPager.getAdapter();
-            int position = ((ExtApplication)getApplication()).getPosition();
-            ((LoadingOnExitFragment) adapter.fragments[position]).onExit();
+
+            if (shouldMakeFragmentLoading) {
+                MyPagerAdapter adapter = (MyPagerAdapter) mPager.getAdapter();
+                int position = ((ExtApplication) getApplication()).getPosition();
+                ((LoadingOnExitFragment) adapter.fragments[position]).onExit();
+            }
             hideBottomButtons();
             //overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
         }
@@ -144,7 +147,7 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
                 if (position != POSITION_NEW_INTERVAL)
                     startMain(mPager, position);
                 else
-                    startNewInterval(mPager);
+                    startNewInterval(mPager, true);
                 }
 
         });
