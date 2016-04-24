@@ -7,6 +7,21 @@
         <item>Exit</item>
     </string-array>
 
+    <string-array name="months">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+
 
     <!--<integer-array name="drawer_titles_colors">-->
         <!--<item>@color/death_grey</item>-->

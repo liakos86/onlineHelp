@@ -119,87 +119,6 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
 
     }
 
-    private void setCustomMapInfoWindow(View v) {
-
-         mapWrapperLayout = (MapWrapperLayout) v.findViewById(R.id.mapWrapperRuns);
-
-        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                return true;
-            }
-        });
-
-        //mapWrapperLayout.init(googleMap, getPixelsFromDp(getActivity().getApplicationContext(), 39 - 134));
-
-//        googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-//            @Override
-//            public View getInfoWindow(Marker marker) {
-//                // We must call this to set the current marker and infoWindow references
-//                // to the MapWrapperLayout
-//
-//                mapWrapperLayout.setMarkerWithInfoWindow(marker, infoWindow);
-//
-//
-//                if (marker.getTitle()==null)
-//                    return infoWindowEmpty;
-//                else {
-//                    int size = currentIntervals.size();
-//                    for (int i=0;i<size; i++){
-//
-//                        Interval interval = currentIntervals.get(i);
-//                        if (marker.getTitle().equals(String.valueOf(interval.getInterval_id()))){
-//                            element_top.setText(
-//                                    "interval "+(i+1)+"\r\n"+
-//                                    (int)interval.getDistance()+"m"
-//
-//                            );
-//
-//                            element_left.setText(
-//                                    "Start: "+interval.getAltitudeStart()+"m \r\n"+
-//                                            "Finish: "+interval.getAltitudeFinish()+"m \r\n"+
-//                                            "Max: "+interval.getAltitudeMax()+"m \r\n"+
-//                                            "Min: "+interval.getAltitudeMin()+"m"
-//
-//                            );
-//
-//                            long intervalTime = interval.getMilliseconds();
-//
-//                            int hours = (int)(intervalTime/3600000);
-//                            int mins = (int)((intervalTime - (hours*3600000))/60000);
-//                            int secs = (int)((intervalTime - (hours*3600000) - (mins*60000))/1000);
-//                            String timeText = String.format("%02d",hours)+":" + String.format("%02d",mins)+":"+String.format("%02d",secs);
-//                            String speedText =  String.format("%1$,.2f", ((double) ((interval.getDistance() / intervalTime) * 3600)));
-//                            float pace =  intervalTime / interval.getDistance();
-//                            int paceMinutes = (int)(pace/60);
-//                            int paceSeconds = (int)(pace - (paceMinutes*60));
-//                            String paceText = paceMinutes<60 ?   String.format("%02d", paceMinutes)+"m "+String.format("%02d", paceSeconds)+"s" : "over 1 hour";
-//
-//                            element_right.setText(
-//                                    "Time: "+timeText+"\r\n"+
-//                                            "Speed: "+speedText+"km/h\r\n"+
-//                                            "Pace: "+paceText
-//
-//                            );
-//
-//
-//                        }
-//                    }
-//                    return infoWindow;
-//                }
-//
-//            }
-//
-//            @Override
-//            public View getInfoContents(Marker marker) {
-//                return null;
-//            }
-//        });
-
-
-
-    }
-
     private void setTextsOnMap(){
         mapIntervalDistanceText.setText(String.valueOf((int)currentRun.getDistance())+"m intervals");
 
@@ -294,7 +213,7 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
 
         runsExpListView.expandGroup(0);
 
-        int right = (int) (getResources().getDisplayMetrics().widthPixels - TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics()));
+        //int right = (int) (getResources().getDisplayMetrics().widthPixels - TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics()));
 
         DisplayMetrics metrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -337,7 +256,6 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
                 viewFlipper.setDisplayedChild(3);
             }
         });
-        
     }
 
     public int GetPixelFromDips(float pixels) {
@@ -356,9 +274,7 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
             parentItems.clear();
             childItems.clear();
             for (Running running : newRuns) {
-
                 List<Interval>intervalsList =db.fetchIntervalsForRun(running.getRunning_id());
-
                 int fastest=0, rounds=intervalsList.size();
                 long millis = Long.MAX_VALUE;
                 for (int i=0; i<rounds; i++){
@@ -367,23 +283,17 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
                         millis = intervalsList.get(i).getMilliseconds();
                     }
                 }
-
                 if (rounds>0)
                 intervalsList.get(fastest).setFastest(true);
 //                else
 //                err.add(running.getRunning_id());
-
                 running.setIntervals(intervalsList);
 //                runs.add(running);
-
                 String month = running.getDate().substring(3,10);
-
                 if (!parentItems.contains(month)){
                     parentItems.add(month);
                 }
-
             }
-
 
             for (String monthNumber : parentItems){
                 ArrayList<Running> monthRuns = new ArrayList<Running>();
@@ -406,40 +316,28 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
 
 
     public void drawMap(){
-
         alreadyDrawn = true;
-
-       currentIntervals = currentRun.getIntervals();
-
+        currentIntervals = currentRun.getIntervals();
         markers.clear();
-
         List<LatLng> locationList = new ArrayList<LatLng>();
-
         double northPoint=-85.05115 , southPoint=85.05115 , eastPoint=-180, westPoint=180;
         LatLng top = new LatLng(0,0), bottom=new LatLng(0,0), left=new LatLng(0,0), right=new LatLng(0,0);
-
         int number = currentIntervals.size();
         double latPoint, lonPoint;
-        //for each interval
-        for (int i=0; i<number; i++) {
 
+        for (int i=0; i<number; i++) {//for each interval
             Interval current = currentIntervals.get(i);
             int color = i % 2 == 0 ? getResources().getColor(R.color.interval_red) : getResources().getColor(R.color.interval_green);
-
             locationList.clear();
-
             String[] latStringList = current.getLatLonList().split(",");
             int listLength = latStringList.length - 1;
-
 
             if (latStringList[0].equals("null")) {
                 Toast.makeText(getActivity(),(i+1)+" : "+ current.getLatLonList(), Toast.LENGTH_SHORT).show();
             } else {
                 for (int j = 0; j < listLength; j += 2) {
-
                     latPoint = Double.valueOf(latStringList[j]);
                     lonPoint = Double.parseDouble(latStringList[j + 1]);
-
 
                     if (latPoint > northPoint) {
                         northPoint = latPoint;
@@ -458,18 +356,13 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
                         westPoint = lonPoint;
                         left = new LatLng(latPoint, lonPoint);
                     }
-
-
 //               if (j%2==0)
                     locationList.add(new LatLng(latPoint, lonPoint));
                 }
-
                 int currSize = locationList.size() - 1;
-
                 for (int k = 0; k < currSize; k++) {
                     googleMap.addPolyline(new PolylineOptions().add(locationList.get(k), locationList.get(k + 1)).width(7).color(color));
                 }
-
 
                 if (currSize > 0) {
                     markers.add(googleMap.addMarker(new MarkerOptions()
@@ -482,17 +375,14 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
                             )
                     );
 
-
                     googleMap.addMarker(new MarkerOptions()
 //                        .infoWindowAnchor(0.48f, 4.16f)
                                     .position(locationList.get(currSize))
 //                                .title(String.valueOf(Html.fromHtml("<b>Interval " + (i + 1) + "</b>")))
                                     .snippet("Speed: " + String.format("%1$,.2f", ((double) ((current.getDistance() / current.getMilliseconds()) * 3600))) + " km/h")
                                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_stop2))
-
                     );
                 }
-
             }
 
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -500,63 +390,16 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
             builder.include(bottom);
             builder.include(left);
             builder.include(right);
-
             bounds = builder.build();
-
             try {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 200));
-
             } catch (Exception e) {
                 //Log.v("LATLNG", "MAP CRASH");
             }
         }
-
     }
-
-//    public LatLng midPoint(double lat1,double lon1,double lat2,double lon2){
-//
-//        double dLon = Math.toRadians(lon2 - lon1);
-//
-//        //convert to radians
-//        lat1 = Math.toRadians(lat1);
-//        lat2 = Math.toRadians(lat2);
-//        lon1 = Math.toRadians(lon1);
-//
-//        double Bx = Math.cos(lat2) * Math.cos(dLon);
-//        double By = Math.cos(lat2) * Math.sin(dLon);
-//        double lat3 = Math.atan2(Math.sin(lat1) + Math.sin(lat2), Math.sqrt((Math.cos(lat1) + Bx) * (Math.cos(lat1) + Bx) + By * By));
-//        double lon3 = lon1 + Math.atan2(By, Math.cos(lat1) + Bx);
-//
-//        //print out in degrees
-////        System.out.println(Math.toDegrees(lat3) + " " + Math.toDegrees(lon3));
-////        googleMap.addMarker(new MarkerOptions()
-//////                        .infoWindowAnchor(0.48f, 4.16f)
-////
-////                        .position(new LatLng(Math.toDegrees(lat3),Math.toDegrees(lon3)))
-////                        .title("You are here")
-////                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher))
-////        );
-//
-//        return new LatLng(Math.toDegrees(lat3),Math.toDegrees(lon3));
-//    }
-    
-    
-    static FrgShowRuns init(int val) {
-        FrgShowRuns truitonList = new FrgShowRuns();
-
-        // Supply val input as an argument.
-        Bundle args = new Bundle();
-        args.putInt("val", val);
-        truitonList.setArguments(args);
-
-        return truitonList;
-    }
-
-
-
 
     private void confirmDelete(final Long trId,final int groupPosition, final int position){
-
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 getActivity());
         alertDialogBuilder.setTitle("Confirm")
@@ -569,40 +412,29 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
                 })
                 .setNegativeButton("Delete", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-
                         deleteRunning(trId, groupPosition, position);
                     }
 
                 });
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
-
-
     }
 
     private void deleteRunning(Long trId, int groupPosition, int position){
         Database db = new Database(getActivity().getBaseContext());
-
         db.deleteRunning(trId);
-
         ((ArrayList<Running>)childItems.get(groupPosition)).remove(position);
-
-//        runs.remove(position);
         adapterExp.notifyDataSetChanged();
         showTextNoRuns();
-//        adapterRunning.notifyDataSetChanged();
     }
 
     @Override
     public void onMapReady(GoogleMap gMap) {
-
-            googleMap = gMap;
-            googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-            googleMap.setIndoorEnabled(false);
+        googleMap = gMap;
+        googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        googleMap.setIndoorEnabled(false);
         googleMap.getUiSettings().setZoomControlsEnabled(true);
-
         progressBarMap.setVisibility(View.GONE);
-
         googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
@@ -610,10 +442,13 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
             }
         });
 
-
-        setCustomMapInfoWindow(getView());
-
-
+        mapWrapperLayout = (MapWrapperLayout) getView().findViewById(R.id.mapWrapperRuns);
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+                    return true;
+                }
+            });
     }
 
 
@@ -641,13 +476,6 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
         private class headerViewHolder{
             TextView month;
         }
-
-//        @Override
-//        public void notifyDataSetChanged() {
-//
-//            super.notifyDataSetChanged();
-//            showTextNoRuns();
-//        }
 
         @Override
         public View getChildView(final int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
@@ -706,22 +534,14 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
         @Override
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
-
             headerViewHolder holder =null;
             if (convertView == null || !(convertView.getTag() instanceof headerViewHolder)) {
-
-
-
                 convertView = inflater.inflate(R.layout.group_header, null);
-
                 holder = new headerViewHolder();
-
                 holder.month = (TextView) convertView.findViewById(R.id.textView1);
-
                 convertView.setTag(holder);
             } else {
                 holder = (headerViewHolder) convertView.getTag();
-
             }
 
             int month=1;
@@ -730,30 +550,9 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
             }catch (Exception e){
                 //Log.v("LATLNG", "month error");
             }
-            String monthName="";
-
-            switch (month){
-
-                case 1: monthName = "January"; break;
-                case 2: monthName = "February"; break;
-                case 3: monthName = "March"; break;
-                case 4 : monthName = "April"; break;
-                case 5: monthName = "May"; break;
-                case 6: monthName = "June"; break;
-                case 7: monthName = "July"; break;
-                case 8 : monthName = "August"; break;
-                case 9: monthName = "September"; break;
-                case 10: monthName = "October"; break;
-                case 11: monthName = "November"; break;
-                case 12 : monthName = "December"; break;
-                default: monthName = parentItems.get(groupPosition);
-            }
-
-
-
-
+            String[] months = getResources().getStringArray(R.array.months);
+            String monthName= months[month];
             holder.month.setText(monthName+" "+parentItems.get(groupPosition).split("/")[1] + " - " + ((ArrayList<Running>) childtems.get(groupPosition)).size() + " workouts");
-
             return convertView;
         }
 
@@ -815,9 +614,7 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
 
 
     private void showTextNoRuns(){
-
         boolean empty= true;
-
         for (Object child : childItems){
             if (((ArrayList)child).size()>0){
                 empty = false;
@@ -832,13 +629,9 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
         }
     }
 
-
-
     private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
         private Activity activity;
         private boolean shouldPlaceAd;
-//        List<Long>err;
-
 
         public PerformAsyncTask(Activity activity) {
             this.activity = activity;
@@ -870,6 +663,15 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
     public void onResume() {
         super.onResume();
         showTextNoRuns();
+    }
+
+    static FrgShowRuns init(int val) {
+        FrgShowRuns truitonList = new FrgShowRuns();
+        // Supply val input as an argument.
+        Bundle args = new Bundle();
+        args.putInt("val", val);
+        truitonList.setArguments(args);
+        return truitonList;
     }
 
     @Override

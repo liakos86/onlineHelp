@@ -49,7 +49,6 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         showBottomButtons();
-
     }
 
     @Override
@@ -72,7 +71,6 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
         }
     }
 
-
     /**
      * Sets the global position of the bottom buttons and then starts the
      * appropriate fragment or the new interval activity
@@ -81,7 +79,6 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
      * @param position the position that the user selected
      */
     private void startMain(NonSwipeableViewPager mPager, int position) {
-
         if (null != mPager) {
             mPager.setCurrentItem(position);
         } else {
@@ -102,14 +99,20 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
         finish();
     }
 
+    /**
+     * Starts a new IntervalActivity
+     * Firstly it calls the onExit() of the selected fragment to display progress bar
+     * Then hides bottom buttons and starts activity
+     * @param mPager
+     */
     protected void startNewInterval(NonSwipeableViewPager mPager) {
         if(!(this instanceof ActivityIntervalNew)){
+            Intent intent = new Intent(this, ActivityIntervalNew.class);
+            startActivity(intent);
             MyPagerAdapter adapter = (MyPagerAdapter) mPager.getAdapter();
             int position = ((ExtApplication)getApplication()).getPosition();
             ((LoadingOnExitFragment) adapter.fragments[position]).onExit();
             hideBottomButtons();
-            Intent intent = new Intent(this, ActivityIntervalNew.class);
-            startActivity(intent);
             //overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
         }
     }
@@ -125,24 +128,25 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
         bottomButtons.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * If the positions is 0 or 1 we just change the displayed fragment
+     * If the position is 2 we start a new IntervalActivity
+     *
+     * @param mPager
+     * @param btn the xml id of the button
+     * @param position the position of the button in the layout
+     */
     private void setBottomButtonListener(final NonSwipeableViewPager mPager, int btn, final int position) {
         LinearLayout bottomButton = (LinearLayout) findViewById(btn);
         bottomButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if (position != POSITION_NEW_INTERVAL)
                     startMain(mPager, position);
                 else
                     startNewInterval(mPager);
-
                 }
 
         });
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
     }
 }
