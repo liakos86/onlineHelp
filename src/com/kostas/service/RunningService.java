@@ -18,6 +18,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.kostas.dbObjects.Interval;
+import com.kostas.onlineHelp.ActivityIntervalNew;
 import com.kostas.onlineHelp.ExtApplication;
 import com.kostas.onlineHelp.MainActivity;
 import com.kostas.onlineHelp.R;
@@ -62,7 +63,6 @@ public class RunningService extends IntentService
 
     Type listOfObjects, listOfLocations;
     //    Vibrator v;
-    int altStart, altFinish, altMax, altMin;
     TTSManager ttsManager;
     List<Location> locationList;
 
@@ -137,17 +137,11 @@ public class RunningService extends IntentService
             intervalTime = intent.getLongExtra(INTERVAL_TIME, 0);
             intervalStartRest = intent.getLongExtra(INTERVAL_START_REST, 0);
             startCountDownForNextInterval(intervalStartRest);
-
-                intervals = new ArrayList<Interval>();
-
-                intervalDistance = intent.getFloatExtra(INTERVAL_DISTANCE, 0);
-
-                intervalRounds = intent.getIntExtra(INTERVAL_ROUNDS, 0 );
-
-
+            intervals = new ArrayList<Interval>();
+            intervalDistance = intent.getFloatExtra(INTERVAL_DISTANCE, 0);
+            intervalRounds = intent.getIntExtra(INTERVAL_ROUNDS, 0 );
 
             new PerformAsyncTask(0).execute();
-
         }
     }
 
@@ -167,31 +161,19 @@ public class RunningService extends IntentService
 
     @Override
     public void onLocationChanged(Location location) {
-
-
 //            if (!firstChange || lastLocation == null) {
         if (lastLocation == null) {
-                //firstChange = true;
-
-                lastLocation = location;
-                locationList.add(location);
-                return;
-            }
-
-            int altCurrent = (int) location.getAltitude();
+            //firstChange = true;
+            lastLocation = location;
+            locationList.add(location);
+            return;
+        }
 
             //the first update can be a max of 20m accurate
             // if ( latLonList==null && location.getAccuracy() < 20){
-
             if (locationList.size() == 1 && location.getAccuracy() < 20) {
-
-                altStart = altCurrent;
-                altMax = altCurrent;
-                altMin = altCurrent;
-
                 currentDistance = 0;
                 locationList.add(location);
-                //latLonList= String.valueOf(location.getLatitude()) + "," + String.valueOf(location.getLongitude());
                 lastLocation = location;
                 return;
             }
@@ -209,15 +191,9 @@ public class RunningService extends IntentService
                     currentDistance += newDistance;
 
                     locationList.add(location);
-                    //latLonList+="," + String.valueOf(location.getLatitude()) + "," + String.valueOf(location.getLongitude());
                     totalTime = SystemClock.uptimeMillis() - mStartTime;
 
-                    if (altCurrent > altMax) altMax = altCurrent;
-                    else if (altCurrent < altMin) altMin = altCurrent;
-
                     if (currentDistance >= intervalDistance) {
-//                play( intervalRounds>0 && intervals.size()+1>=intervalRounds, false);
-                        altFinish = (int) location.getAltitude();
                         finishInterval();
                     } else if (currentDistance > 0) {
                         lastStringBuilder.setLength(0);
@@ -256,7 +232,7 @@ public class RunningService extends IntentService
             mBuilder.setContentText("Click to get into");
 //            mBuilder.setOngoing(true);
 
-            Intent resultIntent = new Intent(application, MainActivity.class);
+            Intent resultIntent = new Intent(application, ActivityIntervalNew.class);
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(application);
             stackBuilder.addParentStack(MainActivity.class);
 
@@ -307,7 +283,7 @@ public class RunningService extends IntentService
     private void finishInterval() {
 
         stopLocationUpdates();
-        intervals.add(new Interval(-1, locationList, totalTime, intervalDistance, altStart, altFinish, altMax, altMin));
+        intervals.add(new Interval(-1, locationList, totalTime, intervalDistance));
         currentDistance = 0;
         locationList.clear();
         boolean completed = intervalRounds > 0 && intervals.size() >= intervalRounds;
@@ -316,7 +292,6 @@ public class RunningService extends IntentService
         int mins = (int)((totalTime - (hours*3600000))/60000);
         int secs = (int)((totalTime - (hours*3600000) - (mins*60000))/1000);
 
-        speak(mins+" minutes and "+secs+" seconds");
 
         if (!completed) {
 
@@ -328,6 +303,7 @@ public class RunningService extends IntentService
             speak("COMPLETED "+intervalRounds+" intervals");
 
         }
+        speak(mins + " minutes and " + secs + " seconds");
 
         editor.putBoolean(INTERVAL_COMPLETED, completed);
         editor.putInt(COMPLETED_NUM, intervals.size());
@@ -353,7 +329,9 @@ public class RunningService extends IntentService
 
     private void speak(String textToSpeak) {
 
-        application.getTtsManager().initQueue(textToSpeak);
+        if (hasSound) {
+            application.getTtsManager().initQueue(textToSpeak);
+        }
 
     }
 
