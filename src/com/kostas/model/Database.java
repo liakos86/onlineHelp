@@ -157,23 +157,13 @@ public class Database extends SQLiteOpenHelper {
                 ContentDescriptor.Interval.Cols.ID,
                 ContentDescriptor.Interval.Cols.LATLONLIST,
                 ContentDescriptor.Interval.Cols.MILLISECONDS,
-                ContentDescriptor.Interval.Cols.DISTANCE,
-                ContentDescriptor.Interval.Cols.ALT_START,
-                ContentDescriptor.Interval.Cols.ALT_FINISH,
-                ContentDescriptor.Interval.Cols.ALT_MAX,
-                ContentDescriptor.Interval.Cols.ALT_MIN
-
+                ContentDescriptor.Interval.Cols.DISTANCE
         };
 
         int sIdPosition = 0;
         int sLatPosition = 1;
         int sMillisPosition = 2;
         int sDistancePosition = 3;
-        int sAltStartPosition = 4;
-        int sAltFinishPosition = 5;
-        int sAltMaxPosition = 6;
-        int sAltMinPosition = 7;
-
 
         Cursor c = mContext.getContentResolver().query(ContentDescriptor.Interval.CONTENT_URI, FROM,
                 ContentDescriptor.Interval.Cols.RUNNING_ID+" = "+String.valueOf(id),
@@ -184,8 +174,8 @@ public class Database extends SQLiteOpenHelper {
         if (c.getCount() > 0) {
 
             while (c.moveToNext()) {
-                St.add(new Interval(c.getLong(sIdPosition),c.getString(sLatPosition), c.getLong(sMillisPosition), c.getFloat(sDistancePosition),
-                                    c.getInt(sAltStartPosition), c.getInt(sAltFinishPosition), c.getInt(sAltMaxPosition), c.getInt(sAltMinPosition)));
+                St.add(new Interval(c.getLong(sIdPosition),c.getString(sLatPosition),
+                        c.getLong(sMillisPosition), c.getFloat(sDistancePosition)));
             }
         }
         c.close();

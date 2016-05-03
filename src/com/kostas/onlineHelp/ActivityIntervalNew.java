@@ -10,7 +10,6 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.*;
 import android.provider.Settings;
-import android.test.mock.MockApplication;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
@@ -54,7 +53,6 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     SharedPreferences app_preferences;
     RelativeLayout textsInfoRun;
     Button buttonSetIntervalValues, buttonDismiss, buttonSave;
-    ImageButton buttonStart, buttonStop, buttonBack;
     LinearLayout layoutBottomButtons;
     TextView roundsText, myAddress, timeText;
     float intervalDistance, coveredDist;
@@ -72,7 +70,6 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     IntervalAdapterItem adapterInterval;
     Spinner plansSpinner;
     SpinnerAdapter plansAdapter;
-    AdView adView, adView2;
     AdRequest adRequest, adRequest2;
     private BroadcastReceiver receiver;
 
@@ -80,15 +77,16 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         ((ExtApplication) getApplication()).setInRunningAct(true);
         setContentView(R.layout.activity_interval);
+
         flipper = (ViewFlipper) findViewById(R.id.flipper);
         flipper.setDisplayedChild(2);
         setPlansSpinner();
         setViewsAndButtons();
-        new PerformAsyncTask(this, 0).execute();
+        getPlansFromDb();
+        new LoadAsyncAds().execute();
         setListeners();
 
         flipper.setDisplayedChild(0);
@@ -199,16 +197,16 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         sound.setChecked(!app_preferences.getBoolean("noSound", false));
         vibration.setChecked(!app_preferences.getBoolean("noVibration", false));
 
-        adView = (AdView) findViewById(R.id.adViewInterval);
-        adView2 = (AdView) findViewById(R.id.adViewInterval2);
+        //adView = (AdView) findViewById(R.id.adViewInterval);
+        //adView2 = (AdView) findViewById(R.id.adViewInterval2);
         intervalsList = new ArrayList<Interval>();
         myAddress = (TextView) findViewById(R.id.myAddressText);
         roundsText = (TextView) findViewById(R.id.roundsText);
         timeText = (TextView) findViewById(R.id.timeText);
         buttonSetIntervalValues = (Button) findViewById(R.id.buttonSetIntervalValues);
-        buttonStart = (ImageButton) findViewById(R.id.buttonStart);
-        buttonStop = (ImageButton) findViewById(R.id.buttonStop);
-        buttonBack = (ImageButton) findViewById(R.id.buttonBack);
+//        buttonStart = (ImageButton) findViewById(R.id.buttonStart);
+//        buttonStop = (ImageButton) findViewById(R.id.buttonStop);
+//        buttonBack = (ImageButton) findViewById(R.id.buttonBack);
         intervalTimePicker = (NumberPickerKostas) findViewById(R.id.intervalTimePicker);
         intervalTimePicker.setValue(10);
         intervalDistancePicker = (NumberPickerKostas) findViewById(R.id.intervalDistancePicker);
@@ -313,7 +311,10 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         coveredDist = 0;
         mHandler.removeCallbacks(mUpdateTimeTask);
         timeText.setText(ZERO_TIME);
-        countDownTimer.cancel();
+
+        if (countDownTimer !=null) {
+            countDownTimer.cancel();
+        }
 
         if (completed) {
             doStop();
@@ -399,7 +400,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         intervalTime = 0;
         intervalStartRest = 0 ;
         intervalsList.clear();
-        buttonBack.setVisibility(View.VISIBLE);
+        findViewById(R.id.buttonBack).setVisibility(View.VISIBLE);
         clearViews();
         hideFrame();
     }
@@ -445,21 +446,21 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             }
         });
 
-        buttonStart.setOnClickListener(new View.OnClickListener() {
+        ( findViewById(R.id.buttonStart)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getInRunningMode(false, false, true, SystemClock.uptimeMillis(), 0);
             }
         });
 
-        buttonStop.setOnClickListener(new View.OnClickListener() {
+        ( findViewById(R.id.buttonStop)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 confirmStopOrDelete(true);
             }
         });
 
-        buttonBack.setOnClickListener(new View.OnClickListener() {
+        ( findViewById(R.id.buttonBack)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 hideFrame();
@@ -470,11 +471,9 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     /**
      * Fetches the user plans from the db
      *
-     * @param activity the activity instance
-     * @param fromAsync indicates if this call is from an asynctask
      */
-    public void getPlansFromDb(Activity activity, boolean fromAsync) {
-        Database db = new Database(activity);
+    public void getPlansFromDb() {
+        Database db = new Database(this);
         plans.clear();
         List<Plan> newPlans = db.fetchPlansFromDb();
         plans.add(new Plan("Select a plan"));
@@ -482,9 +481,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             plans.add(plan);
         }
         plansAdapter.notifyDataSetChanged();
-//        if (!fromAsync) {
-//            setPlansVisibility();
-//        }
+        plansSpinner.setClickable(true);
     }
 
     /**
@@ -656,7 +653,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
 
 
         layoutBottomButtons.setVisibility(View.INVISIBLE);
-        adView2.setVisibility(View.INVISIBLE);
+        findViewById(R.id.adViewInterval2).setVisibility(View.INVISIBLE);
         timerProgressWheel.setVisibility(View.INVISIBLE);
         distanceProgressWheel.setVisibility(View.INVISIBLE);
 
@@ -667,14 +664,14 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
 
         if (startsNow) {
 
-            buttonStart.setVisibility(View.INVISIBLE);
-            buttonStop.setVisibility(View.VISIBLE);
-            buttonBack.setVisibility(View.INVISIBLE);
+            findViewById(R.id.buttonStart).setVisibility(View.INVISIBLE);
+            findViewById(R.id.buttonStop).setVisibility(View.VISIBLE);
+            findViewById(R.id.buttonBack).setVisibility(View.INVISIBLE);
         } else {
 
-            buttonStart.setVisibility(View.VISIBLE);
-            buttonStop.setVisibility(View.INVISIBLE);
-            buttonBack.setVisibility(View.VISIBLE);
+            findViewById(R.id.buttonStart).setVisibility(View.VISIBLE);
+            findViewById(R.id.buttonStop).setVisibility(View.INVISIBLE);
+            findViewById(R.id.buttonBack).setVisibility(View.VISIBLE);
         }
     }
 
@@ -738,6 +735,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         fixListAndAdapter(intervals);
         setInitialTextInfo();
         setProgressAndVisibilityTimerAndDistance(0, View.GONE, 0, View.GONE);
+
         if (intervalsList.size() == 0 && coveredDist == 0) {
             clear();
         }
@@ -757,11 +755,17 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             }
             intervalsList.add(new Interval(-1, sb.toString(), SystemClock.uptimeMillis() - startTimeMillis, coveredDist));
         }
-        new PerformAsyncTask(this, 1).execute();
+
+        mHandler.removeCallbacks(mUpdateTimeTask);
+        stopRunningService();
+        if (countDownTimer != null)
+            countDownTimer.cancel();
+        resetAppPrefs();
+
         if (intervalsList.size() > 0) {
-            buttonStop.setVisibility(View.GONE);
+            findViewById(R.id.buttonStop).setVisibility(View.GONE);
             layoutBottomButtons.setVisibility(View.VISIBLE);
-            adView2.setVisibility(View.VISIBLE);
+            findViewById(R.id.adViewInterval2).setVisibility(View.VISIBLE);
             textsInfoRun.setVisibility(View.GONE);
             completedIntervalsListView.setVisibility(View.VISIBLE);
         }
@@ -953,15 +957,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     }
 
 
-    private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
-        private Activity activity;
-        int type;
-
-        public PerformAsyncTask(Activity activity, int type) {
-            this.activity = activity;
-            this.type = type;
-
-        }
+    private class LoadAsyncAds extends AsyncTask<Void, Void, Void> {
 
         protected void onPreExecute() {
             plansSpinner.setClickable(false);
@@ -969,31 +965,14 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
 
         @Override
         protected Void doInBackground(Void... unused) {
-
-            if (type == 0) {
-                getPlansFromDb(activity, true);
-                placeAds();
-            } else if (type == 1) {
-                mHandler.removeCallbacks(mUpdateTimeTask);
-                stopRunningService();
-                if (countDownTimer != null)
-                    countDownTimer.cancel();
-                resetAppPrefs();
-
-            }
-
+            placeAds();
             return null;
-
         }
 
         @Override
         protected void onPostExecute(Void result) {
-
-            adView2.loadAd(adRequest2);
-            adView.loadAd(adRequest);
-            plansSpinner.setClickable(true);
-//            setPlansVisibility();
-
+            ((AdView)findViewById(R.id.adViewInterval2)).loadAd(adRequest2);
+            ((AdView)findViewById(R.id.adViewInterval)).loadAd(adRequest);
         }
 
     }
@@ -1012,10 +991,15 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
 
         if (((ExtApplication) getApplication()).isInRunningMode()){
             Toast.makeText(getApplication(), "You are running", Toast.LENGTH_SHORT).show();
-        }else{
-            super.onBackPressed();
-            ((ExtApplication) getApplication()).setInRunningAct(false);
+            return;
         }
+
+        ((ExtApplication) getApplication()).setInRunningAct(false);
+        super.onBackPressed();
+
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
+
+
 
     }
 }

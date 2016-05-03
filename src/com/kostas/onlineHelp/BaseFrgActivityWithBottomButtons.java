@@ -48,7 +48,7 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        showBottomButtons();
+        //showBottomButtons();
     }
 
     @Override
@@ -113,23 +113,25 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
             if (shouldMakeFragmentLoading) {
                 MyPagerAdapter adapter = (MyPagerAdapter) mPager.getAdapter();
                 int position = ((ExtApplication) getApplication()).getPosition();
-                ((LoadingOnExitFragment) adapter.fragments[position]).onExit();
+                if (adapter.fragments[position]!=null) {
+                    ((LoadingOnExitFragment) adapter.fragments[position]).onExit();
+                }
             }
-            hideBottomButtons();
-            //overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
+            //hideBottomButtons();
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
         }
     }
 
-    private void hideBottomButtons(){
-        LinearLayout bottomButtons = (LinearLayout) findViewById(R.id.bottomButtons);
-            bottomButtons.setVisibility(View.GONE);
-    }
-
-    private void showBottomButtons(){
-        LinearLayout bottomButtons = (LinearLayout) findViewById(R.id.bottomButtons);
-        if (!((ExtApplication) getApplication()).isInRunningAct())
-        bottomButtons.setVisibility(View.VISIBLE);
-    }
+//    private void hideBottomButtons(){
+//        LinearLayout bottomButtons = (LinearLayout) findViewById(R.id.bottomButtons);
+//            bottomButtons.setVisibility(View.GONE);
+//    }
+//
+//    private void showBottomButtons(){
+//        LinearLayout bottomButtons = (LinearLayout) findViewById(R.id.bottomButtons);
+//        if (!((ExtApplication) getApplication()).isInRunningAct())
+//        bottomButtons.setVisibility(View.VISIBLE);
+//    }
 
     /**
      * If the positions is 0 or 1 we just change the displayed fragment

@@ -23,18 +23,20 @@
               />
 
 
-    <Button
-            android:layout_margin="@dimen/margin10"
-            android:layout_width="fill_parent"
-            android:layout_height="@dimen/standard_view_height"
-            android:text="@string/new_plan"
-            android:textStyle="bold"
-            android:textSize="@dimen/large_text"
-            android:textColor="@color/white_back"
-            android:background="@drawable/close_button_selector"
-            android:id="@+id/buttonNewPlan"
-            android:layout_alignParentBottom="true"
-            />
+        <Button
+                android:layout_alignParentBottom="true"
+                android:layout_margin="@dimen/margin10"
+               android:layout_width="match_parent"
+                android:layout_height="@dimen/standard_view_height"
+                android:text="@string/new_plan"
+                android:textStyle="bold"
+                android:textSize="@dimen/large_text"
+                android:textColor="@color/white_back"
+                android:background="@drawable/close_button_selector"
+                android:id="@+id/buttonNewPlan"
+
+                />
+
 
 </RelativeLayout>
 
@@ -101,12 +103,6 @@
                 android:layout_height="@dimen/standard_view_height">
         </com.kostas.onlineHelp.NumberPickerKostas>
 
-        <!--<EditText android:layout_width="match_parent" android:layout_height="@dimen/standard_view_height"-->
-                <!--android:layout_below="@+id/planIntervalRoundsPicker" android:layout_marginBottom="@dimen/twenty"-->
-                <!--android:background="@color/white_back"-->
-                <!--android:id="@+id/planNewDescription"-->
-                <!--android:padding="@dimen/four"-->
-                <!--/>-->
 
         <EditText
                   android:textColorHint="@color/circle_grey"
@@ -121,19 +117,37 @@
                   android:layout_height="@dimen/standard_view_height"
                   android:hint="@string/description"/>
 
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                      android:layout_alignParentBottom="true">
+        <Button
 
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_marginRight="@dimen/eight"
+                android:layout_marginEnd="@dimen/eight"
+                android:layout_height="@dimen/standard_view_height"
+                android:text="@string/close"
+                android:textStyle="bold"
+                android:textSize="@dimen/xmedium_text"
+                android:textColor="@color/white_back"
+                android:background="@drawable/close_button_selector"
+                android:id="@+id/buttonClosePlan"
+
+                />
 
         <Button
-                android:layout_width="fill_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="@dimen/standard_view_height"
                 android:text="@string/save_plan"
                 android:textStyle="bold"
-                android:textSize="@dimen/large_text"
+                android:textSize="@dimen/xmedium_text"
                 android:textColor="@color/white_back"
-                android:background="@drawable/close_button_selector"
+                android:background="@drawable/plus_minus_selector"
                 android:id="@+id/buttonSavePlan"
-                android:layout_alignParentBottom="true"
+
                 />
+        </LinearLayout>
 
     </RelativeLayout>
 
@@ -146,6 +160,20 @@
                   android:text="@string/no_plans"
                   android:textSize="20sp"
                   android:drawableBottom="@drawable/empty_100"/>
+
+        <Button
+                android:layout_alignParentBottom="true"
+                android:layout_margin="@dimen/margin10"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/standard_view_height"
+                android:text="@string/new_plan"
+                android:textStyle="bold"
+                android:textSize="@dimen/large_text"
+                android:textColor="@color/white_back"
+                android:background="@drawable/close_button_selector"
+                android:id="@+id/buttonNewPlan2"
+
+                />
     </RelativeLayout>
 
 </ViewFlipper>

@@ -101,7 +101,7 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
                 startNewInterval(mPager, false);
         }else{
             MyPagerAdapter adapter = (MyPagerAdapter) mPager.getAdapter();
-            if (((ExtApplication) getApplication()).isNewIntervalInDb()) {
+            if (((ExtApplication) getApplication()).isNewIntervalInDb() && adapter.fragments[0] != null) {
                 ((FrgShowRuns)adapter.fragments[0]).getRunsFromDb(this, false);
                 ((ExtApplication) getApplication()).setNewIntervalInDb(false);
             }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Interval+</string>
-    <string name="crash_toast_text">eskase</string>
+    <string name="crash_toast_text">Ooops! I crashed! Please send me!</string>
     <string name="start">Start</string>
     <string name="save_plan">Save Plan</string>
     <string name="new_plan">New Plan</string>
@@ -10,6 +10,8 @@
     <string name="no_runs">No saved runs yet!</string>
     <string name="fastest">fastest</string>
     <string name="select">select</string>
+    <string name="close">Close</string>
+    <string name="map">Map</string>
     <string name="dialog_error">Description must be between 1 and 20 characters</string>
     <string name="settings_error">Lengths must be up to 20 characters</string>
     <string name="start_hint">start sound (default \'Started\')</string>
@@ -32,6 +34,9 @@
     <string name="description">Enter Description</string>
     <string name="click">Click start markers for info</string>
     <string name="facebook_app_id">1733286690224529</string>
+    <string name="plans">Plans</string>
+    <string name="diary">Diary</string>
+    <string name="run">Run</string>
 
 
 </resources>

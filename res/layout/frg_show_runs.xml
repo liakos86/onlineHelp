@@ -60,8 +60,8 @@
             <LinearLayout android:baselineAligned="false" android:id="@+id/intervalsButtons" android:layout_alignParentBottom="true" android:layout_width="fill_parent" android:layout_height="wrap_content"  android:padding="@dimen/eight">
 
 
-                <Button android:textStyle="bold" android:layout_marginRight="@dimen/eight" android:textColor="@color/white_back"  android:id="@+id/buttonCloseIntervals" android:background="@drawable/close_button_selector" android:text="Close"  android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height"/>
-                <Button android:textStyle="bold"   android:id="@+id/buttonShowMap" android:textColor="@color/white_back" android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height" android:background="@drawable/plus_minus_selector" android:text="Map"/>
+                <Button android:textSize="@dimen/xmedium_text" android:textStyle="bold" android:layout_marginRight="@dimen/eight" android:textColor="@color/white_back"  android:id="@+id/buttonCloseIntervals" android:background="@drawable/close_button_selector" android:text="@string/close"  android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height"/>
+                <Button  android:textSize="@dimen/xmedium_text"   android:textStyle="bold"   android:id="@+id/buttonShowMap" android:textColor="@color/white_back" android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height" android:background="@drawable/plus_minus_selector" android:text="@string/map"/>
 
                 <!--<Button android:paddingLeft="@dimen/four" android:drawableLeft="@drawable/share_32" android:textStyle="bold"  android:id="@+id/buttonShare" android:textColor="@color/white_back" android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height" android:background="@drawable/button_blue_selector" android:text="Share"/>-->
 

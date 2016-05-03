@@ -479,26 +479,20 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
 
         @Override
         public View getChildView(final int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-
             child = (ArrayList<Running>) childtems.get(groupPosition);
-
             runningViewHolder holder =null;
             if (convertView == null || !(convertView.getTag() instanceof runningViewHolder)) {
                 convertView = inflater.inflate(R.layout.list_running_row, parent, false);
-
                 holder = new runningViewHolder();
-
                 holder.intervalCount = (TextView) convertView
                         .findViewById(R.id.intervalCount);
                 holder.description = (TextView) convertView
                         .findViewById(R.id.runningDescription);
                 holder.date =  (TextView) convertView
                         .findViewById(R.id.runningDate);
-
                 convertView.setTag(holder);
             } else {
                 holder = (runningViewHolder) convertView.getTag();
-
             }
 
                 holder.description.setText((int) child.get(childPosition).getDistance() + " meters with " + ((int) (child.get(childPosition).getTime() / 1000)) + " secs rest");
@@ -512,23 +506,16 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
                         return false;
                     }
                 });
-//
-//
+
                 convertView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-
                         currentRun = child.get(childPosition);
-
                         showIntervalsForRun(child.get(childPosition));
                         setTextsOnMap();
                     }
                 });
-
-
             return convertView;
-
-
         }
 
         @Override
@@ -610,8 +597,6 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
         }
 
     }
-
-
 
     private void showTextNoRuns(){
         boolean empty= true;

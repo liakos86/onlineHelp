@@ -27,7 +27,7 @@ public class FrgPlans extends LoadingOnExitFragment {
     List<Plan> plans = new ArrayList<Plan>();
     PlansAdapterItem adapterPlans;
     ViewFlipper plansFlipper;
-    Button buttonNewPlan, buttonSavePlan;
+    Button buttonNewPlan, buttonNewPlan2, buttonSavePlan, buttonClosePlan;
     EditText planDescription;
 
     /**
@@ -63,9 +63,18 @@ public class FrgPlans extends LoadingOnExitFragment {
         planIntervalStartRestPicker.setValue(10);
         planDescription = (EditText) v.findViewById(R.id.planNewDescription);
         buttonNewPlan = ((Button) v.findViewById(R.id.buttonNewPlan));
+        buttonNewPlan2 = ((Button) v.findViewById(R.id.buttonNewPlan2));
         buttonSavePlan = ((Button) v.findViewById(R.id.buttonSavePlan));
+        buttonClosePlan = ((Button) v.findViewById(R.id.buttonClosePlan));
 
         buttonNewPlan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                plansFlipper.setDisplayedChild(2);
+            }
+        });
+
+        buttonNewPlan2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 plansFlipper.setDisplayedChild(2);
@@ -78,6 +87,15 @@ public class FrgPlans extends LoadingOnExitFragment {
                 savePlan();
             }
         });
+
+        buttonClosePlan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                clearViews();
+                plansFlipper.setDisplayedChild(1);
+            }
+        });
+
     }
 
     private void clearViews(){
