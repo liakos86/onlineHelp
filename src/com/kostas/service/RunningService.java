@@ -40,7 +40,6 @@ public class RunningService extends IntentService
     public static final String INTERVAL_START_REST = "intervalStartRest";
     public static final String INTERVAL_ROUNDS = "intervalRounds";
     public static final String INTERVAL_COMPLETED = "intervalCompleted";
-    public static final String LAST_LOCATION = "lastLocation";
     public static final String LATLONLIST = "latLonList";
     public static final String COMPLETED_NUM = "completed_num";
     public static final String TOTAL_DIST = "totalDist";
@@ -145,19 +144,14 @@ public class RunningService extends IntentService
         hasSound = !app_preferences.getBoolean(NO_SOUND, false);
 //        hasVibration = !app_preferences.getBoolean(NO_VIBRATION, false);
 //        v = (Vibrator) application.getSystemService(Context.VIBRATOR_SERVICE);
-
         createForegroundNotification();
-
         intervalTime = intent.getLongExtra(INTERVAL_TIME, 0);
         intervalStartRest = intent.getLongExtra(INTERVAL_START_REST, 0);
         startCountDownForNextInterval(intervalStartRest);
         intervals = new ArrayList<Interval>();
         intervalDistance = intent.getFloatExtra(INTERVAL_DISTANCE, 0);
         intervalRounds = intent.getIntExtra(INTERVAL_ROUNDS, 0);
-
         new PerformAsyncTask(0).execute();
-
-
     }
 
 
