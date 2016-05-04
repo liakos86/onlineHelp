@@ -922,7 +922,6 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     private class LoadAsyncAds extends AsyncTask<Void, Void, Void> {
 
         protected void onPreExecute() {
-            plansSpinner.setClickable(false);
         }
 
         @Override

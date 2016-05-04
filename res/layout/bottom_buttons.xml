@@ -19,7 +19,7 @@ android:background="@color/drawer_black"
                 android:id="@+id/btn_my_runs"
                 style="@style/BottomTab">
             <ImageView
-                    android:src="@drawable/diary_32"
+                    android:src="@drawable/diary_50"
                     style="@style/BottomTabImage"/>
             <TextView
                     android:text="@string/diary"
@@ -29,7 +29,7 @@ android:background="@color/drawer_black"
                 android:id="@+id/btn_my_plans"
                 style="@style/BottomTab">
             <ImageView
-                    android:src="@drawable/plan_32"
+                    android:src="@drawable/plan_50"
                     style="@style/BottomTabImage"/>
             <TextView
                     android:text="@string/plans"
@@ -40,7 +40,7 @@ android:background="@color/drawer_black"
                 android:id="@+id/btn_new_interval"
                 style="@style/BottomTab">
             <ImageView
-                    android:src="@drawable/interval_32"
+                    android:src="@drawable/interval_50"
                     style="@style/BottomTabImage"/>
             <TextView
                     android:text="@string/run"
