@@ -29,6 +29,11 @@ import java.util.List;
 
 public class RunningService extends IntentService
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+
+    public static final String INTERVAL_IN_PROGRESS =  "intervalInProgress";
+    public static final String NO_SOUND = "noSound";
+    public static final String NO_VIBRATION = "noVibration";
+
     public static final String INTERVAL_DISTANCE = "intervalDistance";
     public static final String INTERVAL_SPEED = "intervalSpeed";
     public static final String INTERVAL_TIME = "intervalTime";
@@ -92,10 +97,6 @@ public class RunningService extends IntentService
 
         buildGoogleApiClient();
 
-        hasSound = !app_preferences.getBoolean("noSound", false);
-//        hasVibration = !app_preferences.getBoolean("noVibration", false);
-//        v = (Vibrator) application.getSystemService(Context.VIBRATOR_SERVICE);
-
         ttsManager = application.getTtsManager();
 
     }
@@ -127,8 +128,22 @@ public class RunningService extends IntentService
     }
 
 
+    /**
+     * Can be called multiple times. Basically called every time startService()
+     * is called from an activity
+     *
+     * @param intent
+     * @param startId
+     */
     @Override
     public void onStart(Intent intent, int startId) {
+
+
+        hasSound = !app_preferences.getBoolean(NO_SOUND, false);
+//        hasVibration = !app_preferences.getBoolean(NO_VIBRATION, false);
+//        v = (Vibrator) application.getSystemService(Context.VIBRATOR_SERVICE);
+
+
 
         if (intent!=null){//first
 

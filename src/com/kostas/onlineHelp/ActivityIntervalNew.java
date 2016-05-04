@@ -57,6 +57,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     TextView roundsText, myAddress, timeText;
     float intervalDistance, coveredDist;
     ViewFlipper flipper;
+    CheckBox sound, vibration;
     private Handler mHandler = new Handler();
 
     /**
@@ -191,8 +192,8 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
 
         app_preferences = this.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
 
-        CheckBox sound = (CheckBox) findViewById(R.id.checkbox_sound);
-        CheckBox vibration = (CheckBox) findViewById(R.id.checkbox_vibration);
+        sound = (CheckBox) findViewById(R.id.checkbox_sound);
+        vibration = (CheckBox) findViewById(R.id.checkbox_vibration);
 
         sound.setChecked(!app_preferences.getBoolean("noSound", false));
         vibration.setChecked(!app_preferences.getBoolean("noVibration", false));
@@ -371,21 +372,14 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
      */
     public void resetAppPrefs() {
         SharedPreferences.Editor editor = app_preferences.edit();
-        editor.remove(RunningService.LATLONLIST);
-        editor.remove(RunningService.TOTAL_DIST);
-        editor.remove(RunningService.TOTAL_TIME);
-        editor.remove(RunningService.INTERVAL_ROUNDS);
-        editor.remove(RunningService.INTERVAL_SPEED);
-        editor.remove(RunningService.INTERVAL_COMPLETED);
-        editor.remove(RunningService.INTERVAL_TIME);
-        editor.remove(RunningService.INTERVAL_DISTANCE);
-        editor.remove(RunningService.INTERVAL_ROUNDS);
-        editor.remove(RunningService.INTERVALS);
-        editor.remove(RunningService.IS_RUNNING);
-        editor.remove(RunningService.MSTART_COUNTDOWN_TIME);
-        editor.remove(RunningService.MSTART_TIME);
-        editor.remove(RunningService.LAST_LOCATION);
-        editor.remove(RunningService.COMPLETED_NUM);
+
+        boolean hasNoSound = app_preferences.getBoolean(RunningService.NO_SOUND, false);
+        boolean hasNoVibration = app_preferences.getBoolean(RunningService.NO_VIBRATION, false);
+
+        editor.clear().apply();
+
+        editor.putBoolean(RunningService.NO_SOUND, hasNoSound);
+        editor.putBoolean(RunningService.NO_VIBRATION, hasNoVibration);
         editor.apply();
     }
 
@@ -417,6 +411,20 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
      * Assigns listeners for every button in the layout
      */
     public void setListeners() {
+
+        sound.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                app_preferences.edit().putBoolean(RunningService.NO_SOUND, !sound.isChecked()).apply();
+            }
+        });
+
+        vibration.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                app_preferences.edit().putBoolean(RunningService.NO_VIBRATION, !vibration.isChecked()).apply();
+            }
+        });
 
         buttonSetIntervalValues.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -485,21 +493,6 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     }
 
     /**
-     * Hides the plans spinner if there are no plans
-     */
-//    private void setPlansVisibility() {
-//        if (plans.size() > 1) {
-//            plansSpinner.setVisibility(View.VISIBLE);
-//        }
-//        else {
-//            plansSpinner.setVisibility(View.GONE);
-//        }
-//        if (plansAdapter != null) {
-//            plansAdapter.notifyDataSetChanged();
-//        }
-//    }
-
-    /**
      * Obtains input values from user selections
      *
      * @return true if all values are retrieved successfully
@@ -543,9 +536,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     }
 
     private void setRoundsText(int rounds) {
-
         int size = app_preferences.getInt(RunningService.COMPLETED_NUM, 0);
-
         if (rounds > 0) {
             roundsText.setText(size + " / " + rounds + " comp");
         } else {
@@ -553,16 +544,15 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         }
     }
 
-
     /**
-     *  If the service is running i need to start the receiver, get the values from app_prefs
-     *  and fix every ui element based on these.
-     *
+     *  If the service is running and also the mode is INTERVAL_IN_PROGRESS i need to start the receiver,
+     *  get the values from app_prefs and fix every ui element based on these.
      **/
     @Override
     public void onResume() {
         super.onResume();
-        if (isMyServiceRunning()) {//service is on and i am running
+        //if (isMyServiceRunning() && (app_preferences.getBoolean(RunningService.INTERVAL_IN_PROGRESS, false))) {//service is on and i am running
+        if (isMyServiceRunning()){
             if (receiver == null) {
                 setBroadcastReceiver();
             }
@@ -570,7 +560,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             intervalTime = app_preferences.getLong(RunningService.INTERVAL_TIME, 0);
             intervalStartRest = app_preferences.getLong(RunningService.INTERVAL_START_REST, 0);
             startTimeMillis = app_preferences.getLong(RunningService.MSTART_TIME, SystemClock.uptimeMillis());
-            mHandler.post(mUpdateTimeTask);
+            //mHandler.post(mUpdateTimeTask);
             coveredDist = app_preferences.getFloat(RunningService.TOTAL_DIST, 0);
             setRoundsText(app_preferences.getInt(RunningService.INTERVAL_ROUNDS, 0));
             registerReceiver(receiver, new IntentFilter(RunningService.NOTIFICATION));
@@ -579,43 +569,21 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
                     app_preferences.getInt(RunningService.INTERVAL_ROUNDS, 0) == 0,
                     app_preferences.getLong(RunningService.MSTART_COUNTDOWN_TIME, SystemClock.uptimeMillis()),
                     coveredDist);
-
         }
     }
 
-
-
     @Override
     public void onPause() {
-
-
         super.onPause();
-
-
         if (countDownTimer != null) countDownTimer.cancel();
-
-
         try {
             if (isMyServiceRunning()) {
                 mHandler.removeCallbacks(mUpdateTimeTask);
                 unregisterReceiver(receiver);
             }
-
-
         } catch (Exception e) {
-            // tts.speak("Error",TextToSpeech.QUEUE_FLUSH, null);
             e.printStackTrace();
         }
-
-
-    }
-
-
-    @Override
-    public void onStop() {
-
-
-        super.onStop();
     }
 
     @Override
