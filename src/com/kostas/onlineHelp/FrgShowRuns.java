@@ -538,7 +538,7 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
                 //Log.v("LATLNG", "month error");
             }
             String[] months = getResources().getStringArray(R.array.months);
-            String monthName= months[month];
+            String monthName= months[month-1];
             holder.month.setText(monthName+" "+parentItems.get(groupPosition).split("/")[1] + " - " + ((ArrayList<Running>) childtems.get(groupPosition)).size() + " workouts");
             return convertView;
         }

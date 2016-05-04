@@ -89,8 +89,12 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         getPlansFromDb();
         new LoadAsyncAds().execute();
         setListeners();
-
         flipper.setDisplayedChild(0);
+
+        if (!isMyServiceRunning()) {
+            Intent intent = new Intent(getBaseContext(), RunningService.class);
+            startService(intent);
+        }
     }
 
     /**
@@ -189,25 +193,16 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     }
 
     private void setViewsAndButtons() {
-
         app_preferences = this.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
-
         sound = (CheckBox) findViewById(R.id.checkbox_sound);
         vibration = (CheckBox) findViewById(R.id.checkbox_vibration);
-
         sound.setChecked(!app_preferences.getBoolean("noSound", false));
         vibration.setChecked(!app_preferences.getBoolean("noVibration", false));
-
-        //adView = (AdView) findViewById(R.id.adViewInterval);
-        //adView2 = (AdView) findViewById(R.id.adViewInterval2);
         intervalsList = new ArrayList<Interval>();
         myAddress = (TextView) findViewById(R.id.myAddressText);
         roundsText = (TextView) findViewById(R.id.roundsText);
         timeText = (TextView) findViewById(R.id.timeText);
         buttonSetIntervalValues = (Button) findViewById(R.id.buttonSetIntervalValues);
-//        buttonStart = (ImageButton) findViewById(R.id.buttonStart);
-//        buttonStop = (ImageButton) findViewById(R.id.buttonStop);
-//        buttonBack = (ImageButton) findViewById(R.id.buttonBack);
         intervalTimePicker = (NumberPickerKostas) findViewById(R.id.intervalTimePicker);
         intervalTimePicker.setValue(10);
         intervalDistancePicker = (NumberPickerKostas) findViewById(R.id.intervalDistancePicker);
@@ -222,7 +217,6 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         buttonDismiss = (Button) findViewById(R.id.buttonDismissInterval);
         buttonSave = (Button) findViewById(R.id.buttonSaveRunWithIntervals);
         textsInfoRun = (RelativeLayout) findViewById(R.id.textsInfoRun);
-
         adapterInterval = new IntervalAdapterItem(this, this.getApplicationContext(),
                 R.layout.list_interval_row, intervalsList);
         completedIntervalsListView.setAdapter(adapterInterval);
@@ -270,7 +264,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             timerProgressWheel.setVisibility(View.VISIBLE);
             timerProgressWheel.setText((int) ((millisecondsToCount - (SystemClock.uptimeMillis() - startOfCountdown)) / 1000) + " secs");
 
-            if (!(isMyServiceRunning())) {
+            if ((isMyServiceRunning()) && !(app_preferences.getBoolean(RunningService.INTERVAL_IN_PROGRESS, false))) {
                 startRunningService();
             }
 
@@ -387,16 +381,23 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
      * Clears views and values after finishing an interval session
      */
     private void clear() {
-        ((ExtApplication)getApplication()).setInRunningMode(false);
-        myAddress.setVisibility(View.INVISIBLE);
-        completedIntervalsListView.setVisibility(View.GONE);
-        intervalDistance = 0;
-        intervalTime = 0;
-        intervalStartRest = 0 ;
-        intervalsList.clear();
-        findViewById(R.id.buttonBack).setVisibility(View.VISIBLE);
-        clearViews();
-        hideFrame();
+
+        resetAppPrefs();
+        ((ExtApplication) getApplication()).setInRunningMode(false);
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
+
+//                ((ExtApplication) getApplication()).setInRunningMode(false);
+//        myAddress.setVisibility(View.INVISIBLE);
+//        completedIntervalsListView.setVisibility(View.GONE);
+//        intervalDistance = 0;
+//        intervalTime = 0;
+//        intervalStartRest = 0 ;
+//        intervalsList.clear();
+//        findViewById(R.id.buttonBack).setVisibility(View.VISIBLE);
+//        clearViews();
+//        hideFrame();
     }
 
     /**
@@ -431,9 +432,9 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             public void onClick(View view) {
                 LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                 if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && obtainUserInput()) {
-                    if (isMyServiceRunning()) {
-                        stopRunningService();
-                    }
+//                    if (isMyServiceRunning()) {
+//                        stopRunningService();
+//                    }
                     showFrame();
                 } else if (!(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)))
                     Toast.makeText(getApplication(), "Please enable GPS", Toast.LENGTH_SHORT).show();
@@ -551,8 +552,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     @Override
     public void onResume() {
         super.onResume();
-        //if (isMyServiceRunning() && (app_preferences.getBoolean(RunningService.INTERVAL_IN_PROGRESS, false))) {//service is on and i am running
-        if (isMyServiceRunning()){
+        if (isMyServiceRunning() && (app_preferences.getBoolean(RunningService.INTERVAL_IN_PROGRESS, false))) {//service is on and i am running
             if (receiver == null) {
                 setBroadcastReceiver();
             }
@@ -853,7 +853,6 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
 
     }
 
-
     class SpinnerAdapter extends ArrayAdapter<Plan> {
 
         int layoutResourceId;
@@ -875,7 +874,6 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             return getCustomView(position, convertView, parent);
         }
 
-
         //this is the spinner drop
         public View getCustomDropView(int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater =getLayoutInflater();
@@ -894,9 +892,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             } else {
                 holder = (planViewHolder) convertView.getTag();
             }
-
             holder.description.setText(data.get(position).getDescription());
-
             return convertView;
         }
 
@@ -909,7 +905,6 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
                 holder = new planViewHolder();
                 holder.description = (TextView) convertView.findViewById(R.id.planDescriptionSpinner2);
                 holder.arrow = (ImageView) convertView.findViewById(R.id.planArrow);
-
                 convertView.setTag(holder);
             } else {
                 holder = (planViewHolder) convertView.getTag();
@@ -923,7 +918,6 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         TextView description;
         ImageView arrow;
     }
-
 
     private class LoadAsyncAds extends AsyncTask<Void, Void, Void> {
 
@@ -953,21 +947,15 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         }
     };
 
-
     @Override
     public void onBackPressed() {
-
         if (((ExtApplication) getApplication()).isInRunningMode()){
             Toast.makeText(getApplication(), "You are running", Toast.LENGTH_SHORT).show();
             return;
         }
-
         ((ExtApplication) getApplication()).setInRunningAct(false);
+        stopRunningService();
         super.onBackPressed();
-
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
-
-
-
     }
 }

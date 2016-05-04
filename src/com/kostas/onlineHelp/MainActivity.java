@@ -2,6 +2,7 @@ package com.kostas.onlineHelp;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 import com.kostas.service.RunningService;
@@ -97,7 +98,8 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
     @Override
     protected void onResume() {
         super.onResume();
-        if (isMyServiceRunning() || ((ExtApplication) getApplication()).isInRunningAct()) {//service is on
+        SharedPreferences app_preferences = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        if (isMyServiceRunning() && (app_preferences.getBoolean(RunningService.INTERVAL_IN_PROGRESS, false))) {//service is on
                 startNewInterval(mPager, false);
         }else{
             MyPagerAdapter adapter = (MyPagerAdapter) mPager.getAdapter();
