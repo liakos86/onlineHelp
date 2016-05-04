@@ -49,6 +49,7 @@ public class RunningService extends IntentService
     public static final String INTERVALS = "intervals";
     public static final String NOTIFICATION = "com.kostas.onlineHelp";
     public static final String IS_RUNNING = "is_running";
+    public static final String CONNECTION_FAILED = "connectionFailed";
 
     public float intervalDistance, currentDistance;
     private long mStartTime, totalTime, intervalTime, intervalStartRest, interval = 4000, vibrationMillis;
@@ -390,7 +391,9 @@ public class RunningService extends IntentService
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Toast.makeText(this, "Google services api failed to connect", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(NOTIFICATION);
+        intent.putExtra(CONNECTION_FAILED, true);
+        sendBroadcast(intent);
     }
 
     private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {

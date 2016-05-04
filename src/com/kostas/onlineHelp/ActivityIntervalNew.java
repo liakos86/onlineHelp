@@ -111,7 +111,13 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
                 Bundle bundle = intent.getExtras();
                 if (bundle != null) {
 
-                    if (bundle.getFloat(RunningService.INTERVAL_DISTANCE) != 0) {
+                    if (bundle.getBoolean(RunningService.CONNECTION_FAILED)) {
+                        Toast.makeText(getApplication(), "Google services api is not correctly configured!", Toast.LENGTH_LONG).show();
+                        stopRunningService();
+                        clear();
+                        finish();
+                    }
+                    else if (bundle.getFloat(RunningService.INTERVAL_DISTANCE) != 0) {
                         coveredDist = bundle.getFloat(RunningService.INTERVAL_DISTANCE);
                         setDistanceProgress(coveredDist);
                     } else {//todo add another message to identify ending

@@ -8,7 +8,7 @@
     <ImageView android:id="@+id/planIcon"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
                android:layout_centerVertical="true" android:layout_alignParentLeft="true" android:layout_marginRight="@dimen/eight"
-               android:src="@drawable/plan_32"/>
+               android:src="@drawable/plan_50"/>
 
 
     <TextView android:textStyle="bold" android:layout_toRightOf="@+id/planIcon" android:id="@+id/planDescription" android:textColor="@color/white_back"  android:layout_width="wrap_content" android:layout_height="wrap_content" />
