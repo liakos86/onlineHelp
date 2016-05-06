@@ -5,6 +5,7 @@
     <string name="start">Start</string>
     <string name="save_plan">Save Plan</string>
     <string name="new_plan">New Plan</string>
+    <string name="new_interval">New Interval</string>
     <string name="save_settings">Save Settings</string>
     <string name="no_plans">No saved plans yet!</string>
     <string name="no_runs">No saved runs yet!</string>
@@ -33,6 +34,7 @@
     <string name="click">Click start markers for info</string>
     <string name="facebook_app_id">1733286690224529</string>
     <string name="plans">Plans</string>
+    <string name="settings">Settings</string>
     <string name="diary">Diary</string>
     <string name="run">Run</string>
 

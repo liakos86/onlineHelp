@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.kostas.custom.NumberPickerKostas;
+import com.kostas.custom.ViewHolderRow;
 import com.kostas.dbObjects.Plan;
 import com.kostas.model.Database;
 import com.kostas.onlineHelp.R;
@@ -53,7 +54,7 @@ public class FrgPlans extends Fragment {
         plansListView = (ListView) v.findViewById(R.id.plansList);
         new PerformAsyncTask(getActivity()).execute();
         plansFlipper = (ViewFlipper) v.findViewById(R.id.plansFlipper);
-        adapterPlans = new PlansAdapterItem(getActivity().getApplicationContext(), R.layout.list_plan_row, plans);
+        adapterPlans = new PlansAdapterItem(getActivity().getApplicationContext(), R.layout.list_common_row, plans);
         plansListView.setAdapter(adapterPlans);
         planIntervalTimePicker = (NumberPickerKostas) v.findViewById(R.id.planIntervalTimePicker);
         planIntervalTimePicker.setValue(10);
@@ -175,33 +176,35 @@ public class FrgPlans extends Fragment {
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
 
-            planViewHolder holder =null;
-            if (convertView == null || !(convertView.getTag() instanceof planViewHolder)) {
-                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_plan_row, parent, false);
+            ViewHolderRow holder =null;
+            if (convertView == null || !(convertView.getTag() instanceof ViewHolderRow)) {
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_common_row, parent, false);
 
-                holder = new planViewHolder();
+                holder = new ViewHolderRow();
 
 
-                holder.description = (TextView) convertView
-                        .findViewById(R.id.planDescription);
-                holder.info =  (TextView) convertView
-                        .findViewById(R.id.planInfo);
+                holder.topText = (TextView) convertView
+                        .findViewById(R.id.topText);
+                holder.bottomText =  (TextView) convertView
+                        .findViewById(R.id.bottomText);
+                holder.rowIcon = (ImageView) convertView
+                        .findViewById(R.id.rowIcon);
 
                 convertView.setTag(holder);
             } else {
-                holder = (planViewHolder) convertView.getTag();
+                holder = (ViewHolderRow) convertView.getTag();
 
             }
 
             final Plan plan = plans.get(position);
-            holder.description.setText(plan.getDescription());
-            holder.info.setText( plan.getMeters()+"m with "+plan.getSeconds()+"secs rest"+ (plan.getRounds()>0 ? " x"+plan.getRounds()+" rounds" : "" ));
+            holder.topText.setText(plan.getDescription());
+            holder.bottomText.setText( plan.getMeters()+"m with "+plan.getSeconds()+"secs rest"+ (plan.getRounds()>0 ? " x"+plan.getRounds()+" rounds" : "" ));
+            holder.rowIcon.setImageDrawable(getResources().getDrawable(R.drawable.plan_50));
 
-
-            if (position%2==0)
-                convertView.setBackgroundDrawable(getResources().getDrawable(R.drawable.plan_odd_row));
-            else
-                convertView.setBackgroundDrawable(getResources().getDrawable(R.drawable.plan_even_row));
+//            if (position%2==0)
+//                convertView.setBackgroundDrawable(getResources().getDrawable(R.drawable.plan_odd_row));
+//            else
+//                convertView.setBackgroundDrawable(getResources().getDrawable(R.drawable.plan_even_row));
 
 
             convertView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -218,10 +221,7 @@ public class FrgPlans extends Fragment {
 
     }
 
-    private class planViewHolder{
-        TextView description;
-        TextView info;
-    }
+
 
 
     private void confirmDelete(final Long trId, final int position){

@@ -413,6 +413,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         ((ExtApplication) getApplication()).setInRunningAct(false);
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+        flipper.setDisplayedChild(0);
     }
 
     /**

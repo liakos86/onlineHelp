@@ -19,21 +19,6 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
     private static final String TAG = Thread.currentThread().getStackTrace()[2].getClassName();
 
     /**
-     * The bottom button position of the diary.
-     */
-    static final int POSITION_MY_DIARY = 0;
-
-    /**
-     * The bottom button position of the plans.
-     */
-    static final int POSITION_MY_PLANS = 1;
-
-    /**
-     * The bottom button position of the new interval.
-     */
-    static final int POSITION_NEW_INTERVAL = 2;
-
-    /**
      * Key represents the position of the button while value the layoutId of the button
      */
     Map<Integer, Integer> bottomButtons;
@@ -63,8 +48,8 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
         bottomButtons = new HashMap<Integer, Integer>();
         bottomButtons.put(0, R.id.btn_my_runs);
         bottomButtons.put(1, R.id.btn_my_plans);
-        bottomButtons.put(2, R.id.btn_new_interval);
-        for (int counter = 0; counter < MainActivity.PAGER_SIZE+1; counter++) {
+        bottomButtons.put(2, R.id.btn_settings);
+        for (int counter = 0; counter < MainActivity.PAGER_SIZE; counter++) {
             setBottomButtonListener(mPager, bottomButtons.get(counter), counter);
         }
     }
@@ -99,7 +84,7 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
     /**
      * Starts a new IntervalActivity
      */
-    protected void startNewInterval() {
+     public void startNewInterval() {
         if(!(this instanceof ActivityIntervalNew)){
             Intent intent = new Intent(this, ActivityIntervalNew.class);
             startActivity(intent);
@@ -119,10 +104,7 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
         bottomButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (position != POSITION_NEW_INTERVAL)
                     startMain(mPager, position);
-                else
-                    startNewInterval();
                 }
 
         });

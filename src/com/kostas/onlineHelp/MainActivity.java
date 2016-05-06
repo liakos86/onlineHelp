@@ -29,7 +29,7 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
     /**
      * The total size of the pager objects
      */
-    static final int PAGER_SIZE = 2;
+    static final int PAGER_SIZE = 3;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,7 +45,7 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
      */
     private void setupPager() {
         mPager = (NonSwipeableViewPager) findViewById(R.id.pager);
-        mPager.setOffscreenPageLimit(1);
+        mPager.setOffscreenPageLimit(2);
         mPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(),  PAGER_SIZE));
         setBottomButtons(mPager);
         setSelectedBottomButton(bottomButtons, 0);
@@ -73,12 +73,12 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
      * Sets the state of the pressed button to 'selected'
      *
      * @param bottomButtons
-     * @param postion
+     * @param position
      */
-    private void setSelectedBottomButton(Map<Integer, Integer> bottomButtons, int postion) {
+    private void setSelectedBottomButton(Map<Integer, Integer> bottomButtons, int position) {
         for (int key = 0; key < bottomButtons.size(); key++) {
             LinearLayout btn = (LinearLayout) findViewById(bottomButtons.get(key));
-            btn.setSelected(key != postion ? false : true);
+            btn.setSelected(key == position);
         }
     }
 

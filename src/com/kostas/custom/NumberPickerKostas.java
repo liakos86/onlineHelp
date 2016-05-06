@@ -193,7 +193,7 @@ public class NumberPickerKostas extends LinearLayout {
 
         valueText.setTextColor(getResources().getColor(R.color.interval_green));
         valueText.setGravity(Gravity.CENTER);
-        valueText.setBackgroundDrawable(getResources().getDrawable(R.drawable.value_picker_selector));
+        valueText.setBackgroundDrawable(getResources().getDrawable(R.color.white_back));
 		
 		// Since we're a number that gets affected by the button, we need to be
 		// ready to change the numeric value with a simple ++/--, so whenever

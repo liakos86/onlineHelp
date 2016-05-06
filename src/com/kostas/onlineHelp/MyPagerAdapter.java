@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import com.kostas.fragments.FrgPlans;
+import com.kostas.fragments.FrgSettings;
 import com.kostas.fragments.FrgShowRuns;
 
 
@@ -42,6 +43,12 @@ public class MyPagerAdapter extends FragmentPagerAdapter {
             case 1: {
                 if (fragments[position] == null){
                     fragments[position] = FrgPlans.init(1);
+                }
+                break;
+            }
+            case 2: {
+                if (fragments[position] == null){
+                    fragments[position] = FrgSettings.init(2);
                 }
                 break;
             }

@@ -17,12 +17,14 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.*;
+import com.kostas.custom.ViewHolderRow;
 import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Running;
 import com.kostas.model.Database;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.kostas.onlineHelp.BaseFrgActivityWithBottomButtons;
 import com.kostas.onlineHelp.IntervalAdapterItem;
 import com.kostas.onlineHelp.MainActivity;
 import com.kostas.custom.MapWrapperLayout;
@@ -80,6 +82,8 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
      * Open the map for the interval, close the current interval and go to runs list
      */
     Button openMapButton, closeIntervalsButton;//, shareButton;
+
+    Button buttonNewRun;
 
     /**
      * If the map is drawn we dont need to redraw
@@ -172,6 +176,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         //shareButton = (Button) v.findViewById(R.id.buttonShare);
         runsExpListView = (ExpandableListView) v.findViewById(R.id.listExpRunning);
         intervalListView = (ListView) v.findViewById(R.id.listIntervals);
+        buttonNewRun = (Button) v.findViewById(R.id.buttonNewRun);
 
     }
 
@@ -262,6 +267,13 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
                 viewFlipper.setDisplayedChild(2);
             }
         });//c
+
+        buttonNewRun.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((BaseFrgActivityWithBottomButtons) getActivity()).startNewInterval();
+            }
+        });
     }
 
     public int GetPixelFromDips(float pixels) {
@@ -318,6 +330,33 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
                 runsExpListView.expandGroup(0);
             }
         }
+        computeInfoTexts(newRuns);
+    }
+
+    void computeInfoTexts(List<Running> runs){
+        TextView runsCount =((TextView) getView().findViewById(R.id.runsCount));
+        TextView intervalsCount =((TextView) getView().findViewById(R.id.intervalsCount));
+        TextView metersCount =((TextView) getView().findViewById(R.id.metersCount));
+        TextView durationCount =((TextView) getView().findViewById(R.id.durationCount));
+
+        int runsNum=0, intervalsNum=0;
+        float metersNum = 0f;
+        long millisecsNum = 0l;
+
+        for (Running run : runs){
+            ++runsNum;
+            for (Interval interval : run.getIntervals()){
+                ++intervalsNum;
+                metersNum+=interval.getDistance();
+                millisecsNum+=interval.getMilliseconds();
+            }
+
+        }
+
+        runsCount.setText("RUNS\r\n"+runsNum);
+        intervalsCount.setText("INTERVALS\r\n"+intervalsNum);
+        metersCount.setText("KM\r\n"+metersNum/1000);
+        durationCount.setText(("HRS\r\n"+(int)(millisecsNum/3600000)));
     }
 
     public void drawMap(){
@@ -467,12 +506,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
             this.inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
-        private class runningViewHolder{
-            TextView description;
-            TextView intervalCount;
-            TextView date;
-        }
-
         private class headerViewHolder{
             TextView month;
         }
@@ -480,24 +513,27 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         @Override
         public View getChildView(final int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
             child = (ArrayList<Running>) childtems.get(groupPosition);
-            runningViewHolder holder =null;
-            if (convertView == null || !(convertView.getTag() instanceof runningViewHolder)) {
-                convertView = inflater.inflate(R.layout.list_running_row, parent, false);
-                holder = new runningViewHolder();
-                holder.intervalCount = (TextView) convertView
-                        .findViewById(R.id.intervalCount);
-                holder.description = (TextView) convertView
-                        .findViewById(R.id.runningDescription);
-                holder.date =  (TextView) convertView
-                        .findViewById(R.id.runningDate);
+            ViewHolderRow holder =null;
+            if (convertView == null || !(convertView.getTag() instanceof ViewHolderRow)) {
+                convertView = inflater.inflate(R.layout.list_common_row, parent, false);
+                holder = new ViewHolderRow();
+                holder.rightText = (TextView) convertView
+                        .findViewById(R.id.rightText);
+                holder.bottomText = (TextView) convertView
+                        .findViewById(R.id.bottomText);
+                holder.topText =  (TextView) convertView
+                        .findViewById(R.id.topText);
+                holder.rowIcon = (ImageView) convertView
+                        .findViewById(R.id.rowIcon);
                 convertView.setTag(holder);
             } else {
-                holder = (runningViewHolder) convertView.getTag();
+                holder = (ViewHolderRow) convertView.getTag();
             }
 
-                holder.description.setText((int) child.get(childPosition).getDistance() + " meters with " + ((int) (child.get(childPosition).getTime() / 1000)) + " secs rest");
-                holder.date.setText(child.get(childPosition).getDate());
-                holder.intervalCount.setText(String.valueOf(child.get(childPosition).getIntervals().size()) + " sessions");
+            holder.rowIcon.setImageDrawable(getResources().getDrawable(R.drawable.interval_50));
+                holder.bottomText.setText((int) child.get(childPosition).getDistance() + " meters with " + ((int) (child.get(childPosition).getTime() / 1000)) + " secs rest");
+                holder.topText.setText(child.get(childPosition).getDate());
+                holder.rightText.setText(String.valueOf(child.get(childPosition).getIntervals().size()) + " sessions");
 
                 convertView.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override

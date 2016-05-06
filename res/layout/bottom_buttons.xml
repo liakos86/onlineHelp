@@ -37,28 +37,15 @@ android:background="@color/primary_grey"
         </LinearLayout>
 
         <LinearLayout
-                android:id="@+id/btn_new_interval"
+                android:id="@+id/btn_settings"
                 style="@style/BottomTab">
             <ImageView
-                    android:src="@drawable/interval_50"
+                    android:src="@drawable/settings_50"
                     style="@style/BottomTabImage"/>
             <TextView
-                    android:text="@string/run"
+                    android:text="@string/settings"
                     style="@style/BottomTabText"/>
         </LinearLayout>
-
-        <!--<LinearLayout-->
-                <!--android:id="@+id/btn_exit"-->
-                <!--style="@style/BottomTab">-->
-            <!--<ImageView-->
-                    <!--android:src="@drawable/exit_32"-->
-                    <!--style="@style/BottomTabImage"/>-->
-            <!--<TextView-->
-                    <!--android:text="Exit"-->
-                    <!--style="@style/BottomTabText"/>-->
-        <!--</LinearLayout>-->
-
-
     </LinearLayout>
 
 </LinearLayout>
