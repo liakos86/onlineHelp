@@ -1,24 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-<!--<selector xmlns:android="http://schemas.android.com/apk/res/android">-->
+    <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!--<item>-->
-        <!--<shape android:shape="rectangle">-->
-
-            <!--<solid android:color="@color/circle_grey" />-->
-
-        <!--</shape>-->
-    <!--</item>-->
-
-
-    <item  android:bottom="-.5dp">
+    <item android:state_pressed="true" android:bottom="-.5dp">
         <shape android:shape="rectangle">
-            <solid android:color="@color/drawer_black" />
-            <!--<stroke-->
-                    <!--android:width="0.5dp"-->
-                    <!--android:color="@color/circle_grey" />-->
+            <solid android:color="@color/secondary_grey" />
             <corners
-                    android:radius="0dp" />
+                    android:radius="@dimen/zero" />
             <padding
                     android:left="@dimen/eight"
                     android:top="@dimen/eight"
@@ -27,8 +14,16 @@
         </shape>
     </item>
 
-
-
-
-<!--</selector>-->
-    </layer-list>
+    <item  android:bottom="-.5dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/primary_grey" />
+            <corners
+                    android:radius="@dimen/zero" />
+            <padding
+                    android:left="@dimen/eight"
+                    android:top="@dimen/eight"
+                    android:right="@dimen/eight"
+                    android:bottom="@dimen/eight" />
+        </shape>
+    </item>
+</selector>

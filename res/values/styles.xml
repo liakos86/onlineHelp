@@ -10,24 +10,13 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <!--<style name="MyActionBar.Text" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">-->
-
-        <!--<item name="android:textColor">@color/white_back</item>-->
-        <!--<item name="android:textStyle">bold</item>-->
-        <!--<item name="android:layout_width">match_parent</item>-->
-    <!--</style>-->
-
-
-
     <style name="spinner_style">
         <item name="android:background">@drawable/plus_minus_selector</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
-        <item name="android:paddingLeft">20dp</item>
-        <item name="android:paddingRight">20dp</item>
+        <item name="android:paddingLeft">@dimen/twenty</item>
+        <item name="android:paddingRight">@dimen/twenty</item>
     </style>
-
-
 
     <style name="BottomTab">
         <item name="android:layout_weight">1</item>
@@ -39,14 +28,10 @@
 
     <style name="BottomTabImage">
         <item name="android:layout_marginTop">6dp</item>
-        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_height">@dimen/zero</item>
         <item name="android:layout_weight">0.5</item>
         <item name="android:layout_width">match_parent</item>
     </style>
-
-    <!--<style name="BottomTabImage.home">-->
-        <!--<item name="android:layout_margin">11dp</item>-->
-    <!--</style>-->
 
     <style name="BottomTabText">
         <item name="android:textColor">@color/white_back</item>
@@ -54,7 +39,7 @@
         <item name="android:gravity">center</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:textSize">@dimen/small_text</item>
-        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_height">@dimen/zero</item>
         <item name="android:textStyle">bold</item>
     </style>
 

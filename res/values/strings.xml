@@ -12,10 +12,8 @@
     <string name="select">select</string>
     <string name="close">Close</string>
     <string name="map">Map</string>
-    <string name="dialog_error">Description must be between 1 and 20 characters</string>
+    <string name="dialog_error">Name must be between 1 and 20 characters</string>
     <string name="settings_error">Lengths must be up to 20 characters</string>
-    <string name="start_hint">start sound (default \'Started\')</string>
-    <string name="stop_hint">stop sound (default \'Stopped\')</string>
     <string name="text_time">00 : 00 : 00</string>
     <string name="text_avg_pace">Pace avg: 0m 0s / km</string>
     <string name="text_pace">Pace: 0m 0s / km</string>
@@ -31,7 +29,7 @@
     <string name="save">Save</string>
     <string name="sound">Sound</string>
     <string name="vibrate">Vibrate</string>
-    <string name="description">Enter Description</string>
+    <string name="description">Enter Plan Name</string>
     <string name="click">Click start markers for info</string>
     <string name="facebook_app_id">1733286690224529</string>
     <string name="plans">Plans</string>

@@ -6,7 +6,7 @@
             android:id="@+id/viewFlipperRuns"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:background="@color/drawer_black"
+            android:background="@color/primary_grey"
             >
 
         <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
@@ -32,9 +32,6 @@
 
                     />
 
-
-
-
         </RelativeLayout>
 
         <RelativeLayout  android:layout_width="fill_parent" android:layout_height="fill_parent">
@@ -48,19 +45,17 @@
                 android:layout_alignParentTop="true"
                 />
 
-
             <LinearLayout android:baselineAligned="false" android:id="@+id/intervalsButtons" android:layout_alignParentBottom="true" android:layout_width="fill_parent" android:layout_height="wrap_content"  android:padding="@dimen/eight">
 
 
-                <Button android:textSize="@dimen/xmedium_text" android:textStyle="bold" android:layout_marginRight="@dimen/eight" android:textColor="@color/white_back"  android:id="@+id/buttonCloseIntervals" android:background="@drawable/close_button_selector" android:text="@string/close"  android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height"/>
-                <Button  android:textSize="@dimen/xmedium_text"   android:textStyle="bold"   android:id="@+id/buttonShowMap" android:textColor="@color/white_back" android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height" android:background="@drawable/plus_minus_selector" android:text="@string/map"/>
+                <Button android:textSize="@dimen/xmedium_text" android:textStyle="bold" android:layout_marginRight="@dimen/eight" android:textColor="@color/white_back"  android:id="@+id/buttonCloseIntervals" android:background="@drawable/close_button_selector" android:text="@string/close"  android:layout_weight="1" android:layout_width="@dimen/zero" android:layout_height="@dimen/standard_view_height"/>
+                <Button  android:textSize="@dimen/xmedium_text"   android:textStyle="bold"   android:id="@+id/buttonShowMap" android:textColor="@color/white_back" android:layout_weight="1" android:layout_width="@dimen/zero" android:layout_height="@dimen/standard_view_height" android:background="@drawable/plus_minus_selector" android:text="@string/map"/>
 
-                <!--<Button android:paddingLeft="@dimen/four" android:drawableLeft="@drawable/share_32" android:textStyle="bold"  android:id="@+id/buttonShare" android:textColor="@color/white_back" android:layout_weight="1" android:layout_width="0dp" android:layout_height="@dimen/standard_view_height" android:background="@drawable/button_blue_selector" android:text="Share"/>-->
+                <!--<Button android:paddingLeft="@dimen/four_dp" android:drawableLeft="@drawable/share_32" android:textStyle="bold"  android:id="@+id/buttonShare" android:textColor="@color/white_back" android:layout_weight="1" android:layout_width="@dimen/zero" android:layout_height="@dimen/standard_view_height" android:background="@drawable/button_blue_selector" android:text="Share"/>-->
 
 
 
             </LinearLayout>
-
 
         </RelativeLayout>
 
@@ -131,13 +126,11 @@
     </com.kostas.custom.MapWrapperLayout>
 
 
-    <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
         <TextView android:id="@+id/noRunsText" android:textColor="@color/white_back"
-                  android:layout_centerInParent="true"  android:layout_width="wrap_content"
+                  android:layout_gravity="center"  android:layout_width="wrap_content"
                   android:layout_height="wrap_content" android:text="@string/no_runs" android:textSize="20sp"
                   android:drawableBottom="@drawable/empty_100"/>
 
-    </RelativeLayout>
 
     </ViewFlipper>
 

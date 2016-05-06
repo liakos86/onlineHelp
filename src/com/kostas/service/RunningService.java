@@ -50,9 +50,14 @@ public class RunningService extends IntentService
     public static final String MSTART_TIME = "mStartTime";
     public static final String MSTART_COUNTDOWN_TIME = "mStartCountdownTime";
     public static final String INTERVALS = "intervals";
-    public static final String NOTIFICATION = "com.kostas.onlineHelp";
     public static final String IS_RUNNING = "is_running";
     public static final String CONNECTION_FAILED = "connectionFailed";
+    public static final String FIRST_LOCATION = "firstLocation";
+
+    /**
+     * Intent filter
+     */
+    public static final String NOTIFICATION = "com.kostas.onlineHelp";
 
     /**
      * The DURATION for updates and vibration
@@ -186,6 +191,9 @@ public class RunningService extends IntentService
     public void onLocationChanged(Location location) {
 
         if (!intervalInProgress) {
+            if (lastLocation == null){
+                sendFirstLocation(location);
+            }
             lastLocation = location;
             return;
         }
@@ -270,7 +278,7 @@ public class RunningService extends IntentService
             intent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             PendingIntent pendIntent = PendingIntent.getActivity(this, 0, intent2, 0);
 //This constructor is deprecated. Use Notification.Builder instead
-            Notification notice = new Notification(R.drawable.interval_flag, "Interval in progress", System.currentTimeMillis());
+            Notification notice = new Notification(R.drawable.ic_notification_icon, "Interval in progress", System.currentTimeMillis());
 //This method is deprecated. Use Notification.Builder instead.
             notice.setLatestEventInfo(this, "Click to get into", "Running", pendIntent);
             notice.flags |= Notification.FLAG_NO_CLEAR;
@@ -284,15 +292,18 @@ public class RunningService extends IntentService
         currentDistance = 0;
         locationList.clear();
         boolean completed = intervalRounds > 0 && intervals.size() >= intervalRounds;
-        int hours = (int) (totalTime / 3600000);
-        int mins = (int) ((totalTime - (hours * 3600000)) / 60000);
-        int secs = (int) ((totalTime - (hours * 3600000) - (mins * 60000)) / 1000);
+
+        vibrate(2000);
         if (!completed) {
             startCountDownForNextInterval(intervalTime);
             speak("STOPPED");
         } else {
             speak("COMPLETED " + intervalRounds + " intervals");
         }
+        int hours = (int) (totalTime / 3600000);
+        int mins = (int) ((totalTime - (hours * 3600000)) / 60000);
+        int secs = (int) ((totalTime - (hours * 3600000) - (mins * 60000)) / 1000);
+
         speak(mins + " minutes and " + secs + " seconds");
         SharedPreferences.Editor editor = app_preferences.edit();
         editor.putBoolean(INTERVAL_COMPLETED, completed);
@@ -318,6 +329,24 @@ public class RunningService extends IntentService
         if (hasSound) {
             application.getTtsManager().initQueue(textToSpeak);
         }
+    }
+
+    private void vibrate(long millis){
+        if (hasVibration){
+            v.vibrate(millis);
+        }
+    }
+
+    private void sendFirstLocation(Location loc){
+        SharedPreferences.Editor editor = app_preferences.edit();
+        Type locType = new TypeToken<Location>() {
+        }.getType();
+        String json = (new Gson()).toJson(loc, locType);
+        editor.putString(FIRST_LOCATION, json);
+        editor.apply();
+        Intent intent = new Intent(NOTIFICATION);
+        intent.putExtra(FIRST_LOCATION, "loc");
+        sendBroadcast(intent);
     }
 
     private void refreshInterval(float pace) {
@@ -369,6 +398,8 @@ public class RunningService extends IntentService
             editor.putLong(MSTART_TIME, mStartTime);
             editor.apply();
             connectAndReceive();
+
+            vibrate(1000);
             speak("STARTED");
         }
     };

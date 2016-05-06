@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="drawer_titles">
-        <item>New interval</item>
-        <item>My Diary</item>
-        <item>My Plans</item>
-        <item>Exit</item>
-    </string-array>
-
     <string-array name="months">
         <item>January</item>
         <item>February</item>
@@ -21,19 +14,4 @@
         <item>November</item>
         <item>December</item>
     </string-array>
-
-
-    <!--<integer-array name="drawer_titles_colors">-->
-        <!--<item>@color/death_grey</item>-->
-        <!--<item>@android:color/white</item>-->
-        <!--<item>@color/death_grey</item>-->
-        <!--<item>@android:color/white</item>-->
-        <!--<item>@android:color/white</item>-->
-        <!--<item>@android:color/white</item>-->
-        <!--<item>@android:color/white</item>-->
-        <!--<item>@android:color/white</item>-->
-        <!--<item>@android:color/white</item>-->
-    <!--</integer-array>-->
-
-
 </resources>

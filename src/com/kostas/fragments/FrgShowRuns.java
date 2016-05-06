@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -221,15 +222,16 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
         DisplayMetrics metrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        int width = metrics.widthPixels;
+       // int width = metrics.widthPixels;
+        int right = (int) (getResources().getDisplayMetrics().widthPixels - TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics()));
 
         //placing the indicator 'right' pixels from the right of the view
         if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            runsExpListView.setIndicatorBounds(width-GetPixelFromDips(40), width-GetPixelFromDips(20));
-//            runsExpListView.setIndicatorBounds(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
+           // runsExpListView.setIndicatorBounds(width-GetPixelFromDips(40), width-GetPixelFromDips(20));
+            runsExpListView.setIndicatorBounds(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
         } else {
-            runsExpListView.setIndicatorBoundsRelative(width-GetPixelFromDips(40), width-GetPixelFromDips(20));
-//            runsExpListView.setIndicatorBoundsRelative(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
+   //         runsExpListView.setIndicatorBoundsRelative(width-GetPixelFromDips(40), width-GetPixelFromDips(20));
+         runsExpListView.setIndicatorBoundsRelative(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
         }
 
         adapterInterval = new IntervalAdapterItem(getActivity(), getActivity().getApplicationContext(),
@@ -318,7 +320,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         }
     }
 
-
     public void drawMap(){
         alreadyDrawn = true;
         currentIntervals = currentRun.getIntervals();
@@ -370,19 +371,14 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
                 if (currSize > 0) {
                     markers.add(googleMap.addMarker(new MarkerOptions()
-                                            //.infoWindowAnchor(0.48f, 6.16f)
                                             .position(locationList.get(0))
                                             .title(String.valueOf(current.getInterval_id()))
-//                                .title(String.valueOf(Html.fromHtml("<b>Interval " + (i + 1) + "</b>")))
-//                                .snippet("Speed: " + String.format("%1$,.2f", ((double) ((current.getDistance() / current.getMilliseconds()) * 3600))) + " km/h")
                                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start2))
                             )
                     );
 
                     googleMap.addMarker(new MarkerOptions()
-//                        .infoWindowAnchor(0.48f, 4.16f)
                                     .position(locationList.get(currSize))
-//                                .title(String.valueOf(Html.fromHtml("<b>Interval " + (i + 1) + "</b>")))
                                     .snippet("Speed: " + String.format("%1$,.2f", ((double) ((current.getDistance() / current.getMilliseconds()) * 3600))) + " km/h")
                                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_stop2))
                     );
@@ -435,7 +431,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
     @Override
     public void onMapReady(GoogleMap gMap) {
         googleMap = gMap;
-        googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         googleMap.setIndoorEnabled(false);
         googleMap.getUiSettings().setZoomControlsEnabled(true);
         progressBarMap.setVisibility(View.GONE);
@@ -500,7 +496,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
             }
 
                 holder.description.setText((int) child.get(childPosition).getDistance() + " meters with " + ((int) (child.get(childPosition).getTime() / 1000)) + " secs rest");
-                holder.date.setText(child.get(childPosition).getDate() + "  id = " + child.get(childPosition).getRunning_id());
+                holder.date.setText(child.get(childPosition).getDate());
                 holder.intervalCount.setText(String.valueOf(child.get(childPosition).getIntervals().size()) + " sessions");
 
                 convertView.setOnLongClickListener(new View.OnLongClickListener() {

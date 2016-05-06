@@ -38,12 +38,9 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
      */
     Map<Integer, Integer> bottomButtons;
 
-    String []drawerTitles;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        drawerTitles = getResources().getStringArray(R.array.drawer_titles);
     }
 
     @Override

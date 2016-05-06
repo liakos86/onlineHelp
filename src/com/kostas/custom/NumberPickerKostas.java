@@ -51,16 +51,6 @@ import com.kostas.onlineHelp.R;
  */
 public class NumberPickerKostas extends LinearLayout {
 
-	private final long REPEAT_DELAY = 50;
-	
-	private final int ELEMENT_HEIGHT = 100;
-	private final int ELEMENT_WIDTH = ELEMENT_HEIGHT; // you're all squares, yo
-
-
-	
-//	private final int MINIMUM = 10;
-//	private final int MAXIMUM = 600;
-
     private int minValue;
     private int maxValue;
     private int step;
@@ -68,9 +58,6 @@ public class NumberPickerKostas extends LinearLayout {
 	private final int TEXT_SIZE = 14;
 	
 	public Integer value;
-	
-//	ImageButton decrement;
-//	ImageButton increment;
 
     Button decrement;
     Button increment;
@@ -95,10 +82,10 @@ public class NumberPickerKostas extends LinearLayout {
 		public void run() {
 			if( autoIncrement ){
 				increment();
-				repeatUpdateHandler.postDelayed( new RepetetiveUpdater(), REPEAT_DELAY );
+				repeatUpdateHandler.postDelayed( new RepetetiveUpdater(), 50 );
 			} else if( autoDecrement ){
 				decrement();
-				repeatUpdateHandler.postDelayed( new RepetetiveUpdater(), REPEAT_DELAY );
+				repeatUpdateHandler.postDelayed( new RepetetiveUpdater(), 50 );
 			}
 		}
 	}
@@ -134,19 +121,6 @@ public class NumberPickerKostas extends LinearLayout {
 		initIncrementButton( context );
 
         initValueEditText( context );
-		
-		// Can be configured to be vertical or horizontal
-		// Thanks for the help, LinearLayout!	
-//		if( getOrientation() == VERTICAL ){
-////            addView( increment);
-//
-//            addView( descriptionText, elementTextParams);
-//            addView( valueText, elementTextParams );
-//			addView( increment, elementParams );
-//
-//			addView( decrement, elementParams );
-//		} else {
-
             addView( descriptionText, elementTextParams);
             addView( valueText, elementTextParams );
 
@@ -156,19 +130,12 @@ public class NumberPickerKostas extends LinearLayout {
 	}
 	
 	private void initIncrementButton( Context context){
-//		increment = new ImageButton( context );
-
-
         increment = new Button( context );
 		increment.setTextSize( TEXT_SIZE+6 );
 		increment.setText( "+" );
         increment.setTextColor(getResources().getColor(R.color.white_back));
-
-
         increment.setTypeface(Typeface.DEFAULT_BOLD);
-//        increment.setBackgroundDrawable(getResources().getDrawable(R.drawable.interval_plus_selector));
         increment.setBackgroundDrawable(getResources().getDrawable(R.drawable.plus_minus_selector));
-
 
                 // Increment once for a click
                         increment.setOnClickListener(new OnClickListener() {
@@ -209,7 +176,7 @@ public class NumberPickerKostas extends LinearLayout {
         descriptionText.setGravity(Gravity.CENTER);
         descriptionText.setTypeface(Typeface.DEFAULT_BOLD);
 
-        descriptionText.setBackgroundDrawable(getResources().getDrawable(R.drawable.descr_picker_selector));
+        descriptionText.setBackgroundDrawable(getResources().getDrawable(R.color.interval_green));
 
         descriptionText.setText( text );
     }
@@ -378,12 +345,12 @@ public class NumberPickerKostas extends LinearLayout {
 
     public void disableButtonColor(boolean disable){
         if (disable){
-            descriptionText.setBackgroundDrawable(getResources().getDrawable(R.drawable.descr_picker_inactive));
-            increment.setBackgroundDrawable(getResources().getDrawable(R.drawable.plus_minus_inactive));
-            decrement.setBackgroundDrawable(getResources().getDrawable(R.drawable.plus_minus_inactive));
-            valueText.setTextColor(getResources().getColor(R.color.circle_grey));
+            descriptionText.setBackgroundDrawable(getResources().getDrawable(R.color.secondary_grey));
+            increment.setBackgroundDrawable(getResources().getDrawable(R.color.secondary_grey));
+            decrement.setBackgroundDrawable(getResources().getDrawable(R.color.secondary_grey));
+            valueText.setTextColor(getResources().getColor(R.color.secondary_grey));
         }else{
-            descriptionText.setBackgroundDrawable(getResources().getDrawable(R.drawable.descr_picker_selector));
+            descriptionText.setBackgroundDrawable(getResources().getDrawable(R.color.interval_green));
             increment.setBackgroundDrawable(getResources().getDrawable(R.drawable.plus_minus_selector));
             decrement.setBackgroundDrawable(getResources().getDrawable(R.drawable.plus_minus_selector));
             valueText.setTextColor(getResources().getColor(R.color.interval_green));

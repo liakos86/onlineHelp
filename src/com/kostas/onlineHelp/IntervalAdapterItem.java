@@ -51,17 +51,17 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
 
         if (data.get(position).isFastest()) {
             convertView.setBackgroundColor(mContext.getResources().getColor(R.color.white_back));
-            holder.distance.setTextColor(mContext.getResources().getColor(R.color.drawer_black));
-            holder.time.setTextColor(mContext.getResources().getColor(R.color.drawer_black));
+            holder.distance.setTextColor(mContext.getResources().getColor(R.color.primary_grey));
+            holder.time.setTextColor(mContext.getResources().getColor(R.color.primary_grey));
             holder.fastest.setVisibility(View.VISIBLE);
 
         }
         else {
             if (position % 2 == 0){
-                convertView.setBackgroundColor(mContext.getResources().getColor(R.color.drawer_grey));
+                convertView.setBackgroundColor(mContext.getResources().getColor(R.color.secondary_grey));
 
             }else{
-                convertView.setBackgroundColor(mContext.getResources().getColor(R.color.drawer_black));
+                convertView.setBackgroundColor(mContext.getResources().getColor(R.color.primary_grey));
 
             }
             holder.distance.setTextColor(mContext.getResources().getColor(R.color.white_back));
@@ -95,11 +95,10 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
         return convertView;
 
     }
-
+   private class intervalViewHolder{
+        TextView distance;
+        TextView time;
+        TextView fastest;
+    }
 }
 
- class intervalViewHolder{
-    TextView distance;
-    TextView time;
-     TextView fastest;
-}

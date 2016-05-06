@@ -93,7 +93,11 @@ public class FrgPlans extends Fragment {
             @Override
             public void onClick(View view) {
                 clearViews();
-                plansFlipper.setDisplayedChild(0);//c
+                if (plans.size()>0) {
+                    plansFlipper.setDisplayedChild(0);//c
+                }else{
+                    plansFlipper.setDisplayedChild(2);
+                }
             }
         });
 
@@ -195,9 +199,9 @@ public class FrgPlans extends Fragment {
 
 
             if (position%2==0)
-                convertView.setBackgroundDrawable(getResources().getDrawable(R.drawable.plan_even_row));
-            else
                 convertView.setBackgroundDrawable(getResources().getDrawable(R.drawable.plan_odd_row));
+            else
+                convertView.setBackgroundDrawable(getResources().getDrawable(R.drawable.plan_even_row));
 
 
             convertView.setOnLongClickListener(new View.OnLongClickListener() {

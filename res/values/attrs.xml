@@ -18,13 +18,6 @@
     <attr name="multiplier" format="float"/>
 </declare-styleable>
 
-    <declare-styleable name="CircularImageView">
-        <attr name="border" format="boolean"/>
-        <attr name="border_width" format="dimension"/>
-        <attr name="border_color" format="color"/>
-        <attr name="shadow" format="boolean"/>
-    </declare-styleable>
-
     <declare-styleable name="NumberPickerKostas">
         <attr name="minValue" format="integer"/>
         <attr name="maxValue" format="integer"/>
@@ -32,18 +25,8 @@
         <attr name="textName" format="string"/>
     </declare-styleable>
 
-    <declare-styleable name="Theme">
-        <attr name="circularImageViewStyle" format="reference"></attr>
-    </declare-styleable>
-
     <declare-styleable name="kostasPickerTheme">
         <attr name="kostasPickerViewStyle" format="reference"></attr>
-    </declare-styleable>
-
-    <declare-styleable name="ShownEdittext">
-        <attr name="android:inputType"/>
-        <attr name="android:hint"/>
-        <attr name="android:enabled"/>
     </declare-styleable>
 
 </resources>
