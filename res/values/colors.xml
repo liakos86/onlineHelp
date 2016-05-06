@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="runner_red">#e60000</color>
-    <color name="vodafone_red_selected">#bf0101</color>
-    <color name="vodafone_dark_blue">#006768</color>
-    <color name="runner_orange">#e89624</color>
     <color name="circle_grey">#c6c6c6</color>
     <color name="disable_grey">#ffdedede</color>
     <color name="drawer_grey">#282828</color>
@@ -15,9 +11,7 @@
     <color name="semitrans_green">#90e6</color>
     <color name="semitrans_vodafone_red">#55e60000</color>
     <color name="progresswheel_rim">#e9e9e9</color>
-    <color name="drawer_counter">#bf0101</color>
     <color name="secondary_txt">#717171</color>
-    <color name="vodafone_red_disable">#88fbfbfb</color>
     <color name="back_swipe">#f4f4f4</color>
     <color name="logincheckbox_color">#666666</color>
     <color name="white_back">#f6f5f5</color>
@@ -29,6 +23,5 @@
     <color name="interval_red_pressed">#e74c3c</color>
     <color name="interval_blue">#2980b9</color>
     <color name="interval_blue_pressed">#3498db</color>
-    <color name="green">#008000</color>
 
 </resources>
