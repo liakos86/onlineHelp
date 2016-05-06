@@ -11,14 +11,6 @@
 
         <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
 
-        <ProgressBar android:layout_width="@dimen/standard_view_height"
-                     android:layout_height="@dimen/standard_view_height"
-                     android:layout_centerInParent="true"/>
-
-    </RelativeLayout>
-
-        <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
-
         <ExpandableListView
                 android:id="@+id/listExpRunning"
                 android:layout_alignParentTop="true"
@@ -73,10 +65,7 @@
         </RelativeLayout>
 
 
-
-
-
-        <com.kostas.onlineHelp.MapWrapperLayout
+        <com.kostas.custom.MapWrapperLayout
             android:id="@+id/mapWrapperRuns"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -139,7 +128,7 @@
 
         </FrameLayout>
 
-    </com.kostas.onlineHelp.MapWrapperLayout>
+    </com.kostas.custom.MapWrapperLayout>
 
 
     <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">

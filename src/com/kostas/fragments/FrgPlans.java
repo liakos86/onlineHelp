@@ -1,4 +1,4 @@
-package com.kostas.onlineHelp;
+package com.kostas.fragments;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -11,9 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import com.kostas.custom.NumberPickerKostas;
 import com.kostas.dbObjects.Plan;
-import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
+import com.kostas.onlineHelp.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ import java.util.List;
 /**
  * Created by liakos on 10/10/2015.
  */
-public class FrgPlans extends LoadingOnExitFragment {
+public class FrgPlans extends Fragment {
 
     ListView plansListView;
     List<Plan> plans = new ArrayList<Plan>();
@@ -70,16 +71,16 @@ public class FrgPlans extends LoadingOnExitFragment {
         buttonNewPlan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                plansFlipper.setDisplayedChild(2);
+                plansFlipper.setDisplayedChild(1);
             }
-        });
+        });//c
 
         buttonNewPlan2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                plansFlipper.setDisplayedChild(2);
+                plansFlipper.setDisplayedChild(1);
             }
-        });
+        });//c
 
         buttonSavePlan.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,7 +93,7 @@ public class FrgPlans extends LoadingOnExitFragment {
             @Override
             public void onClick(View view) {
                 clearViews();
-                plansFlipper.setDisplayedChild(1);
+                plansFlipper.setDisplayedChild(0);//c
             }
         });
 
@@ -127,13 +128,13 @@ public class FrgPlans extends LoadingOnExitFragment {
      */
     private void showTextNoPlans(){
         if (plans.size()==0){
-            plansFlipper.setDisplayedChild(3);
+            plansFlipper.setDisplayedChild(2);//c
         }else{
-            plansFlipper.setDisplayedChild(1);
+            plansFlipper.setDisplayedChild(0);//c
         }
     }
 
-    static FrgPlans init(int val) {
+    public static FrgPlans init(int val) {
         FrgPlans truitonList = new FrgPlans();
 
         // Supply val input as an argument.
@@ -270,7 +271,7 @@ public class FrgPlans extends LoadingOnExitFragment {
 
 
         clearViews();
-        plansFlipper.setDisplayedChild(1);
+        plansFlipper.setDisplayedChild(0);//c
 
     }
 
@@ -310,10 +311,5 @@ public class FrgPlans extends LoadingOnExitFragment {
     public void onResume() {
         super.onResume();
         showTextNoPlans();
-    }
-
-    @Override
-    void onExit() {
-        plansFlipper.setDisplayedChild(0);
     }
 }

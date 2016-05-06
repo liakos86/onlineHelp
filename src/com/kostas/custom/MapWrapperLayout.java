@@ -1,4 +1,4 @@
-package com.kostas.onlineHelp;
+package com.kostas.custom;
 
 import android.content.Context;
 import android.graphics.Point;

@@ -1,6 +1,7 @@
 package com.kostas.onlineHelp;
 
 import android.app.Application;
+import com.kostas.custom.MyAcraSender;
 import com.kostas.service.TTSManager;
 import org.acra.ACRA;
 import org.acra.ReportField;
@@ -50,10 +51,6 @@ public class ExtApplication extends Application {
         ACRA.getErrorReporter().addReportSender(mySender);
         ttsManager = new TTSManager();
         ttsManager.init(this);
-    }
-
-    public int getPosition() {
-        return position;
     }
 
     public void setPosition(int position) {

@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.LinearLayout;
+import com.kostas.custom.NonSwipeableViewPager;
+import com.kostas.fragments.FrgShowRuns;
 import com.kostas.service.RunningService;
 
 import java.util.Map;
@@ -99,8 +101,8 @@ public class MainActivity extends BaseFrgActivityWithBottomButtons {
     protected void onResume() {
         super.onResume();
         SharedPreferences app_preferences = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        if (isMyServiceRunning() && (app_preferences.getBoolean(RunningService.INTERVAL_IN_PROGRESS, false))) {//service is on
-                startNewInterval(mPager, false);
+        if ((isMyServiceRunning() && (app_preferences.getBoolean(RunningService.INTERVAL_IN_PROGRESS, false)))||(((ExtApplication) getApplication()).isInRunningAct())) {//service is on
+                startNewInterval();
         }else{
             MyPagerAdapter adapter = (MyPagerAdapter) mPager.getAdapter();
             if (((ExtApplication) getApplication()).isNewIntervalInDb() && adapter.fragments[0] != null) {

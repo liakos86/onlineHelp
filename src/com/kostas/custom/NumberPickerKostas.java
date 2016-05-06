@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.kostas.onlineHelp;
+package com.kostas.custom;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -39,6 +39,7 @@ import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.*;
 import android.widget.*;
+import com.kostas.onlineHelp.R;
 
 /**
  * A simple layout group that provides a numeric text area with two buttons to

@@ -17,6 +17,8 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.kostas.custom.NumberPickerKostas;
+import com.kostas.custom.ProgressWheel;
 import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Plan;
 import com.kostas.dbObjects.Running;
@@ -707,8 +709,6 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         String intervalsGson = app_preferences.getString(RunningService.INTERVALS, "");
         List<Interval> intervals = (List<Interval>) gson.fromJson(intervalsGson, listOfObjects);
         fixListAndAdapter(intervals);
-        setInitialTextInfo();
-        setProgressAndVisibilityTimerAndDistance(0, View.GONE, 0, View.GONE);
 
         if (intervalsList.size() == 0 && coveredDist == 0) {
             clear();
@@ -730,6 +730,8 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             intervalsList.add(new Interval(-1, sb.toString(), SystemClock.uptimeMillis() - startTimeMillis, coveredDist));
         }
 
+        setInitialTextInfo();
+        setProgressAndVisibilityTimerAndDistance(0, View.GONE, 0, View.GONE);
         mHandler.removeCallbacks(mUpdateTimeTask);
         stopRunningService();
         if (countDownTimer != null)
@@ -961,6 +963,5 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         ((ExtApplication) getApplication()).setInRunningAct(false);
         stopRunningService();
         super.onBackPressed();
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
     }
 }

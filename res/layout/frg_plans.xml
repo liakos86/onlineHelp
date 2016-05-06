@@ -9,13 +9,6 @@
        >
 
     <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
-
-    <ProgressBar android:layout_width="@dimen/standard_view_height"
-                 android:layout_height="@dimen/standard_view_height"
-                 android:layout_centerInParent="true"/>
-    </RelativeLayout>
-
-    <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
     <ListView android:id="@+id/plansList"
               android:layout_alignParentTop="true"
               android:layout_width="match_parent"
@@ -43,7 +36,7 @@
     <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent"
             android:layout_margin="@dimen/margin10">
 
-        <com.kostas.onlineHelp.NumberPickerKostas
+        <com.kostas.custom.NumberPickerKostas
 
                 android:layout_alignParentTop="true"
                 app:minValue="100"
@@ -56,9 +49,9 @@
                 android:layout_width="match_parent"
                 android:layout_marginBottom="@dimen/eight"
                 android:layout_height="@dimen/standard_view_height">
-        </com.kostas.onlineHelp.NumberPickerKostas>
+        </com.kostas.custom.NumberPickerKostas>
 
-        <com.kostas.onlineHelp.NumberPickerKostas
+        <com.kostas.custom.NumberPickerKostas
 
                 android:layout_below="@+id/planIntervalDistancePicker"
                 app:minValue="10"
@@ -71,9 +64,9 @@
                 android:layout_width="match_parent"
                 android:layout_marginBottom="@dimen/eight"
                 android:layout_height="@dimen/standard_view_height">
-        </com.kostas.onlineHelp.NumberPickerKostas>
+        </com.kostas.custom.NumberPickerKostas>
 
-        <com.kostas.onlineHelp.NumberPickerKostas
+        <com.kostas.custom.NumberPickerKostas
 
                 android:layout_marginBottom="@dimen/eight"
                 android:layout_below="@+id/planIntervalTimePicker"
@@ -86,9 +79,9 @@
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/standard_view_height">
-        </com.kostas.onlineHelp.NumberPickerKostas>
+        </com.kostas.custom.NumberPickerKostas>
 
-        <com.kostas.onlineHelp.NumberPickerKostas
+        <com.kostas.custom.NumberPickerKostas
 
                 android:layout_marginBottom="@dimen/eight"
                 android:layout_below="@+id/planIntervalStartRestPicker"
@@ -101,7 +94,7 @@
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/standard_view_height">
-        </com.kostas.onlineHelp.NumberPickerKostas>
+        </com.kostas.custom.NumberPickerKostas>
 
 
         <EditText

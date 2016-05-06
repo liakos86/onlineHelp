@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.LinearLayout;
+import com.kostas.custom.NonSwipeableViewPager;
 
 
 import java.util.HashMap;
@@ -95,43 +96,18 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
         startActivity(intent);
-//        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
         finish();
     }
 
     /**
      * Starts a new IntervalActivity
-     * Firstly it calls the onExit() of the selected fragment to display progress bar
-     * Then hides bottom buttons and starts activity
-     * @param mPager
      */
-    protected void startNewInterval(NonSwipeableViewPager mPager, boolean shouldMakeFragmentLoading) {
+    protected void startNewInterval() {
         if(!(this instanceof ActivityIntervalNew)){
             Intent intent = new Intent(this, ActivityIntervalNew.class);
             startActivity(intent);
-
-            if (shouldMakeFragmentLoading) {
-                MyPagerAdapter adapter = (MyPagerAdapter) mPager.getAdapter();
-                int position = ((ExtApplication) getApplication()).getPosition();
-                if (adapter.fragments[position]!=null) {
-                    ((LoadingOnExitFragment) adapter.fragments[position]).onExit();
-                }
-            }
-            //hideBottomButtons();
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
         }
     }
-
-//    private void hideBottomButtons(){
-//        LinearLayout bottomButtons = (LinearLayout) findViewById(R.id.bottomButtons);
-//            bottomButtons.setVisibility(View.GONE);
-//    }
-//
-//    private void showBottomButtons(){
-//        LinearLayout bottomButtons = (LinearLayout) findViewById(R.id.bottomButtons);
-//        if (!((ExtApplication) getApplication()).isInRunningAct())
-//        bottomButtons.setVisibility(View.VISIBLE);
-//    }
 
     /**
      * If the positions is 0 or 1 we just change the displayed fragment
@@ -149,7 +125,7 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
                 if (position != POSITION_NEW_INTERVAL)
                     startMain(mPager, position);
                 else
-                    startNewInterval(mPager, true);
+                    startNewInterval();
                 }
 
         });

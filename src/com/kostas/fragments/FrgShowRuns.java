@@ -1,4 +1,4 @@
-package com.kostas.onlineHelp;
+package com.kostas.fragments;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -6,8 +6,8 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +22,10 @@ import com.kostas.model.Database;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.kostas.onlineHelp.IntervalAdapterItem;
+import com.kostas.onlineHelp.MainActivity;
+import com.kostas.custom.MapWrapperLayout;
+import com.kostas.onlineHelp.R;
 
 import java.util.*;
 
@@ -29,7 +33,7 @@ import java.util.*;
 /**
  * Created by liakos on 11/4/2015.
  */
-public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCallback{
+public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
     /**
      * All the intervals together
@@ -182,7 +186,7 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
         for (Interval interval : running.getIntervals()){
             intervals.add(interval);
         }
-        viewFlipper.setDisplayedChild(2);
+        viewFlipper.setDisplayedChild(1);//c
         adapterInterval.notifyDataSetChanged();
         if (googleMap!=null) {
             drawMap();
@@ -239,23 +243,23 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
                     googleMap.clear();
                     alreadyDrawn = false;
                 }
-                viewFlipper.setDisplayedChild(1);
+                viewFlipper.setDisplayedChild(0);//c
             }
         });
 
         closeMapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                viewFlipper.setDisplayedChild(2);
+                viewFlipper.setDisplayedChild(1);
             }
-        });
+        });//c
 
         openMapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                viewFlipper.setDisplayedChild(3);
+                viewFlipper.setDisplayedChild(2);
             }
-        });
+        });//c
     }
 
     public int GetPixelFromDips(float pixels) {
@@ -608,9 +612,9 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
         }
 
         if (empty){
-           viewFlipper.setDisplayedChild(4);
+           viewFlipper.setDisplayedChild(3);//c
         }else{
-            viewFlipper.setDisplayedChild(1);
+            viewFlipper.setDisplayedChild(0);//c
         }
     }
 
@@ -650,7 +654,7 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
         showTextNoRuns();
     }
 
-    static FrgShowRuns init(int val) {
+    public static FrgShowRuns init(int val) {
         FrgShowRuns truitonList = new FrgShowRuns();
         // Supply val input as an argument.
         Bundle args = new Bundle();
@@ -659,8 +663,4 @@ public class FrgShowRuns extends LoadingOnExitFragment implements OnMapReadyCall
         return truitonList;
     }
 
-    @Override
-    void onExit() {
-        viewFlipper.setDisplayedChild(0);
-    }
 }

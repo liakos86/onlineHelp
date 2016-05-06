@@ -23,7 +23,7 @@
             <!--<RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">-->
 
 
-                <com.kostas.onlineHelp.NumberPickerKostas
+                <com.kostas.custom.NumberPickerKostas
 
                         android:layout_alignParentTop="true"
                     app:minValue="100"
@@ -36,9 +36,9 @@
                     android:layout_width="match_parent"
                         android:layout_marginBottom="@dimen/eight"
                     android:layout_height="@dimen/standard_view_height">
-            </com.kostas.onlineHelp.NumberPickerKostas>
+            </com.kostas.custom.NumberPickerKostas>
 
-                <com.kostas.onlineHelp.NumberPickerKostas
+                <com.kostas.custom.NumberPickerKostas
 
                         android:layout_below="@+id/intervalDistancePicker"
                     app:minValue="10"
@@ -51,9 +51,9 @@
                     android:layout_width="match_parent"
                         android:layout_marginBottom="@dimen/eight"
                     android:layout_height="@dimen/standard_view_height">
-            </com.kostas.onlineHelp.NumberPickerKostas>
+            </com.kostas.custom.NumberPickerKostas>
 
-                <com.kostas.onlineHelp.NumberPickerKostas
+                <com.kostas.custom.NumberPickerKostas
 
                         android:layout_marginBottom="@dimen/eight"
                         android:layout_below="@+id/intervalTimePicker"
@@ -66,9 +66,9 @@
                         android:orientation="horizontal"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/standard_view_height">
-                </com.kostas.onlineHelp.NumberPickerKostas>
+                </com.kostas.custom.NumberPickerKostas>
 
-            <com.kostas.onlineHelp.NumberPickerKostas
+            <com.kostas.custom.NumberPickerKostas
 
                     android:layout_marginBottom="@dimen/twenty"
                     android:layout_below="@+id/intervalStartRestPicker"
@@ -81,7 +81,7 @@
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/standard_view_height">
-            </com.kostas.onlineHelp.NumberPickerKostas>
+            </com.kostas.custom.NumberPickerKostas>
 
 
             <LinearLayout
@@ -198,7 +198,7 @@
                       android:layout_marginBottom="@dimen/eight"
                       android:visibility="gone"/>
 
-            <com.kostas.onlineHelp.ProgressWheel
+            <com.kostas.custom.ProgressWheel
                     android:id="@+id/timerProgressWheel"
                     android:layout_width="@dimen/progressBarSize"
                     android:layout_height="@dimen/progressBarSize"
@@ -214,7 +214,7 @@
                     app:rimWidth="@dimen/twenty"
                     />
 
-            <com.kostas.onlineHelp.ProgressWheel
+            <com.kostas.custom.ProgressWheel
                     android:id="@+id/distanceProgressWheel"
                     android:layout_width="@dimen/progressBarSize"
                     android:layout_height="@dimen/progressBarSize"

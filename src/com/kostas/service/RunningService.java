@@ -32,6 +32,9 @@ import java.util.List;
 public class RunningService extends IntentService
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
+    /**
+     * Strings for shared preferences use.
+     */
     public static final String INTERVAL_IN_PROGRESS = "intervalInProgress";
     public static final String NO_SOUND = "noSound";
     public static final String NO_VIBRATION = "noVibration";
@@ -51,20 +54,34 @@ public class RunningService extends IntentService
     public static final String IS_RUNNING = "is_running";
     public static final String CONNECTION_FAILED = "connectionFailed";
 
-    public float intervalDistance, currentDistance;
-    private long mStartTime, totalTime, intervalTime, intervalStartRest, interval = 4000, vibrationMillis;
+    /**
+     * The DURATION for updates and vibration
+     */
+    private final long DURATION = 2000;
+
+    /**
+     * The distance to count for in this interval session.
+     */
+    private float intervalDistance;
+    /**
+     * The distance covered so far in this specific interval
+     */
+    private float currentDistance;
+    private long mStartTime, totalTime, intervalTime, intervalStartRest;
     private int intervalRounds;
+    /**
+     * The last location object obtained by the location updates
+     * Used to compute distance from the next location and add to total.
+     */
     public Location lastLocation;
     SharedPreferences app_preferences;
-    SharedPreferences.Editor editor;
-    boolean hasSound;
+    boolean hasSound, hasVibration;
     ExtApplication application;
     GoogleApiClient mGoogleApiClient;
     LocationRequest mLocationRequest;
     Boolean intervalInProgress;
     PowerManager.WakeLock wl;
-    Type listOfObjects, listOfLocations;
-    //    Vibrator v;
+    Vibrator v;
     TTSManager ttsManager;
     List<Location> locationList;
     private Handler mHandler = new Handler();
@@ -82,11 +99,8 @@ public class RunningService extends IntentService
                 "MyWakelockTag");
         wl.acquire();
         application = (ExtApplication) getApplication();
+        v = (Vibrator) application.getSystemService(Context.VIBRATOR_SERVICE);
         app_preferences = getApplication().getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
-        listOfObjects = new TypeToken<List<Interval>>() {
-        }.getType();
-        listOfLocations = new TypeToken<List<Location>>() {
-        }.getType();
         locationList = new ArrayList<Location>();
         buildGoogleApiClient();
         ttsManager = application.getTtsManager();
@@ -108,8 +122,8 @@ public class RunningService extends IntentService
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
         if (intervalInProgress) {
-            mLocationRequest.setInterval(3000);
-            mLocationRequest.setFastestInterval(2000);
+            mLocationRequest.setInterval(DURATION);
+            mLocationRequest.setFastestInterval(DURATION - 1000);
             mLocationRequest.setSmallestDisplacement(10);
         } else {
             mLocationRequest.setInterval(1000);
@@ -133,7 +147,7 @@ public class RunningService extends IntentService
     @Override
     public void onStart(Intent intent, int startId) {
 
-        editor = app_preferences.edit();
+        SharedPreferences.Editor editor = app_preferences.edit();
         if (startId == 1) {//first
             editor.putBoolean(INTERVAL_IN_PROGRESS, false).apply();
             intervalInProgress = false;
@@ -143,8 +157,7 @@ public class RunningService extends IntentService
         intervalInProgress = true;
         editor.putBoolean(INTERVAL_IN_PROGRESS, true).apply();
         hasSound = !app_preferences.getBoolean(NO_SOUND, false);
-//        hasVibration = !app_preferences.getBoolean(NO_VIBRATION, false);
-//        v = (Vibrator) application.getSystemService(Context.VIBRATOR_SERVICE);
+        hasVibration = !app_preferences.getBoolean(NO_VIBRATION, false);
         createForegroundNotification();
         intervalTime = intent.getLongExtra(INTERVAL_TIME, 0);
         intervalStartRest = intent.getLongExtra(INTERVAL_START_REST, 0);
@@ -204,8 +217,8 @@ public class RunningService extends IntentService
                 lastLocation = location;
             }
 
-            mLocationRequest.setFastestInterval(interval - 1000);
-            mLocationRequest.setInterval(interval);
+            mLocationRequest.setFastestInterval(DURATION - 1000);
+            mLocationRequest.setInterval(DURATION);
         }
     }
 
@@ -229,7 +242,7 @@ public class RunningService extends IntentService
         final int myID = 1234;
         if (Build.VERSION.SDK_INT > 15) {
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(application);
-            mBuilder.setSmallIcon(R.drawable.interval_flag);
+            mBuilder.setSmallIcon(R.drawable.ic_notification_icon);
             mBuilder.setContentTitle("Interval in progress");
             mBuilder.setContentText("Click to get into");
 //            mBuilder.setOngoing(true);
@@ -281,12 +294,15 @@ public class RunningService extends IntentService
             speak("COMPLETED " + intervalRounds + " intervals");
         }
         speak(mins + " minutes and " + secs + " seconds");
+        SharedPreferences.Editor editor = app_preferences.edit();
         editor.putBoolean(INTERVAL_COMPLETED, completed);
         editor.putInt(COMPLETED_NUM, intervals.size());
         editor.putBoolean(IS_RUNNING, false);
         editor.putFloat(TOTAL_DIST, 0);
         editor.putFloat(TOTAL_TIME, 0);
-        String json = (new Gson()).toJson(intervals, listOfObjects);
+        Type listOfIntervals = new TypeToken<List<Interval>>() {
+        }.getType();
+        String json = (new Gson()).toJson(intervals, listOfIntervals);
         editor.putString(INTERVALS, json);
         editor.apply();
         //todo Do i really need to care about my broadcast when no receivers?
@@ -305,13 +321,13 @@ public class RunningService extends IntentService
     }
 
     private void refreshInterval(float pace) {
-        interval = (100 * pace / 6) > 2000 ? ((100 * pace / 6) < 4000 ? (long) (100 * pace / 6) : 4000) : 2000;
+        //DURATION = (100 * pace / 6) > 2000 ? ((100 * pace / 6) < 4000 ? (long) (100 * pace / 6) : 4000) : 2000;
         new PerformAsyncTask(2).execute();
     }
 
     private void startCountDownForNextInterval(long millis) {
         mHandler.postDelayed(mStartRunnable, millis);
-        editor = app_preferences.edit();
+        SharedPreferences.Editor editor = app_preferences.edit();
         editor.putLong(MSTART_COUNTDOWN_TIME, SystemClock.uptimeMillis());
         editor.apply();
     }
@@ -347,17 +363,13 @@ public class RunningService extends IntentService
     private Runnable mStartRunnable = new Runnable() {
 
         public void run() {
-
             mStartTime = SystemClock.uptimeMillis();
-
+            SharedPreferences.Editor editor = app_preferences.edit();
             editor.putBoolean(IS_RUNNING, true);
             editor.putLong(MSTART_TIME, mStartTime);
             editor.apply();
-
             connectAndReceive();
-
             speak("STARTED");
-
         }
     };
 
@@ -411,37 +423,27 @@ public class RunningService extends IntentService
 
         @Override
         protected Void doInBackground(Void... unused) {
-
-
-            editor = app_preferences.edit();
-
+            SharedPreferences.Editor editor = app_preferences.edit();
             if (type == 0) {
-
                 editor.putFloat(INTERVAL_DISTANCE, intervalDistance);
                 editor.putLong(INTERVAL_START_REST, intervalStartRest);
                 editor.putLong(INTERVAL_TIME, intervalTime);
                 editor.putInt(INTERVAL_ROUNDS, intervalRounds);
-
-                editor.apply();
-
             } else if (type == 2) {
-
-
                 if (((PowerManager) getSystemService(Context.POWER_SERVICE)).isScreenOn()) {
                     Intent intent = new Intent(NOTIFICATION);
                     intent.putExtra(INTERVAL_DISTANCE, currentDistance);
                     intent.putExtra(INTERVAL_TIME, totalTime);
                     sendBroadcast(intent);
                 }
-
                 editor.putFloat(TOTAL_DIST, currentDistance);
                 editor.putLong(TOTAL_TIME, totalTime);
-
+                Type listOfLocations = new TypeToken<List<Location>>() {
+                }.getType();
                 String json = (new Gson()).toJson(locationList, listOfLocations);
                 editor.putString(LATLONLIST, json);
-//                editor.putString(LATLONLIST, latLonList);
-                editor.apply();
             }
+            editor.apply();
             return null;
         }
 

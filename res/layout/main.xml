@@ -11,7 +11,7 @@
             android:layout_height="match_parent"
        >
 
-        <com.kostas.onlineHelp.NonSwipeableViewPager
+        <com.kostas.custom.NonSwipeableViewPager
                 android:id="@+id/pager"
                 android:layout_width="fill_parent"
                 android:layout_height="0dp"
