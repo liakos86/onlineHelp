@@ -150,12 +150,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         int mins = (int) ((intervalTime - (hours * 3600000)) / 60000);
         int secs = (int) ((intervalTime - (hours * 3600000) - (mins * 60000)) / 1000);
         return "Fastest "+String.format("%02d", hours) + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs);
-     //   String speedText = String.format("%1$,.2f", ((double) ((interval.getDistance() / intervalTime) * 3600)));
-//        float pace = intervalTime / interval.getDistance();
-//        int paceMinutes = (int) (pace / 60);
-//        int paceSeconds = (int) (pace - (paceMinutes * 60));
-//        String paceText = paceMinutes < 60 ? String.format("%02d", paceMinutes) + "m " + String.format("%02d", paceSeconds) + "s" : "over 1 hour";
-
     }
 
 
@@ -173,13 +167,10 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         openMapButton = (Button) v.findViewById(R.id.buttonShowMap);
         closeMapButton = (ImageButton) v.findViewById(R.id.buttonCloseMap);
         closeIntervalsButton = (Button) v.findViewById(R.id.buttonCloseIntervals);
-        //shareButton = (Button) v.findViewById(R.id.buttonShare);
         runsExpListView = (ExpandableListView) v.findViewById(R.id.listExpRunning);
         intervalListView = (ListView) v.findViewById(R.id.listIntervals);
         buttonNewRun = (Button) v.findViewById(R.id.buttonNewRun);
-
     }
-
 
     public void initializeMap(){
        ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapListKostas)).getMapAsync(this);
@@ -355,7 +346,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
         runsCount.setText("RUNS\r\n"+runsNum);
         intervalsCount.setText("INTERVALS\r\n"+intervalsNum);
-        metersCount.setText("KM\r\n"+metersNum/1000);
+        metersCount.setText("KM\r\n"+String.format("%1$,.1f",metersNum/1000));
         durationCount.setText(("HRS\r\n"+(int)(millisecsNum/3600000)));
     }
 

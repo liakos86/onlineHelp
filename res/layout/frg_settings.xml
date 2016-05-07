@@ -1,10 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
-              android:padding="@dimen/eight"
+              android:padding="@dimen/margin10"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
+    <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:src="@drawable/interval_50"
+            android:layout_centerInParent="true"/>
 
+    <TextView android:layout_above="@+id/loginButton"
+              android:layout_centerHorizontal="true"
+              android:layout_marginBottom="@dimen/eight"
+              android:textSize="@dimen/small_text"
+              android:id="@+id/icons8text"
+              android:layout_width="wrap_content"
+              android:clickable="true"
+              android:layout_height="wrap_content"/>
+
+    <Button android:layout_above="@+id/shareButton"
+            android:id="@+id/loginButton"
+            android:drawableStart="@drawable/login_50"
+            android:drawableLeft="@drawable/login_50"
+            android:paddingLeft="@dimen/eight"
+            style="@style/buttonStyle"
+            android:background="@drawable/close_button_selector"
+            android:layout_alignParentBottom="false"
+            android:layout_marginBottom="@dimen/margin10"
+            android:text="@string/login"/>
+
+
+
+    <Button android:id="@+id/shareButton"
+            android:paddingLeft="@dimen/eight"
+            android:drawableStart="@drawable/share_50"
+            android:drawableLeft="@drawable/share_50"
+            style="@style/buttonStyle"
+            android:background="@drawable/share_button_selector"
+            android:text="@string/share"/>
 
 </RelativeLayout>

@@ -149,17 +149,11 @@
                   android:drawableBottom="@drawable/empty_100"/>
 
         <Button
-                android:layout_alignParentBottom="true"
                 android:layout_margin="@dimen/margin10"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/standard_view_height"
+                style="@style/buttonStyle"
                 android:text="@string/new_plan"
-                android:textStyle="bold"
-                android:textSize="@dimen/large_text"
-                android:textColor="@color/white_back"
                 android:background="@drawable/close_button_selector"
                 android:id="@+id/buttonNewPlan2"
-
                 />
     </RelativeLayout>
 

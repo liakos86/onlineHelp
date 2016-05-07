@@ -121,14 +121,8 @@
                 android:maxLines="1"
                 android:singleLine="true"/>
 
-            <Button
-                    android:layout_alignParentBottom="true"
-                    android:layout_width="match_parent"
-                    android:layout_height="54dp"
-                    android:text="@string/start"
-                    android:textStyle="bold"
-                    android:textSize="@dimen/xlarge_text"
-                    android:textColor="@color/white_back"
+            <Button style="@style/buttonStyle"
+                  android:text="@string/start"
                     android:background="@drawable/close_button_selector"
                     android:id="@+id/buttonSetIntervalValues"
                     android:layout_marginTop="@dimen/margin10"

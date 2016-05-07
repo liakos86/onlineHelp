@@ -152,15 +152,9 @@
 
     </ViewFlipper>
 
-    <Button
-            android:layout_alignParentBottom="true"
+    <Button style="@style/buttonStyle"
         android:layout_margin="@dimen/margin10"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/standard_view_height"
         android:text="@string/new_interval"
-        android:textStyle="bold"
-        android:textSize="@dimen/large_text"
-        android:textColor="@color/white_back"
         android:background="@drawable/close_button_selector"
         android:id="@+id/buttonNewRun"
         />
