@@ -95,6 +95,11 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
     TextView mapIntervalDistanceText, mapIntervalTimeText, mapIntervalRoundsText, mapIntervalFastestText;
 
+    TextView runsCount ;
+    TextView intervalsCount;
+    TextView metersCount;
+    TextView durationCount ;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -154,6 +159,11 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
 
     private void initializeViews(View v){
+
+         runsCount = (TextView) v.findViewById(R.id.runsCount);
+         intervalsCount =(TextView) v.findViewById(R.id.intervalsCount);
+         metersCount =(TextView) v.findViewById(R.id.metersCount);
+         durationCount =(TextView) v.findViewById(R.id.durationCount);
 
         mapIntervalDistanceText = (TextView) v.findViewById(R.id.mapIntervalDistanceText);
         mapIntervalFastestText = (TextView) v.findViewById(R.id.mapIntervalFastestText);
@@ -325,10 +335,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
     }
 
     void computeInfoTexts(List<Running> runs){
-        TextView runsCount =((TextView) getView().findViewById(R.id.runsCount));
-        TextView intervalsCount =((TextView) getView().findViewById(R.id.intervalsCount));
-        TextView metersCount =((TextView) getView().findViewById(R.id.metersCount));
-        TextView durationCount =((TextView) getView().findViewById(R.id.durationCount));
+
 
         int runsNum=0, intervalsNum=0;
         float metersNum = 0f;

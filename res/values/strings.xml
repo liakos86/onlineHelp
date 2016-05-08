@@ -18,7 +18,6 @@
     <string name="zero_time">00 : 00 : 00</string>
     <string name="text_avg_pace">Pace avg: 0m 0s / km</string>
     <string name="text_pace">Pace: 0m 0s / km</string>
-    <string name="text_rounds">0 / 0</string>
     <string name="adId1">ca-app-pub-1164456313108704/9576922674</string>
     <string name="adId2">ca-app-pub-1164456313108704/6586430278</string>
     <string name="adId3">ca-app-pub-1164456313108704/8546000271</string>
@@ -39,5 +38,6 @@
     <string name="shareTitle">Share app using</string>
     <string name="soon">Soon available!</string>
     <string name="login">Login</string>
+    <string name="duration">Duration</string>
     <string name="icons8"><a href="https://icons8.com/register/?key=Qdg6">Icons powered by Icons8</a></string>
 </resources>

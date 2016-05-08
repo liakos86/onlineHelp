@@ -48,10 +48,10 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
      */
     private long intervalTime, intervalStartRest, startTimeMillis;
     SharedPreferences app_preferences;
-    LinearLayout textsInfoRun;
+    //LinearLayout textsInfoRun;
     Button buttonSetIntervalValues, buttonDismiss, buttonSave;
     LinearLayout layoutBottomButtons;
-    TextView roundsText, myAddress, timeText;
+    TextView roundsText, myAddress, timeText, distanceText;
     /**
      * The distance needed to be covered for every interval
      */
@@ -68,7 +68,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
      * Pickers for selecting distance, time between intervals, rest start and rounds of interval
      */
     NumberPickerKostas intervalTimePicker, intervalDistancePicker, intervalRoundsPicker, intervalStartRestPicker;
-    ProgressWheel timerProgressWheel;
+    ProgressWheel progressWheel;
     ListView completedIntervalsListView;
     List<Interval> intervalsList;
     List<Plan> plans = new ArrayList<Plan>();
@@ -219,6 +219,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         intervalsList = new ArrayList<Interval>();
         myAddress = (TextView) findViewById(R.id.myAddressText);
         roundsText = (TextView) findViewById(R.id.roundsText);
+        distanceText = ((TextView) findViewById(R.id.distanceText));
         timeText = (TextView) findViewById(R.id.timeText);
         buttonSetIntervalValues = (Button) findViewById(R.id.buttonSetIntervalValues);
         intervalTimePicker = (NumberPickerKostas) findViewById(R.id.intervalTimePicker);
@@ -228,12 +229,12 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         intervalRoundsPicker = (NumberPickerKostas) findViewById(R.id.intervalRoundsPicker);
         intervalStartRestPicker = (NumberPickerKostas) findViewById(R.id.intervalStartRestPicker);
         intervalStartRestPicker.setValue(10);
-        timerProgressWheel = (ProgressWheel) findViewById(R.id.timerProgressWheel);
+        progressWheel = (ProgressWheel) findViewById(R.id.timerProgressWheel);
         completedIntervalsListView = (ListView) findViewById(R.id.completedIntervals);
         layoutBottomButtons = (LinearLayout) findViewById(R.id.layoutBottomButtons);
         buttonDismiss = (Button) findViewById(R.id.buttonDismissInterval);
         buttonSave = (Button) findViewById(R.id.buttonSaveRunWithIntervals);
-        textsInfoRun = (LinearLayout) findViewById(R.id.textsInfoRun);
+        //textsInfoRun = (LinearLayout) findViewById(R.id.textsInfoRun);
         adapterInterval = new IntervalAdapterItem(this, this.getApplicationContext(),
                 R.layout.list_interval_row, intervalsList);
         completedIntervalsListView.setAdapter(adapterInterval);
@@ -271,15 +272,15 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
 
         if (isRunning && !isCompleted) {//from resume
             setDistanceProgress(distanceCovered);
-            timerProgressWheel.setVisibility(View.VISIBLE);
+            progressWheel.setVisibility(View.VISIBLE);
             //distanceProgressWheel.setVisibility(View.VISIBLE);
             mHandler.post(mUpdateTimeTask);
         }
         else if (!isRunning && !isCompleted) {//from resume OR first time
             final int step = (int) (360000 / millisecondsToCount);
             //distanceProgressWheel.setVisibility(View.INVISIBLE);
-            timerProgressWheel.setVisibility(View.VISIBLE);
-            timerProgressWheel.setText((int) ((millisecondsToCount - (SystemClock.uptimeMillis() - startOfCountdown)) / 1000) + " secs");
+            progressWheel.setVisibility(View.VISIBLE);
+            progressWheel.setText((int) ((millisecondsToCount - (SystemClock.uptimeMillis() - startOfCountdown)) / 1000) + " secs");
 
             if ((isMyServiceRunning()) && !(app_preferences.getBoolean(RunningService.INTERVAL_IN_PROGRESS, false))) {
                 startRunningService(true);
@@ -335,7 +336,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
 
         setRoundsText(intervalRoundsPicker.getValue());
         //distanceProgressWheel.setVisibility(View.INVISIBLE);
-        timerProgressWheel.setVisibility(View.VISIBLE);
+        progressWheel.setVisibility(View.VISIBLE);
         final int step = (int) (360000 / intervalTime);
         countDownTimer = new CountDownTimer(intervalTime, 1000) {
             public void onTick(long millisUntilFinished) {
@@ -351,8 +352,8 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
      * Actions performed when the countdown finishes and the interval will start.
      */
     private void onFinishUpdate() {
-        //distanceProgressWheel.setText(0 + " / " + (int) intervalDistance);
-        timerProgressWheel.setText(0 + " / " + (int) intervalDistance);
+        progressWheel.setText(0 + " / " + (int) intervalDistance);
+        distanceText.setText(0 + " / " + (int) intervalDistance);
         startTimeMillis = SystemClock.uptimeMillis();
         mHandler.post(mUpdateTimeTask);
         setProgressAndVisibilityTimerAndDistance(View.VISIBLE);
@@ -365,8 +366,8 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
      * @param step the step to decrease in degrees from the timer progress wheel
      */
     private void onTickUpdate(long millis, int step) {
-        timerProgressWheel.setText(millis / 1000 + " secs");
-        timerProgressWheel.setProgress((int) (timerProgressWheel.getProgress() - step));
+        progressWheel.setText(millis / 1000 + " secs");
+        progressWheel.setProgress((int) (progressWheel.getProgress() - step));
     }
 
     /**
@@ -377,8 +378,9 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     private void setDistanceProgress(float progress) {
 //        distanceProgressWheel.setProgress(((int) ((progress / intervalDistance) * 360)));
 //        distanceProgressWheel.setText((int) progress + " / " + (int) intervalDistance);
-        timerProgressWheel.setProgress(((int) ((progress / intervalDistance) * 360)));
-        timerProgressWheel.setText((int) progress + " / " + (int) intervalDistance);
+        progressWheel.setProgress(((int) ((progress / intervalDistance) * 360)));
+        progressWheel.setText((int) progress + " / " + (int) intervalDistance);
+        distanceText.setText((int) progress + " / " + (int) intervalDistance);
 
     }
 
@@ -413,8 +415,9 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         intervalTime = 0;
         intervalStartRest = 0 ;
         intervalsList.clear();
-        findViewById(R.id.buttonBack).setVisibility(View.VISIBLE);
-        clearViews();
+
+
+        //clearViews();
         hideFrame();
     }
 
@@ -422,7 +425,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         setButtonVisibilities(false);
         layoutBottomButtons.setVisibility(View.INVISIBLE);
         findViewById(R.id.adViewInterval2).setVisibility(View.INVISIBLE);
-        timerProgressWheel.setVisibility(View.INVISIBLE);
+        progressWheel.setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -534,11 +537,12 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     }
 
     private void setRoundsText(int rounds) {
+
         int size = app_preferences.getInt(RunningService.COMPLETED_NUM, 0);
         if (rounds > 0) {
-            roundsText.setText(size + " / " + rounds + " comp");
+            roundsText.setText(size + " / " + rounds);
         } else {
-            roundsText.setText(size + " comp");
+            roundsText.setText(""+size);
         }
     }
 
@@ -600,17 +604,22 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         }
     }
 
+    /**
+     * shows the view with the progressWheel
+     * and the run info textviews
+     * sets textviews to visible because the activity might not have been killed before
+     * and those might be hidden from the previous run ending
+     */
     private void showFrame() {
         flipper.setDisplayedChild(1);
         buttonSave.setClickable(true);
         buttonDismiss.setClickable(true);
         setRoundsText(intervalRoundsPicker.getValue());
-        textsInfoRun.setVisibility(View.VISIBLE);
+        distanceText.setText("0 / "+(int)intervalDistance);
     }
 
     private void hideFrame() {
         flipper.setDisplayedChild(0);
-        textsInfoRun.setVisibility(View.INVISIBLE);
     }
 
     private void confirmStopOrDelete(final boolean isStopRunDialog) {
@@ -663,6 +672,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             for (Location l : locationList) {
                 sb.append("," + l.getLatitude() + "," + l.getLongitude() + "," + l.getLatitude() + "," + l.getLongitude());
             }
+
             intervalsList.add(new Interval(-1, sb.toString(), SystemClock.uptimeMillis() - startTimeMillis, coveredDist));
         }
 
@@ -677,11 +687,13 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             countDownTimer.cancel();
         }
         resetAppPrefs();
-        findViewById(R.id.buttonStop).setVisibility(View.GONE);
-        layoutBottomButtons.setVisibility(View.VISIBLE);
-        findViewById(R.id.adViewInterval2).setVisibility(View.VISIBLE);
-        textsInfoRun.setVisibility(View.GONE);
-        completedIntervalsListView.setVisibility(View.VISIBLE);
+
+
+        flipper.setDisplayedChild(2);
+
+
+
+
         coveredDist = 0;
     }
 
@@ -689,8 +701,8 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
      *@param visibility
      */
     private void setProgressAndVisibilityTimerAndDistance(int visibility){
-        timerProgressWheel.setProgress(0);
-        timerProgressWheel.setVisibility(visibility);
+        progressWheel.setProgress(0);
+        progressWheel.setVisibility(visibility);
     }
 
     /**
@@ -881,12 +893,5 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         ((ExtApplication) getApplication()).setInRunningAct(false);
         stopRunningService();
         super.onBackPressed();
-    }
-
-
-    @Override
-    protected void onDestroy() {
-        Toast.makeText(getApplication(),"des",Toast.LENGTH_SHORT).show();
-        super.onDestroy();
     }
 }

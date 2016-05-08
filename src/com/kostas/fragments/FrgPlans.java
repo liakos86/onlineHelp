@@ -57,12 +57,12 @@ public class FrgPlans extends Fragment {
         plansFlipper = (ViewFlipper) v.findViewById(R.id.plansFlipper);
         adapterPlans = new PlansAdapterItem(getActivity().getApplicationContext(), R.layout.list_common_row, plans);
         plansListView.setAdapter(adapterPlans);
-        planIntervalTimePicker = (NumberPickerKostas) v.findViewById(R.id.planIntervalTimePicker);
+        planIntervalTimePicker = (NumberPickerKostas) v.findViewById(R.id.intervalTimePicker);
         planIntervalTimePicker.setValue(10);
-        planIntervalDistancePicker = (NumberPickerKostas) v.findViewById(R.id.planIntervalDistancePicker);
+        planIntervalDistancePicker = (NumberPickerKostas) v.findViewById(R.id.intervalDistancePicker);
         planIntervalDistancePicker.setValue(50);
-        planIntervalRoundsPicker = (NumberPickerKostas) v.findViewById(R.id.planIntervalRoundsPicker);
-        planIntervalStartRestPicker = (NumberPickerKostas) v.findViewById(R.id.planIntervalStartRestPicker);
+        planIntervalRoundsPicker = (NumberPickerKostas) v.findViewById(R.id.intervalRoundsPicker);
+        planIntervalStartRestPicker = (NumberPickerKostas) v.findViewById(R.id.intervalStartRestPicker);
         planIntervalStartRestPicker.setValue(10);
         planDescription = (EditText) v.findViewById(R.id.planNewDescription);
         buttonNewPlan = ((Button) v.findViewById(R.id.buttonNewPlan));

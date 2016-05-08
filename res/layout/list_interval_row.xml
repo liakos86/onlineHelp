@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent"
-                android:layout_height="44dp" android:background="@drawable/grey_no_gradient_interval"  android:padding="@dimen/four_dp" android:minHeight="44dp"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:background="@color/primary_grey"
+                android:layout_height="wrap_content"   android:padding="@dimen/eight" android:minHeight="@dimen/standard_view_height"
         >
+    <TextView android:textSize="@dimen/medium_text"  android:id="@+id/timeIntervalText" android:textColor="@color/white_back" android:layout_width="wrap_content" android:layout_height="wrap_content" />
 
-    <TextView android:textStyle="bold"  android:id="@+id/distanceIntervalText" android:textColor="@color/white_back"  android:layout_width="wrap_content" android:layout_height="wrap_content" />
-    <TextView android:textStyle="italic"  android:layout_below="@+id/distanceIntervalText" android:id="@+id/timeIntervalText" android:textColor="@color/white_back" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+    <TextView  android:textSize="@dimen/small_text" android:layout_below="@+id/timeIntervalText" android:id="@+id/distanceIntervalText" android:textColor="@color/white_back"  android:layout_width="wrap_content" android:layout_height="wrap_content" />
 
-    <TextView android:textStyle="italic|bold" android:layout_alignParentRight="true" android:layout_centerVertical="true" android:id="@+id/fastestIntervalText" android:textColor="@color/interval_green" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/fastest" android:layout_marginRight="@dimen/four_dp"/>
+    <TextView android:textSize="@dimen/small_text" android:textStyle="italic" android:layout_alignParentRight="true" android:layout_centerVertical="true" android:id="@+id/fastestIntervalText" android:textColor="@color/interval_green" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/fastest" />
 
 </RelativeLayout>

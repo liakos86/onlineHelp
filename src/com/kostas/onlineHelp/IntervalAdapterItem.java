@@ -50,20 +50,11 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
 
 
         if (data.get(position).isFastest()) {
-            convertView.setBackgroundColor(mContext.getResources().getColor(R.color.white_back));
-            holder.distance.setTextColor(mContext.getResources().getColor(R.color.primary_grey));
-            holder.time.setTextColor(mContext.getResources().getColor(R.color.primary_grey));
+            convertView.setBackgroundColor(mContext.getResources().getColor(R.color.secondary_grey));
             holder.fastest.setVisibility(View.VISIBLE);
-
         }
         else {
-            if (position % 2 == 0){
-                convertView.setBackgroundColor(mContext.getResources().getColor(R.color.secondary_grey));
 
-            }else{
-                convertView.setBackgroundColor(mContext.getResources().getColor(R.color.primary_grey));
-
-            }
             holder.distance.setTextColor(mContext.getResources().getColor(R.color.white_back));
             holder.time.setTextColor(mContext.getResources().getColor(R.color.white_back));
             holder.fastest.setVisibility(View.GONE);
@@ -89,7 +80,7 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
         String paceText = paceMinutes<60 ?   String.format("%02d", paceMinutes)+"m "+String.format("%02d", paceSeconds)+"s" : "over 1 hour";
 
         holder.time.setText(
-                "  Speed: "+  String.format("%1$,.2f", ((double) ((data.get(position).getDistance()/intervalTime)  *3600)))+"km/h " +
+                "Speed: "+  String.format("%1$,.2f", ((double) ((data.get(position).getDistance()/intervalTime)  *3600)))+"km/h " +
                 "  Pace: "+paceText);
 
         return convertView;
