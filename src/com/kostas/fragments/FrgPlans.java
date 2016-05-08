@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.kostas.custom.NumberPickerKostas;
 import com.kostas.custom.ViewHolderRow;
@@ -68,6 +69,18 @@ public class FrgPlans extends Fragment {
         buttonNewPlan2 = ((Button) v.findViewById(R.id.buttonNewPlan2));
         buttonSavePlan = ((Button) v.findViewById(R.id.buttonSavePlan));
         buttonClosePlan = ((Button) v.findViewById(R.id.buttonClosePlan));
+
+        planDescription.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (!b) {
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                            Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(planDescription.getWindowToken(), 0);
+                }
+
+            }
+        });
 
         buttonNewPlan.setOnClickListener(new View.OnClickListener() {
             @Override

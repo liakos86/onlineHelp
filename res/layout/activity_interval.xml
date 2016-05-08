@@ -190,7 +190,7 @@
                           android:textColor="@color/white_back"
                           android:textStyle="bold"
                           android:id="@+id/timeText"
-                          android:text="@string/text_time"
+                          android:text="@string/zero_time"
                           android:background="@drawable/time_back"
                         />
 

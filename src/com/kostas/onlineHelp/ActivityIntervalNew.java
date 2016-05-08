@@ -12,7 +12,6 @@ import android.os.*;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.*;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -37,11 +36,6 @@ import java.util.*;
  * Activity for performing a new interval session
  */
 public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
-
-    /**
-     * The starting timer text
-     */
-    private final String ZERO_TIME = "00 : 00 : 00";
 
     /**
      * Timer for counting down for the next interval round
@@ -328,7 +322,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     private void prepareForNextInterval(boolean completed) {
         coveredDist = 0;
         mHandler.removeCallbacks(mUpdateTimeTask);
-        timeText.setText(ZERO_TIME);
+        timeText.setText(getResources().getString(R.string.zero_time));
 
         if (countDownTimer !=null) {
             countDownTimer.cancel();
@@ -413,7 +407,22 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         ((ExtApplication) getApplication()).setInRunningAct(false);
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
-        flipper.setDisplayedChild(0);
+
+        completedIntervalsListView.setVisibility(View.GONE);
+        intervalDistance = 0;
+        intervalTime = 0;
+        intervalStartRest = 0 ;
+        intervalsList.clear();
+        findViewById(R.id.buttonBack).setVisibility(View.VISIBLE);
+        clearViews();
+        hideFrame();
+    }
+
+    private void clearViews() {
+        setButtonVisibilities(false);
+        layoutBottomButtons.setVisibility(View.INVISIBLE);
+        findViewById(R.id.adViewInterval2).setVisibility(View.INVISIBLE);
+        timerProgressWheel.setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -439,13 +448,12 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             @Override
             public void onClick(View view) {
                 LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && obtainUserInput()) {
-//                    if (isMyServiceRunning()) {
-//                        stopRunningService();
-//                    }
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    obtainUserInput();
                     showFrame();
-                } else if (!(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)))
+                } else {
                     Toast.makeText(getApplication(), "Please enable GPS", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -503,30 +511,11 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
 
     /**
      * Obtains input values from user selections
-     *
-     * @return true if all values are retrieved successfully
-     */
-    private boolean obtainUserInput() {
-        try {
+     **/
+    private void obtainUserInput() {
             intervalDistance = ((float) intervalDistancePicker.getValue());
             intervalTime = intervalTimePicker.getValue() * 1000;
             intervalStartRest = intervalStartRestPicker.getValue() * 1000;
-            CheckBox sound = (CheckBox) findViewById(R.id.checkbox_sound);
-            CheckBox vibration = (CheckBox) findViewById(R.id.checkbox_vibration);
-            Boolean soundOn = sound.isChecked();
-            Boolean vibrationOn = vibration.isChecked();
-            SharedPreferences.Editor editor = app_preferences.edit();
-            editor.putBoolean("noSound", !soundOn);
-            editor.putBoolean("noVibration", !vibrationOn);
-            editor.apply();
-        } catch (Exception e) {
-            Toast.makeText(getApplication(), "wrong data", Toast.LENGTH_LONG).show();
-            return false;
-        }
-        InputMethodManager imm = (InputMethodManager) getSystemService(
-                Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(buttonSetIntervalValues.getWindowToken(), 0);
-        return true;
     }
 
     /**
@@ -892,5 +881,12 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         ((ExtApplication) getApplication()).setInRunningAct(false);
         stopRunningService();
         super.onBackPressed();
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        Toast.makeText(getApplication(),"des",Toast.LENGTH_SHORT).show();
+        super.onDestroy();
     }
 }

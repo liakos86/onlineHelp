@@ -124,13 +124,14 @@ public class RunningService extends IntentService
      * Create a request for location updates
      * setting the appropriate parameters
      */
-    protected void createLocationRequest() {
+    private void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        if (intervalInProgress) {
+
+        if (intervalInProgress){
             mLocationRequest.setInterval(DURATION);
             mLocationRequest.setFastestInterval(DURATION - 1000);
             mLocationRequest.setSmallestDisplacement(10);
-        } else {
+        }else {
             mLocationRequest.setInterval(1000);
             mLocationRequest.setFastestInterval(1000);
             mLocationRequest.setSmallestDisplacement(1);
@@ -217,7 +218,8 @@ public class RunningService extends IntentService
                 if (currentDistance >= intervalDistance) {
                     finishInterval();
                 } else if (currentDistance > 0) {
-                   refreshInterval((location.getTime() - lastLocation.getTime()) / newDistance);
+                  // refreshInterval((location.getTime() - lastLocation.getTime()) / newDistance);
+                    refreshInterval();
                 }
             }
 
@@ -287,7 +289,7 @@ public class RunningService extends IntentService
     }
 
     private void finishInterval() {
-        stopLocationUpdates();
+        intervalInProgress = false;
         intervals.add(new Interval(-1, locationList, totalTime, intervalDistance));
         currentDistance = 0;
         locationList.clear();
@@ -295,7 +297,6 @@ public class RunningService extends IntentService
 
         vibrate(2000);
         if (!completed) {
-            startCountDownForNextInterval(intervalTime);
             speak("STOPPED");
         } else {
             speak("COMPLETED " + intervalRounds + " intervals");
@@ -303,7 +304,6 @@ public class RunningService extends IntentService
         int hours = (int) (totalTime / 3600000);
         int mins = (int) ((totalTime - (hours * 3600000)) / 60000);
         int secs = (int) ((totalTime - (hours * 3600000) - (mins * 60000)) / 1000);
-
         speak(mins + " minutes and " + secs + " seconds");
         SharedPreferences.Editor editor = app_preferences.edit();
         editor.putBoolean(INTERVAL_COMPLETED, completed);
@@ -316,6 +316,10 @@ public class RunningService extends IntentService
         String json = (new Gson()).toJson(intervals, listOfIntervals);
         editor.putString(INTERVALS, json);
         editor.apply();
+
+
+        startCountDownForNextInterval(intervalTime);
+
         //todo Do i really need to care about my broadcast when no receivers?
         if (((PowerManager) getSystemService(Context.POWER_SERVICE)).isScreenOn()) {
             Intent intent = new Intent(NOTIFICATION);
@@ -349,7 +353,7 @@ public class RunningService extends IntentService
         sendBroadcast(intent);
     }
 
-    private void refreshInterval(float pace) {
+    private void refreshInterval() {
         //DURATION = (100 * pace / 6) > 2000 ? ((100 * pace / 6) < 4000 ? (long) (100 * pace / 6) : 4000) : 2000;
         new PerformAsyncTask(2).execute();
     }
@@ -393,12 +397,12 @@ public class RunningService extends IntentService
 
         public void run() {
             mStartTime = SystemClock.uptimeMillis();
+            intervalInProgress = true;
+            connectAndReceive();
             SharedPreferences.Editor editor = app_preferences.edit();
             editor.putBoolean(IS_RUNNING, true);
             editor.putLong(MSTART_TIME, mStartTime);
             editor.apply();
-            connectAndReceive();
-
             vibrate(1000);
             speak("STARTED");
         }
