@@ -54,7 +54,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
     private ArrayList<Object> childItems = new ArrayList<Object>();
     private ExpandableListView runsExpListView;
     MyExpandableAdapter adapterExp;
-    ProgressBar progressBarMap;
     Running currentRun;
     List<Interval> currentIntervals;
     ArrayList<Marker> markers = new ArrayList<Marker>();
@@ -92,8 +91,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
     AdView adView;
     AdRequest adRequest;
-
-    TextView mapIntervalDistanceText, mapIntervalTimeText, mapIntervalRoundsText, mapIntervalFastestText;
 
     TextView runsCount ;
     TextView intervalsCount;
@@ -133,23 +130,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
     }
 
-    private void setTextsOnMap(){
-        mapIntervalDistanceText.setText(String.valueOf((int)currentRun.getDistance())+"m intervals");
-
-        long fastestTime = 1l;
-        for (Interval interval : currentIntervals){
-            if (interval.isFastest()){
-                fastestTime = interval.getMilliseconds();
-                break;
-            }
-        }
-
-        mapIntervalFastestText.setText(getFastestTextFromMillis(fastestTime));
-        mapIntervalRoundsText.setText(currentIntervals.size()+" rounds");
-        mapIntervalTimeText.setText((int)currentRun.getTime()/1000+" secs rest");
-    }
-
-
     public String getFastestTextFromMillis(long intervalTime) {
         int hours = (int) (intervalTime / 3600000);
         int mins = (int) ((intervalTime - (hours * 3600000)) / 60000);
@@ -165,13 +145,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
          metersCount =(TextView) v.findViewById(R.id.metersCount);
          durationCount =(TextView) v.findViewById(R.id.durationCount);
 
-        mapIntervalDistanceText = (TextView) v.findViewById(R.id.mapIntervalDistanceText);
-        mapIntervalFastestText = (TextView) v.findViewById(R.id.mapIntervalFastestText);
-        mapIntervalRoundsText = (TextView) v.findViewById(R.id.mapIntervalRoundsText);
-        mapIntervalTimeText = (TextView) v.findViewById(R.id.mapIntervalTimeText);
-
         adView = (AdView) v.findViewById(R.id.adViewInterval3);
-        progressBarMap = (ProgressBar) v.findViewById(R.id.progressBarMap);
         viewFlipper = (ViewFlipper) v.findViewById(R.id.viewFlipperRuns);
 
         openMapButton = (Button) v.findViewById(R.id.buttonShowMap);
@@ -294,16 +268,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
             childItems.clear();
             for (Running running : newRuns) {
                 List<Interval>intervalsList =db.fetchIntervalsForRun(running.getRunning_id());
-                int fastest=0, rounds=intervalsList.size();
-                long millis = Long.MAX_VALUE;
-                for (int i=0; i<rounds; i++){
-                    if (intervalsList.get(i).getMilliseconds()< millis) {
-                        fastest=i;
-                        millis = intervalsList.get(i).getMilliseconds();
-                    }
-                }
-                if (rounds>0)
-                intervalsList.get(fastest).setFastest(true);
 //                else
 //                err.add(running.getRunning_id());
                 running.setIntervals(intervalsList);
@@ -471,7 +435,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         googleMap.setIndoorEnabled(false);
         googleMap.getUiSettings().setZoomControlsEnabled(true);
-        progressBarMap.setVisibility(View.GONE);
         googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
@@ -546,7 +509,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
                     public void onClick(View view) {
                         currentRun = child.get(childPosition);
                         showIntervalsForRun(child.get(childPosition));
-                        setTextsOnMap();
                     }
                 });
             return convertView;

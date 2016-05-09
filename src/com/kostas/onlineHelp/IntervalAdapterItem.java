@@ -54,9 +54,8 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
             holder.fastest.setVisibility(View.VISIBLE);
         }
         else {
+            convertView.setBackgroundColor(mContext.getResources().getColor(R.color.primary_grey));
 
-            holder.distance.setTextColor(mContext.getResources().getColor(R.color.white_back));
-            holder.time.setTextColor(mContext.getResources().getColor(R.color.white_back));
             holder.fastest.setVisibility(View.GONE);
 
         }

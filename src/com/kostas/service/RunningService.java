@@ -92,6 +92,16 @@ public class RunningService extends IntentService
     private Handler mHandler = new Handler();
     private List<Interval> intervals = new ArrayList<Interval>();
 
+    /**
+     * The pos of the fastest interval
+     **/
+    private int fastest_position;
+    /**
+     * The millisecs of the fastest interval
+     */
+    private long fastest_millis;
+
+
     @Override
     protected void onHandleIntent(Intent intent) {
     }
@@ -160,6 +170,10 @@ public class RunningService extends IntentService
             connectAndReceive();
             return;
         }
+
+        fastest_position = 0;
+        fastest_millis = Long.MAX_VALUE;
+
         intervalInProgress = true;
         editor.putBoolean(INTERVAL_IN_PROGRESS, true).apply();
         hasSound = !app_preferences.getBoolean(NO_SOUND, false);
@@ -290,7 +304,16 @@ public class RunningService extends IntentService
 
     private void finishInterval() {
         intervalInProgress = false;
-        intervals.add(new Interval(-1, locationList, totalTime, intervalDistance));
+        Interval interval = new Interval(-1, locationList, totalTime, intervalDistance);
+        intervals.add(interval);
+        if (totalTime < fastest_millis){
+            fastest_millis = totalTime;
+            intervals.get(fastest_position).setFastest(false);
+            interval.setFastest(true);
+            fastest_position = intervals.size()-1;
+
+        }
+
         currentDistance = 0;
         locationList.clear();
         boolean completed = intervalRounds > 0 && intervals.size() >= intervalRounds;
@@ -326,6 +349,9 @@ public class RunningService extends IntentService
             intent.putExtra(INTERVAL_COMPLETED, completed);
             sendBroadcast(intent);
         }
+
+
+
         totalTime = 0;
     }
 

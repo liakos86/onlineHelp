@@ -17,16 +17,16 @@
             <LinearLayout android:layout_width="match_parent" android:id="@+id/runsInfo"
                           android:layout_height="@dimen/standard_view_height">
         <TextView android:layout_weight="1" android:id="@+id/runsCount" android:layout_width="@dimen/zero" android:layout_height="wrap_content"
-                 android:textColor="@color/white_back" android:textSize="@dimen/medium_text" android:gravity="center" android:layout_gravity="center"
+                 android:textSize="@dimen/medium_text" android:gravity="center" android:layout_gravity="center"
                />
             <TextView  android:layout_weight="1" android:id="@+id/intervalsCount" android:layout_width="@dimen/zero" android:layout_height="wrap_content"
-                      android:textColor="@color/white_back" android:textSize="@dimen/medium_text" android:gravity="center" android:layout_gravity="center"
+                       android:textSize="@dimen/medium_text" android:gravity="center" android:layout_gravity="center"
                       />
             <TextView android:layout_weight="1" android:id="@+id/metersCount" android:layout_width="@dimen/zero" android:layout_height="wrap_content"
-                      android:textColor="@color/white_back" android:textSize="@dimen/medium_text" android:gravity="center" android:layout_gravity="center"
+                      android:textSize="@dimen/medium_text" android:gravity="center" android:layout_gravity="center"
                    />
             <TextView android:layout_weight="1" android:id="@+id/durationCount" android:layout_width="@dimen/zero" android:layout_height="wrap_content"
-                       android:textColor="@color/white_back" android:textSize="@dimen/medium_text" android:gravity="center" android:layout_gravity="center"
+                       android:textSize="@dimen/medium_text" android:gravity="center" android:layout_gravity="center"
                       />
             </LinearLayout>
         <ExpandableListView
@@ -58,14 +58,38 @@
                 android:id="@+id/listIntervals"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/intervalsButtons"
+                android:layout_above="@+id/buttonShowMap"
                 android:layout_alignParentTop="true"
                 />
 
-            <LinearLayout android:layout_margin="@dimen/margin10" android:baselineAligned="false" android:id="@+id/intervalsButtons" android:layout_alignParentBottom="true" android:layout_width="fill_parent" android:layout_height="wrap_content"  >
-                <Button android:textSize="@dimen/xmedium_text" android:textStyle="bold" android:layout_marginRight="@dimen/eight" android:textColor="@color/white_back"  android:id="@+id/buttonCloseIntervals" android:background="@drawable/close_button_selector" android:text="@string/close"  android:layout_weight="1" android:layout_width="@dimen/zero" android:layout_height="@dimen/standard_view_height"/>
-                <Button  android:textSize="@dimen/xmedium_text"   android:textStyle="bold"   android:id="@+id/buttonShowMap" android:textColor="@color/white_back" android:layout_weight="1" android:layout_width="@dimen/zero" android:layout_height="@dimen/standard_view_height" android:background="@drawable/plus_minus_selector" android:text="@string/map"/>
-            </LinearLayout>
+            <View android:id="@+id/strut"
+                  android:layout_width="0dp"
+                  android:layout_height="0dp"
+                  android:layout_alignParentBottom="true"
+                  android:layout_centerHorizontal="true"/>
+            <Button android:text="@string/close"
+                    android:textSize="@dimen/xmedium_text"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginLeft="@dimen/margin10"
+                    android:layout_alignRight="@id/strut"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginRight="@dimen/four_dp"
+                    android:textColor="@color/white_back" android:textStyle="bold"
+                    android:id="@+id/buttonCloseIntervals" android:background="@drawable/close_button_selector"
+                    android:layout_width="@dimen/zero"
+                    android:layout_height="@dimen/standard_view_height"/>
+            <Button android:text="@string/map"
+                    android:textSize="@dimen/xmedium_text"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignLeft="@id/strut"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="@dimen/margin10"
+                    android:textColor="@color/white_back" android:textStyle="bold"
+                    android:id="@+id/buttonShowMap"
+                    android:background="@drawable/plus_minus_selector"
+                    android:layout_width="@dimen/zero"
+                    android:layout_height="@dimen/standard_view_height"/>
+
 
         </RelativeLayout>
 
@@ -88,34 +112,6 @@
             android:layout_height="match_parent"
 
             />
-            <RelativeLayout android:gravity="center|top"
-                            android:background="@drawable/inactive_button"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                    android:padding="@dimen/eight"
-                    android:layout_margin="@dimen/twenty"
-                    >
-
-                <TextView android:textStyle="bold" android:textSize="@dimen/medium_text" android:gravity="top|start" android:id="@+id/mapIntervalDistanceText" android:textColor="@color/white_back" android:layout_width="match_parent" android:layout_height="wrap_content" />
-                <TextView android:textStyle="bold" android:textSize="@dimen/medium_text" android:gravity="top|end" android:id="@+id/mapIntervalTimeText" android:textColor="@color/white_back" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-                <TextView android:textStyle="bold" android:textSize="@dimen/medium_text" android:layout_below="@+id/mapIntervalDistanceText" android:gravity="bottom|start" android:id="@+id/mapIntervalRoundsText" android:textColor="@color/white_back" android:layout_width="match_parent" android:layout_height="wrap_content" />
-                <TextView android:textStyle="bold" android:textSize="@dimen/medium_text" android:layout_below="@id/mapIntervalTimeText" android:gravity="bottom|end" android:id="@+id/mapIntervalFastestText" android:textColor="@color/white_back" android:layout_width="match_parent" android:layout_height="wrap_content" />
-
-
-
-            </RelativeLayout>
-
-
-            <!--<TextView-->
-                    <!--android:layout_margin="@dimen/margin10"-->
-                    <!--android:text="@string/click"-->
-                    <!--android:singleLine="true"-->
-                    <!--android:gravity="center"-->
-                    <!--android:textColor="@color/white_back"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:background="@drawable/inactive_button"-->
-                    <!--android:layout_gravity="top|center"-->
-                    <!--android:layout_height="@dimen/standard_view_height"/>-->
 
             <ImageButton
                     android:layout_margin="15dp"
@@ -127,16 +123,12 @@
                     android:id="@+id/buttonCloseMap"
                     android:layout_gravity="left|bottom" />
 
-            <ProgressBar android:id="@+id/progressBarMap" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical|center_horizontal"/>
-
-
         </FrameLayout>
 
     </com.kostas.custom.MapWrapperLayout>
 
 
-        <TextView android:id="@+id/noRunsText" android:textColor="@color/white_back"
+        <TextView android:id="@+id/noRunsText"
                   android:layout_gravity="center"  android:layout_width="wrap_content"
                   android:layout_height="wrap_content" android:text="@string/no_runs" android:textSize="20sp"
                   android:drawableBottom="@drawable/empty_100"/>

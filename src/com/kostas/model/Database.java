@@ -60,7 +60,6 @@ public class Database extends SQLiteOpenHelper {
         for (Interval interval : running.getIntervals())
         {
             interval.setRunning_id(runId);
-//            interval.setInterval_id(-1);
             addInterval(interval);
         }
 
@@ -157,13 +156,15 @@ public class Database extends SQLiteOpenHelper {
                 ContentDescriptor.Interval.Cols.ID,
                 ContentDescriptor.Interval.Cols.LATLONLIST,
                 ContentDescriptor.Interval.Cols.MILLISECONDS,
-                ContentDescriptor.Interval.Cols.DISTANCE
+                ContentDescriptor.Interval.Cols.DISTANCE,
+                ContentDescriptor.Interval.Cols.FASTEST
         };
 
         int sIdPosition = 0;
         int sLatPosition = 1;
         int sMillisPosition = 2;
         int sDistancePosition = 3;
+        int sFastestPosition = 4;
 
         Cursor c = mContext.getContentResolver().query(ContentDescriptor.Interval.CONTENT_URI, FROM,
                 ContentDescriptor.Interval.Cols.RUNNING_ID+" = "+String.valueOf(id),
@@ -174,8 +175,10 @@ public class Database extends SQLiteOpenHelper {
         if (c.getCount() > 0) {
 
             while (c.moveToNext()) {
-                St.add(new Interval(c.getLong(sIdPosition),c.getString(sLatPosition),
-                        c.getLong(sMillisPosition), c.getFloat(sDistancePosition)));
+                Interval interval = new Interval(c.getLong(sIdPosition),c.getString(sLatPosition),
+                        c.getLong(sMillisPosition), c.getFloat(sDistancePosition));
+                interval.setFastest(c.getInt(sFastestPosition)==1);
+                St.add(interval);
             }
         }
         c.close();

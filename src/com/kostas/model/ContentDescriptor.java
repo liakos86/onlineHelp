@@ -86,9 +86,6 @@ public class ContentDescriptor {
             public static final String TIME = "time";
             public static final String DESCRIPTION = "description";
 
-
-
-
         }
 
         protected static UriMatcher addToUriMatcher(String authority, UriMatcher matcher) {
@@ -110,12 +107,6 @@ public class ContentDescriptor {
                     + String.format(sFrmPrimaryKey, Cols.ID) + ")";
         }
     }
-
-
-
-
-
-
 
 
     public static class Interval {
@@ -143,6 +134,7 @@ public class ContentDescriptor {
             public static final String MILLISECONDS = "milliseconds";
             public static final String LATLONLIST = "latlonlist";
             public static final String DISTANCE = "distance";
+            public static final String FASTEST = "fastest";
         }
 
         protected static UriMatcher addToUriMatcher(String authority, UriMatcher matcher) {
@@ -160,6 +152,7 @@ public class ContentDescriptor {
                     + String.format(sFrmTextNotNull, Cols.MILLISECONDS) + " , "
                     + String.format(sFrmTextNotNull, Cols.LATLONLIST) + " , "
                     + String.format(sFrmTextNotNull, Cols.DISTANCE) + " , "
+                    + String.format(sFrmInt, Cols.FASTEST) + " , "
                     + String.format(sFrmPrimaryKey, Cols.ID) + ")";
         }
     }
@@ -217,11 +210,5 @@ public class ContentDescriptor {
                     + String.format(sFrmPrimaryKey, Cols.ID) + ")";
         }
     }
-
-
-
-
-
-
 
 }

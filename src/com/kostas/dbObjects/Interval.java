@@ -128,6 +128,7 @@ public class Interval implements Serializable{
             toRet.put(ContentDescriptor.Interval.Cols.MILLISECONDS, item.milliseconds);
             toRet.put(ContentDescriptor.Interval.Cols.LATLONLIST, item.latLonList);
             toRet.put(ContentDescriptor.Interval.Cols.DISTANCE, item.distance);
+            toRet.put(ContentDescriptor.Interval.Cols.FASTEST, item.isFastest ? 1 : 0);
 
             return toRet;
         }
@@ -145,6 +146,7 @@ public class Interval implements Serializable{
             toRet.latLonList = cursor.getString(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.LATLONLIST));
             toRet.milliseconds = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.MILLISECONDS));
             toRet.distance = cursor.getFloat(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.DISTANCE));
+            toRet.isFastest = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.FASTEST))==1;
             return toRet;
         }
     }
