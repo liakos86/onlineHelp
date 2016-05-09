@@ -9,7 +9,7 @@
     <dimen name="small_text">12sp</dimen>
     <dimen name="xsmall_text">10sp</dimen>
     <dimen name="xxsmall_text">8sp</dimen>
-    <dimen name="margin10">10dp</dimen>
+    <dimen name="ten_device_pixels">10dp</dimen>
     <dimen name="progressBarSize">150dp</dimen>
     <dimen name="twenty">20dp</dimen>
     <dimen name="eight">8dp</dimen>

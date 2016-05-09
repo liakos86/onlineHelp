@@ -70,7 +70,7 @@
             <Button android:text="@string/close"
                     android:textSize="@dimen/xmedium_text"
                     android:layout_alignParentBottom="true"
-                    android:layout_marginLeft="@dimen/margin10"
+                    android:layout_marginLeft="@dimen/ten_device_pixels"
                     android:layout_alignRight="@id/strut"
                     android:layout_alignParentLeft="true"
                     android:layout_marginRight="@dimen/four_dp"
@@ -83,7 +83,7 @@
                     android:layout_alignParentBottom="true"
                     android:layout_alignLeft="@id/strut"
                     android:layout_alignParentRight="true"
-                    android:layout_marginRight="@dimen/margin10"
+                    android:layout_marginRight="@dimen/ten_device_pixels"
                     android:textColor="@color/white_back" android:textStyle="bold"
                     android:id="@+id/buttonShowMap"
                     android:background="@drawable/plus_minus_selector"
@@ -137,7 +137,7 @@
     </ViewFlipper>
 
     <Button style="@style/buttonStyle"
-        android:layout_margin="@dimen/margin10"
+        android:layout_margin="@dimen/ten_device_pixels"
         android:text="@string/new_interval"
         android:background="@drawable/close_button_selector"
         android:id="@+id/buttonNewRun"

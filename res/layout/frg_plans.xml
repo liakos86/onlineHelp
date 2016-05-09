@@ -19,7 +19,7 @@
 
         <Button
                 android:layout_alignParentBottom="true"
-                android:layout_margin="@dimen/margin10"
+                android:layout_margin="@dimen/ten_device_pixels"
                android:layout_width="match_parent"
                 android:layout_height="@dimen/standard_view_height"
                 android:text="@string/new_plan"
@@ -35,7 +35,7 @@
 </RelativeLayout>
 
     <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent"
-            android:layout_margin="@dimen/margin10">
+            android:layout_margin="@dimen/ten_device_pixels">
 
         <include android:id="@+id/pickers"
                 android:layout_width="fill_parent"
@@ -91,7 +91,6 @@
 
     <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
         <TextView android:id="@+id/noPlansText"
-                  android:textColor="@color/white_back"
                   android:layout_centerInParent="true"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
@@ -100,7 +99,7 @@
                   android:drawableBottom="@drawable/empty_100"/>
 
         <Button
-                android:layout_margin="@dimen/margin10"
+                android:layout_margin="@dimen/ten_device_pixels"
                 style="@style/buttonStyle"
                 android:text="@string/new_plan"
                 android:background="@drawable/close_button_selector"

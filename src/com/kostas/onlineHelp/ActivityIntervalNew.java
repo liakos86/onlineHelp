@@ -612,12 +612,11 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
 
     private void confirmStopOrDelete(final boolean isStopRunDialog) {
 
-        String title = isStopRunDialog ? "Quit Interval" : "Delete Interval";
         String message = isStopRunDialog ? "Stop running now?" : "Delete current progress?";
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 this);
-        alertDialogBuilder.setTitle(title)
+        alertDialogBuilder
                 .setMessage(message)
                 .setCancelable(false)
                 .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {

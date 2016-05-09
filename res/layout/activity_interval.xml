@@ -34,13 +34,13 @@
         <LinearLayout android:layout_width="match_parent" android:layout_below="@+id/plansSpinner"
                       android:layout_height="@dimen/standard_view_height">
 
-            <CheckBox android:gravity="center" android:paddingLeft="@dimen/margin10" android:paddingRight="@dimen/zero"
+            <CheckBox android:gravity="center" android:paddingLeft="@dimen/ten_device_pixels" android:paddingRight="@dimen/zero"
                       android:layout_weight="1" android:layout_marginRight="@dimen/eight"
                       android:background="@drawable/checkbox_selector" android:button="@drawable/checkbox_sound_design"
                       android:textColor="@color/white_back" android:id="@+id/checkbox_sound" android:layout_width="@dimen/zero"
                       android:layout_height="fill_parent" android:text="@string/sound"/>
 
-            <CheckBox android:gravity="center" android:paddingLeft="@dimen/margin10" android:layout_weight="1"
+            <CheckBox android:gravity="center" android:paddingLeft="@dimen/ten_device_pixels" android:layout_weight="1"
                       android:background="@drawable/checkbox_selector"
                       android:button="@drawable/checkbox_vibrate_design" android:textColor="@color/white_back"
                       android:id="@+id/checkbox_vibration" android:layout_width="@dimen/zero"
@@ -66,15 +66,16 @@
                 android:layout_centerHorizontal="true"
                 android:textColor="@color/white_back"
                 android:visibility="invisible"
-                android:layout_marginTop="@dimen/margin10"
+                android:layout_marginTop="@dimen/ten_device_pixels"
                 android:maxLines="1"
                 android:singleLine="true"/>
 
             <Button style="@style/buttonStyle"
+                    android:textSize="@dimen/xlarge_text"
                   android:text="@string/start"
                     android:background="@drawable/close_button_selector"
                     android:id="@+id/buttonSetIntervalValues"
-                    android:layout_marginTop="@dimen/margin10"
+                    android:layout_marginTop="@dimen/ten_device_pixels"
                     android:layout_marginBottom="@dimen/twenty"
                     />
     </RelativeLayout>
@@ -86,38 +87,40 @@
 
 
         <com.kostas.custom.ProgressWheel
-                android:layout_marginTop="@dimen/standard_view_height"
+
+                android:id="@+id/timerProgressWheel"
+
+                android:layout_marginTop="@dimen/twenty"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:id="@+id/timerProgressWheel"
+
                 android:layout_width="@dimen/progressBarSize"
                 android:layout_height="@dimen/progressBarSize"
                 android:visibility="invisible"
                 app:textSize="@dimen/medium_text"
-                app:textColor="@color/interval_green"
-                app:rimColor="@color/white_back"
-                app:barColor="@color/interval_red"
-                app:contourColor="@color/secondary_grey"
+
                 app:barWidth="@dimen/xmedium_text"
                 app:rimWidth="@dimen/twenty"
                 />
 
         <ImageButton
-
-                android:layout_marginTop="@dimen/standard_view_height"
-                android:layout_width="@dimen/progressBarSize"
-                android:layout_height="@dimen/progressBarSize"
+                android:id="@+id/buttonStart"
                 android:src="@drawable/replay"
                 android:background="@drawable/circle_green"
-                android:id="@+id/buttonStart"
+
+                android:layout_marginTop="@dimen/twenty"
+                android:layout_width="@dimen/progressBarSize"
+                android:layout_height="@dimen/progressBarSize"
                 android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"/>
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="@dimen/ten_device_pixels"/>
 
         <TextView
+                android:background="@drawable/textview_with_hr"
+                android:gravity="center"
+                android:layout_height="@dimen/standard_view_height"
                 android:layout_below="@+id/buttonStart"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
+                android:layout_width="match_parent"
                 android:textSize="@dimen/large_text"
                 android:textColor="@color/secondary_grey"
                 android:id="@+id/rounds2"
@@ -132,17 +135,17 @@
                           android:layout_height="@dimen/standard_view_height"
                           android:layout_centerHorizontal="true"
                           android:textSize="@dimen/xlarge_text"
-                          android:textColor="@color/white_back"
                           android:id="@+id/roundsText"
 
                         />
 
 
         <TextView
+                android:background="@drawable/textview_with_hr"
+                android:gravity="center"
+                android:layout_height="@dimen/standard_view_height"
                 android:layout_below="@+id/roundsText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
+                android:layout_width="match_parent"
                 android:textSize="@dimen/large_text"
                 android:textColor="@color/secondary_grey"
                 android:id="@+id/duration2"
@@ -156,16 +159,16 @@
                           android:layout_height="@dimen/standard_view_height"
                         android:layout_centerHorizontal="true"
                           android:textSize="@dimen/xlarge_text"
-                          android:textColor="@color/white_back"
                           android:id="@+id/timeText"
                         android:text="@string/zero_time"
                         />
 
         <TextView
+                android:background="@drawable/textview_with_hr"
+                android:gravity="center"
+                android:layout_height="@dimen/standard_view_height"
                 android:layout_below="@+id/timeText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
+                android:layout_width="match_parent"
                 android:textSize="@dimen/large_text"
                 android:textColor="@color/secondary_grey"
                 android:id="@+id/distance"
@@ -179,16 +182,13 @@
                 android:layout_height="@dimen/standard_view_height"
                 android:layout_centerHorizontal="true"
                 android:textSize="@dimen/xlarge_text"
-                android:textColor="@color/white_back"
                 android:id="@+id/distanceText"
                 />
 
 
         <ImageButton
-
                 android:layout_alignParentBottom="true"
-                android:layout_marginTop="@dimen/four_dp"
-                android:layout_marginBottom="@dimen/four_dp"
+                android:layout_margin="@dimen/ten_device_pixels"
                 android:layout_width="@dimen/circular_image_size"
                 android:visibility="invisible"
                 android:layout_height="@dimen/circular_image_size"
@@ -199,8 +199,7 @@
 
         <ImageButton
                android:layout_alignParentBottom="true"
-                android:layout_marginTop="@dimen/four_dp"
-                android:layout_marginBottom="@dimen/four_dp"
+                android:layout_margin="@dimen/ten_device_pixels"
                 android:layout_width="@dimen/circular_image_size"
                 android:layout_height="@dimen/circular_image_size"
                 android:src="@drawable/return_32"

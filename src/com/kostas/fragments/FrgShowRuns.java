@@ -403,7 +403,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
     private void confirmDelete(final Long trId,final int groupPosition, final int position){
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 getActivity());
-        alertDialogBuilder.setTitle("Confirm")
+        alertDialogBuilder
                 .setMessage("Delete Running ?")
                 .setCancelable(false)
                 .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {

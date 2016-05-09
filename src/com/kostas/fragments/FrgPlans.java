@@ -241,7 +241,7 @@ public class FrgPlans extends Fragment {
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 getActivity());
-        alertDialogBuilder.setTitle("Confirm")
+        alertDialogBuilder
                 .setMessage("Delete Plan ?")
                 .setCancelable(false)
                 .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
