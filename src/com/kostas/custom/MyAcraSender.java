@@ -2,16 +2,9 @@ package com.kostas.custom;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.widget.Toast;
 import com.kostas.onlineHelp.ExtApplication;
-import com.kostas.onlineHelp.MainActivity;
-import com.kostas.service.RunningService;
-import org.acra.ReportField;
-import org.acra.ReportingInteractionMode;
-import org.acra.annotation.ReportsCrashes;
+import com.kostas.onlineHelp.ActMain;
 import org.acra.collector.CrashReportData;
-import org.acra.sender.HttpSender;
 import org.acra.sender.ReportSender;
 import org.acra.sender.ReportSenderException;
 
@@ -29,7 +22,7 @@ public class MyAcraSender implements ReportSender {
 
     @Override
     public void send(CrashReportData report) throws ReportSenderException {
-        SharedPreferences sharedPreferences = application.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = application.getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
         sharedPreferences.edit().clear().apply();
     }
 }

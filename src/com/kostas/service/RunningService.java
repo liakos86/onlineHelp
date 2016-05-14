@@ -20,9 +20,9 @@ import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.kostas.dbObjects.Interval;
-import com.kostas.onlineHelp.ActivityIntervalNew;
+import com.kostas.onlineHelp.ActIntervalNew;
 import com.kostas.onlineHelp.ExtApplication;
-import com.kostas.onlineHelp.MainActivity;
+import com.kostas.onlineHelp.ActMain;
 import com.kostas.onlineHelp.R;
 
 import java.lang.reflect.Type;
@@ -115,7 +115,7 @@ public class RunningService extends IntentService
         wl.acquire();
         application = (ExtApplication) getApplication();
         v = (Vibrator) application.getSystemService(Context.VIBRATOR_SERVICE);
-        app_preferences = getApplication().getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
+        app_preferences = getApplication().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
         locationList = new ArrayList<Location>();
         buildGoogleApiClient();
         ttsManager = application.getTtsManager();
@@ -171,10 +171,13 @@ public class RunningService extends IntentService
             return;
         }
 
+        if (intervalInProgress){
+            return;
+        }
+
         fastest_position = 0;
         fastest_millis = Long.MAX_VALUE;
 
-        intervalInProgress = true;
         editor.putBoolean(INTERVAL_IN_PROGRESS, true).apply();
         hasSound = !app_preferences.getBoolean(NO_SOUND, false);
         hasVibration = !app_preferences.getBoolean(NO_VIBRATION, false);
@@ -270,9 +273,9 @@ public class RunningService extends IntentService
             mBuilder.setContentTitle("Interval in progress");
             mBuilder.setContentText("Click to get into");
 //            mBuilder.setOngoing(true);
-            Intent resultIntent = new Intent(application, ActivityIntervalNew.class);
+            Intent resultIntent = new Intent(application, ActIntervalNew.class);
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(application);
-            stackBuilder.addParentStack(MainActivity.class);
+            stackBuilder.addParentStack(ActMain.class);
 // Adds the Intent that starts the Activity to the top of the stack
             stackBuilder.addNextIntent(resultIntent);
             PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -290,7 +293,7 @@ public class RunningService extends IntentService
 //            notificationManager.notify(123, notification);
         } else {
 //The intent to launch when the user clicks the expanded notification
-            Intent intent2 = new Intent(this, MainActivity.class);
+            Intent intent2 = new Intent(this, ActMain.class);
             intent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             PendingIntent pendIntent = PendingIntent.getActivity(this, 0, intent2, 0);
 //This constructor is deprecated. Use Notification.Builder instead
@@ -424,8 +427,10 @@ public class RunningService extends IntentService
         public void run() {
             mStartTime = SystemClock.uptimeMillis();
             intervalInProgress = true;
+
             connectAndReceive();
             SharedPreferences.Editor editor = app_preferences.edit();
+
             editor.putBoolean(IS_RUNNING, true);
             editor.putLong(MSTART_TIME, mStartTime);
             editor.apply();

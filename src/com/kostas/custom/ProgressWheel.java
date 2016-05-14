@@ -78,7 +78,7 @@ public class ProgressWheel extends View {
             //super.handleMessage(msg);
         }
     };
-    int progress = 0;
+    volatile int  progress = 0;
     boolean isSpinning = false;
 
     //Other

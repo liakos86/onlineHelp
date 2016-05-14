@@ -49,7 +49,7 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
         bottomButtons.put(0, R.id.btn_my_runs);
         bottomButtons.put(1, R.id.btn_my_plans);
         bottomButtons.put(2, R.id.btn_settings);
-        for (int counter = 0; counter < MainActivity.PAGER_SIZE; counter++) {
+        for (int counter = 0; counter < ActMain.PAGER_SIZE; counter++) {
             setBottomButtonListener(mPager, bottomButtons.get(counter), counter);
         }
     }
@@ -75,7 +75,7 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
      * @param position
      */
     private void startMainWhenNoPager(int position) {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, ActMain.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
         startActivity(intent);
         finish();
@@ -85,8 +85,8 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
      * Starts a new IntervalActivity
      */
      public void startNewInterval() {
-        if(!(this instanceof ActivityIntervalNew)){
-            Intent intent = new Intent(this, ActivityIntervalNew.class);
+        if(!(this instanceof ActIntervalNew)){
+            Intent intent = new Intent(this, ActIntervalNew.class);
             startActivity(intent);
         }
     }

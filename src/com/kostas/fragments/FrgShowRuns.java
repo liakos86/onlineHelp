@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -24,11 +25,8 @@ import com.kostas.model.Database;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.kostas.onlineHelp.BaseFrgActivityWithBottomButtons;
-import com.kostas.onlineHelp.IntervalAdapterItem;
-import com.kostas.onlineHelp.MainActivity;
+import com.kostas.onlineHelp.*;
 import com.kostas.custom.MapWrapperLayout;
-import com.kostas.onlineHelp.R;
 
 import java.util.*;
 
@@ -112,22 +110,22 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         return  v;
     }
 
-    private boolean placeAd() {
+    private void placeAd() {
+        String android_id = Settings.Secure.getString(getActivity().getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        SharedPreferences app_preferences  = getActivity().getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences app_preferences  = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
         String deviceId = app_preferences.getString("deviceId", null);
-
-        if (deviceId!=null) {
-
+        if (deviceId == null) {
+            deviceId = ((ExtApplication) getActivity().getApplication()).md5(android_id).toUpperCase();
+            SharedPreferences.Editor editor = app_preferences.edit();
+            editor.putString("deviceId", deviceId);
+            editor.apply();
+        }
 
             adRequest = new AdRequest.Builder()
                     .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
                     .addTestDevice(deviceId)
                     .build();
-
-            return  true;
-        }else return false;
-
     }
 
     public String getFastestTextFromMillis(long intervalTime) {
@@ -612,7 +610,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
     private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
         private Activity activity;
-        private boolean shouldPlaceAd;
 
         public PerformAsyncTask(Activity activity) {
             this.activity = activity;
@@ -625,7 +622,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         @Override
         protected Void doInBackground(Void... unused) {
             getRunsFromDb(activity, true);
-            shouldPlaceAd = placeAd();
+            placeAd();
             return null;
         }
 
@@ -636,7 +633,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
                 adapterExp.notifyDataSetChanged();
                 showTextNoRuns();
             }
-            if (shouldPlaceAd) adView.loadAd(adRequest);
+            adView.loadAd(adRequest);
         }
     }
 

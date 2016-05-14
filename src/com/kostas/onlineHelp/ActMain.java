@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * The main activity that contains the pager to choose fragment or new interval
  */
-public class MainActivity extends BaseFrgActivityWithBottomButtons {
+public class ActMain extends BaseFrgActivityWithBottomButtons {
 
     /**
      * Shared prefs name

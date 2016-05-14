@@ -28,15 +28,13 @@ import com.kostas.service.RunningService;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
  * Activity for performing a new interval session
  */
-public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
+public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
 
     /**
      * Timer for counting down for the next interval round
@@ -90,11 +88,15 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         setPlansSpinner();
         setViewsAndButtons();
         getPlansFromDb();
-        new LoadAsyncAds().execute();
+        if (((ExtApplication) getApplication()).isOnline()) {
+            Toast.makeText(getApplication(), "online", Toast.LENGTH_SHORT).show();
+            new LoadAsyncAds().execute();
+        }
         setListeners();
         flipper.setDisplayedChild(0);
 
         if (!isMyServiceRunning()) {
+            resetAppPrefs();
             startRunningService(false);
             registerReceiver(receiver, new IntentFilter(NOTIFICATION));
         }
@@ -139,34 +141,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         };
     }
 
-    /**
-     * For testing purposes returns an md5 hash of the device to add testing ads
-     * @param s
-     * @return
-     */
-    public static String md5(final String s) {
-        try {
-            // Create MD5 Hash
-            MessageDigest digest = java.security.MessageDigest
-                    .getInstance("MD5");
-            digest.update(s.getBytes());
-            byte messageDigest[] = digest.digest();
 
-            // Create Hex String
-            StringBuffer hexString = new StringBuffer();
-            for (int i = 0; i < messageDigest.length; i++) {
-                String h = Integer.toHexString(0xFF & messageDigest[i]);
-                while (h.length() < 2)
-                    h = "0" + h;
-                hexString.append(h);
-            }
-            return hexString.toString();
-
-        } catch (NoSuchAlgorithmException e) {
-            //Log.v("SERVICE",e.getMessage());
-        }
-        return "";
-    }
 
     /**
      * Self explanatory
@@ -175,7 +150,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
         String deviceId = app_preferences.getString("deviceId", null);
         if (deviceId == null) {
-            deviceId = md5(android_id).toUpperCase();
+            deviceId = ((ExtApplication) getApplication()).md5(android_id).toUpperCase();
             SharedPreferences.Editor editor = app_preferences.edit();
             editor.putString("deviceId", deviceId);
             editor.apply();
@@ -210,7 +185,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     }
 
     private void setViewsAndButtons() {
-        app_preferences = this.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
+        app_preferences = this.getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
         sound = (CheckBox) findViewById(R.id.checkbox_sound);
         vibration = (CheckBox) findViewById(R.id.checkbox_vibration);
         sound.setChecked(!app_preferences.getBoolean("noSound", false));
@@ -322,6 +297,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         coveredDist = 0;
         mHandler.removeCallbacks(mUpdateTimeTask);
         timeText.setText(getResources().getString(R.string.zero_time));
+        distanceText.setText(0 + " / " + (int) intervalDistance);
 
         if (countDownTimer !=null) {
             countDownTimer.cancel();
@@ -335,6 +311,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         setRoundsText(intervalRoundsPicker.getValue());
         //distanceProgressWheel.setVisibility(View.INVISIBLE);
         progressWheel.setVisibility(View.VISIBLE);
+        progressWheel.setProgress(360);
         final int step = (int) (360000 / intervalTime);
         countDownTimer = new CountDownTimer(intervalTime, 1000) {
             public void onTick(long millisUntilFinished) {
@@ -405,7 +382,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         resetAppPrefs();
         ((ExtApplication) getApplication()).setInRunningMode(false);
         ((ExtApplication) getApplication()).setInRunningAct(false);
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, ActMain.class);
         startActivity(intent);
 
         completedIntervalsListView.setVisibility(View.GONE);
@@ -465,6 +442,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         ( findViewById(R.id.buttonStart)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                ( findViewById(R.id.buttonStart)).setClickable(false);
                 getInRunningMode(false, false, true, SystemClock.uptimeMillis(), 0);
             }
         });
@@ -541,6 +519,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
     @Override
     public void onResume() {
         super.onResume();
+        ( findViewById(R.id.buttonStart)).setClickable(true);
         if (isMyServiceRunning() && (app_preferences.getBoolean(INTERVAL_IN_PROGRESS, false))) {//service is on and i am running
             setBroadcastReceiver();
             intervalDistance = app_preferences.getFloat(INTERVAL_DISTANCE, 0);
@@ -668,7 +647,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
             return;
         }
 
-        setProgressAndVisibilityTimerAndDistance(View.GONE);
+        //setProgressAndVisibilityTimerAndDistance(View.GONE);
         mHandler.removeCallbacks(mUpdateTimeTask);
         if (countDownTimer != null) {
             countDownTimer.cancel();
@@ -702,7 +681,7 @@ public class ActivityIntervalNew extends BaseFrgActivityWithBottomButtons {
         Database db = new Database(getApplicationContext());
         db.addRunning(running);
         ((ExtApplication) getApplication()).setNewIntervalInDb(true);
-        Toast.makeText(getApplication(), "Saved in Diary", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplication(), "Saved in Diary", Toast.LENGTH_SHORT).show();
         clear();
     }
 

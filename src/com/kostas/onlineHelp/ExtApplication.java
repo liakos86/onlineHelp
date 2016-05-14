@@ -1,6 +1,10 @@
 package com.kostas.onlineHelp;
 
 import android.app.Application;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.widget.Toast;
 import com.kostas.custom.MyAcraSender;
 import com.kostas.service.TTSManager;
 import org.acra.ACRA;
@@ -8,6 +12,9 @@ import org.acra.ReportField;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 import org.acra.sender.HttpSender;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 @ReportsCrashes(formKey = "",
         httpMethod = HttpSender.Method.POST,
@@ -51,6 +58,55 @@ public class ExtApplication extends Application {
         ACRA.getErrorReporter().addReportSender(mySender);
         ttsManager = new TTSManager();
         ttsManager.init(this);
+    }
+
+    /*
+ * isOnline - Check if there is a NetworkConnection
+ * @return boolean
+ */
+    public boolean isOnline() {
+        ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+
+        boolean is3g = manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)
+                .isConnectedOrConnecting();
+
+        if (is3g){
+            Toast.makeText(this, manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getSubtypeName(),Toast.LENGTH_SHORT).show();
+        }
+
+        boolean isWifi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+                .isConnectedOrConnecting();
+
+        return isWifi || is3g ;
+    }
+
+    /**
+     * For testing purposes returns an md5 hash of the device to add testing ads
+     * @param s
+     * @return
+     */
+    public static String md5(final String s) {
+        try {
+            // Create MD5 Hash
+            MessageDigest digest = java.security.MessageDigest
+                    .getInstance("MD5");
+            digest.update(s.getBytes());
+            byte messageDigest[] = digest.digest();
+
+            // Create Hex String
+            StringBuffer hexString = new StringBuffer();
+            for (int i = 0; i < messageDigest.length; i++) {
+                String h = Integer.toHexString(0xFF & messageDigest[i]);
+                while (h.length() < 2)
+                    h = "0" + h;
+                hexString.append(h);
+            }
+            return hexString.toString();
+
+        } catch (NoSuchAlgorithmException e) {
+            //Log.v("SERVICE",e.getMessage());
+        }
+        return "";
     }
 
     public void setPosition(int position) {
