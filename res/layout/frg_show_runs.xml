@@ -39,8 +39,7 @@
                 />
 
             <com.google.android.gms.ads.AdView
-
-                    android:layout_margin="@dimen/eight"
+                    android:layout_marginTop="@dimen/eight"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/adViewInterval3"

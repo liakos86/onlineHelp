@@ -82,11 +82,21 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
     }
 
     /**
-     * Starts a new IntervalActivity
+     * Starts a new ActIntervalNew
      */
-     public void startNewInterval() {
+     public void startIntervalAct() {
         if(!(this instanceof ActIntervalNew)){
             Intent intent = new Intent(this, ActIntervalNew.class);
+            startActivity(intent);
+        }
+    }
+
+    /**
+     * Starts a new ActIntervalResults
+     */
+    public void startResultsAct() {
+        if(!(this instanceof ActIntervalResults)){
+            Intent intent = new Intent(this, ActIntervalResults.class);
             startActivity(intent);
         }
     }

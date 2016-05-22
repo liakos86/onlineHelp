@@ -33,6 +33,12 @@ public class ExtApplication extends Application {
      * Is the running activity displayed
      */
     private boolean inRunningAct;
+
+    /**
+     * Is the activity in the interval results act
+     */
+    private boolean inResultsAct;
+
     /**
      * Is there a new interval in db? I need to fetch again then
      */
@@ -70,14 +76,22 @@ public class ExtApplication extends Application {
         boolean is3g = manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)
                 .isConnectedOrConnecting();
 
-        if (is3g){
-            Toast.makeText(this, manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getSubtypeName(),Toast.LENGTH_SHORT).show();
-        }
+//        if (is3g){
+//            Toast.makeText(this, manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getSubtypeName(),Toast.LENGTH_SHORT).show();
+//        }
 
         boolean isWifi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
                 .isConnectedOrConnecting();
 
         return isWifi || is3g ;
+    }
+
+    public boolean isInResultsAct() {
+        return inResultsAct;
+    }
+
+    public void setInResultsAct(boolean inResultsAct) {
+        this.inResultsAct = inResultsAct;
     }
 
     /**

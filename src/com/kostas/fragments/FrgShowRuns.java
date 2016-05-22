@@ -36,6 +36,8 @@ import java.util.*;
  */
 public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
+    List <Running> runs = new ArrayList<Running>();
+
     /**
      * All the intervals together
      */
@@ -128,12 +130,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
                     .build();
     }
 
-    public String getFastestTextFromMillis(long intervalTime) {
-        int hours = (int) (intervalTime / 3600000);
-        int mins = (int) ((intervalTime - (hours * 3600000)) / 60000);
-        int secs = (int) ((intervalTime - (hours * 3600000) - (mins * 60000)) / 1000);
-        return "Fastest "+String.format("%02d", hours) + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs);
-    }
 
 
     private void initializeViews(View v){
@@ -244,32 +240,21 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         buttonNewRun.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((BaseFrgActivityWithBottomButtons) getActivity()).startNewInterval();
+                ((BaseFrgActivityWithBottomButtons) getActivity()).startIntervalAct();
             }
         });
     }
 
-    public int GetPixelFromDips(float pixels) {
-        // Get the screen's density scale
-        final float scale = getResources().getDisplayMetrics().density;
-        // Convert the dps to pixels, based on density scale
-        return (int) (pixels * scale + 0.5f);
-    }
-
-    public void getRunsFromDb(Activity activity, boolean fromAsync){
+    public void getRunsFromDb(Activity activity, boolean fromAsync){//todo MAKE THIS SYNCHRONIZED?
         Database db = new Database(activity);
-        List <Running> newRuns = db.fetchRunsFromDb();
-        Collections.reverse(newRuns);
-        if (newRuns.size()>0) {
-//            runs.clear();
+        runs = db.fetchRunsFromDb();
+        Collections.reverse(runs);
+        if (runs.size()>0) {
             parentItems.clear();
             childItems.clear();
-            for (Running running : newRuns) {
+            for (Running running : runs) {
                 List<Interval>intervalsList =db.fetchIntervalsForRun(running.getRunning_id());
-//                else
-//                err.add(running.getRunning_id());
                 running.setIntervals(intervalsList);
-//                runs.add(running);
                 String month = running.getDate().substring(3,10);
                 if (!parentItems.contains(month)){
                     parentItems.add(month);
@@ -278,7 +263,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
             for (String monthNumber : parentItems){
                 ArrayList<Running> monthRuns = new ArrayList<Running>();
-                for (Running running : newRuns) {
+                for (Running running : runs) {
                     String month = running.getDate().substring(3,10);
                     if (month.equals(monthNumber)){
                         monthRuns.add(running);
@@ -293,10 +278,9 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
                 runsExpListView.expandGroup(0);
             }
         }
-        computeInfoTexts(newRuns);
     }
 
-    void computeInfoTexts(List<Running> runs){
+    public void computeInfoTexts(){
 
 
         int runsNum=0, intervalsNum=0;
@@ -424,6 +408,8 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         db.deleteRunning(trId);
         ((ArrayList<Running>)childItems.get(groupPosition)).remove(position);
         adapterExp.notifyDataSetChanged();
+        getRunsFromDb(getActivity(), false);//todo find a way to remove run from list and not refetch from db
+        computeInfoTexts();
         showTextNoRuns();
     }
 
@@ -451,7 +437,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
 
     public class MyExpandableAdapter extends BaseExpandableListAdapter {
-
         private Activity activity;
         private ArrayList<Object> childtems;
         private LayoutInflater inflater;
@@ -610,6 +595,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
     private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
         private Activity activity;
+        private List<Running> newRuns;
 
         public PerformAsyncTask(Activity activity) {
             this.activity = activity;
@@ -634,13 +620,14 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
                 showTextNoRuns();
             }
             adView.loadAd(adRequest);
+            computeInfoTexts();
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        showTextNoRuns();
+        //showTextNoRuns();
     }
 
     public static FrgShowRuns init(int val) {

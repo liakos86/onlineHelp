@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+    <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res/com.kostas.onlineHelp"
+            android:background="@color/primary_grey"
+            android:padding="@dimen/eight"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+        <ListView android:id="@+id/completedIntervals"
+                  android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="@dimen/eight"
+                  android:layout_alignParentTop="true"
+                  android:layout_above="@+id/adViewInterval2"
+                />
+
+        <com.google.android.gms.ads.AdView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/adViewInterval2"
+                app:adSize="BANNER"
+                app:adUnitId="@string/adId2"
+                android:layout_above="@+id/buttonDismissInterval"
+                android:layout_marginBottom="@dimen/eight"
+                />
+
+
+        <View android:id="@+id/strut"
+              android:layout_width="0dp"
+              android:layout_height="0dp"
+              android:layout_alignParentBottom="true"
+              android:layout_centerHorizontal="true"/>
+        <Button android:text="@string/delete"
+                android:layout_alignParentBottom="true"
+                android:layout_alignRight="@id/strut"
+                android:layout_alignParentLeft="true"
+                android:layout_marginRight="@dimen/four_dp"
+                android:textColor="@color/white_back" android:textStyle="bold"
+                android:id="@+id/buttonDismissInterval" android:background="@drawable/close_button_selector"
+                android:layout_width="@dimen/zero"
+                android:layout_height="@dimen/standard_view_height"/>
+        <Button android:text="@string/save"
+                android:layout_alignParentBottom="true"
+                android:layout_alignLeft="@id/strut"
+                android:layout_alignParentRight="true"
+                android:textColor="@color/white_back" android:textStyle="bold"
+                android:id="@+id/buttonSaveRunWithIntervals"
+                android:background="@drawable/plus_minus_selector"
+                android:layout_width="@dimen/zero"
+                android:layout_height="@dimen/standard_view_height"/>
+    </RelativeLayout>
+
+

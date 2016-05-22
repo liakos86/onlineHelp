@@ -2,6 +2,7 @@ package com.kostas.onlineHelp;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.LinearLayout;
@@ -12,7 +13,7 @@ import com.kostas.service.RunningService;
 import java.util.Map;
 
 /**
- * The main activity that contains the pager to choose fragment or new interval
+ * The activity_main activity that contains the pager to choose fragment or new interval
  */
 public class ActMain extends BaseFrgActivityWithBottomButtons {
 
@@ -32,9 +33,14 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
     static final int PAGER_SIZE = 3;
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_main);
         setupPager();
 //        FacebookSdk.sdkInitialize(getApplicationContext());
     }
@@ -102,11 +108,14 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
         super.onResume();
         SharedPreferences app_preferences = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         if ((isMyServiceRunning() && (app_preferences.getBoolean(RunningService.INTERVAL_IN_PROGRESS, false)))||(((ExtApplication) getApplication()).isInRunningAct())) {//service is on
-                startNewInterval();
+            startIntervalAct();
+        }else  if (((ExtApplication) getApplication()).isInResultsAct()) {
+            startResultsAct();
         }else{
             MyPagerAdapter adapter = (MyPagerAdapter) mPager.getAdapter();
             if (((ExtApplication) getApplication()).isNewIntervalInDb() && adapter.fragments[0] != null) {
                 ((FrgShowRuns)adapter.fragments[0]).getRunsFromDb(this, false);
+                ((FrgShowRuns)adapter.fragments[0]).computeInfoTexts();
                 ((ExtApplication) getApplication()).setNewIntervalInDb(false);
             }
         }

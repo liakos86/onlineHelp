@@ -20,15 +20,12 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.kostas.custom.NumberPickerKostas;
 import com.kostas.custom.ProgressWheel;
-import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Plan;
-import com.kostas.dbObjects.Running;
 import com.kostas.model.Database;
 import com.kostas.service.RunningService;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -47,7 +44,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      */
     private long intervalTime, intervalStartRest, startTimeMillis;
     SharedPreferences app_preferences;
-    Button buttonSetIntervalValues, buttonDismiss, buttonSave;
+    Button buttonSetIntervalValues;
     TextView roundsText, myAddress, timeText, distanceText;
     /**
      * The distance needed to be covered for every interval
@@ -66,13 +63,10 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      */
     NumberPickerKostas intervalTimePicker, intervalDistancePicker, intervalRoundsPicker, intervalStartRestPicker;
     ProgressWheel progressWheel;
-    ListView completedIntervalsListView;
-    List<Interval> intervalsList;
     List<Plan> plans = new ArrayList<Plan>();
-    IntervalAdapterItem adapterInterval;
     Spinner plansSpinner;
     SpinnerAdapter plansAdapter;
-    AdRequest adRequest, adRequest2;
+    AdRequest adRequest;
     private BroadcastReceiver receiver;
 
     @Override
@@ -84,16 +78,14 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         setContentView(R.layout.activity_interval);
 
         flipper = (ViewFlipper) findViewById(R.id.flipper);
-        flipper.setDisplayedChild(2);
         setPlansSpinner();
         setViewsAndButtons();
         getPlansFromDb();
         if (((ExtApplication) getApplication()).isOnline()) {
-            Toast.makeText(getApplication(), "online", Toast.LENGTH_SHORT).show();
-            new LoadAsyncAds().execute();
+            //Toast.makeText(getApplication(), "online", Toast.LENGTH_SHORT).show();
+            new LoadAsync().execute();
         }
         setListeners();
-        flipper.setDisplayedChild(0);
 
         if (!isMyServiceRunning()) {
             resetAppPrefs();
@@ -128,7 +120,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
                     else if (bundle.getBoolean(CONNECTION_FAILED)) {
                         Toast.makeText(getApplication(), "Google services api is not correctly configured!", Toast.LENGTH_LONG).show();
                         stopRunningService();
-                        clear();
+                        clearAndReturnToMain();
                     }
                     else if (bundle.getFloat(INTERVAL_DISTANCE) != 0) {
                         coveredDist = bundle.getFloat(INTERVAL_DISTANCE);
@@ -159,10 +151,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
                 .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
                 .addTestDevice(deviceId)
                 .build();
-        adRequest2 = new AdRequest.Builder()
-                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                .addTestDevice(deviceId)
-                .build();
+
     }
 
     /**
@@ -170,18 +159,9 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      */
     private void setPlansSpinner() {
         plansSpinner = (Spinner) findViewById(R.id.plansSpinner);
-        plansAdapter = new SpinnerAdapter(this, android.R.layout.simple_spinner_dropdown_item, plans);
+        plansAdapter = new SpinnerAdapter(this, R.layout.custom_plans_spinner_item, plans);
         plansSpinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
         plansSpinner.setAdapter(plansAdapter);
-
-        if (Build.VERSION.SDK_INT > 15) {
-            Display display = this.getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-            int _width = size.x;
-            plansSpinner.setDropDownWidth(_width - 10);
-        }
-
     }
 
     private void setViewsAndButtons() {
@@ -190,7 +170,6 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         vibration = (CheckBox) findViewById(R.id.checkbox_vibration);
         sound.setChecked(!app_preferences.getBoolean("noSound", false));
         vibration.setChecked(!app_preferences.getBoolean("noVibration", false));
-        intervalsList = new ArrayList<Interval>();
         myAddress = (TextView) findViewById(R.id.myAddressText);
         roundsText = (TextView) findViewById(R.id.roundsText);
         distanceText = ((TextView) findViewById(R.id.distanceText));
@@ -204,13 +183,6 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         intervalStartRestPicker = (NumberPickerKostas) findViewById(R.id.intervalStartRestPicker);
         intervalStartRestPicker.setValue(10);
         progressWheel = (ProgressWheel) findViewById(R.id.timerProgressWheel);
-        completedIntervalsListView = (ListView) findViewById(R.id.completedIntervals);
-        buttonDismiss = (Button) findViewById(R.id.buttonDismissInterval);
-        buttonSave = (Button) findViewById(R.id.buttonSaveRunWithIntervals);
-        //textsInfoRun = (LinearLayout) findViewById(R.id.textsInfoRun);
-        adapterInterval = new IntervalAdapterItem(this, this.getApplicationContext(),
-                R.layout.list_interval_row, intervalsList);
-        completedIntervalsListView.setAdapter(adapterInterval);
     }
 
     /**
@@ -351,12 +323,9 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      * @param progress the meters covered so far in the interval
      */
     private void setDistanceProgress(float progress) {
-//        distanceProgressWheel.setProgress(((int) ((progress / intervalDistance) * 360)));
-//        distanceProgressWheel.setText((int) progress + " / " + (int) intervalDistance);
         progressWheel.setProgress(((int) ((progress / intervalDistance) * 360)));
         progressWheel.setText((int) progress + " / " + (int) intervalDistance);
         distanceText.setText((int) progress + " / " + (int) intervalDistance);
-
     }
 
     /**
@@ -364,12 +333,9 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      */
     public void resetAppPrefs() {
         SharedPreferences.Editor editor = app_preferences.edit();
-
         boolean hasNoSound = app_preferences.getBoolean(NO_SOUND, false);
         boolean hasNoVibration = app_preferences.getBoolean(NO_VIBRATION, false);
-
         editor.clear().apply();
-
         editor.putBoolean(NO_SOUND, hasNoSound);
         editor.putBoolean(NO_VIBRATION, hasNoVibration);
         editor.apply();
@@ -378,19 +344,17 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
     /**
      * Clears views and values after finishing an interval session
      */
-    private void clear() {
+    private void clearAndReturnToMain() {
         resetAppPrefs();
         ((ExtApplication) getApplication()).setInRunningMode(false);
         ((ExtApplication) getApplication()).setInRunningAct(false);
-        Intent intent = new Intent(this, ActMain.class);
-        startActivity(intent);
 
-        completedIntervalsListView.setVisibility(View.GONE);
         intervalDistance = 0;
         intervalTime = 0;
         intervalStartRest = 0 ;
-        intervalsList.clear();
         hideFrame();
+        Intent intent = new Intent(this, ActMain.class);
+        startActivity(intent);
     }
 
     /**
@@ -425,19 +389,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
             }
         });
 
-        buttonDismiss.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                confirmStopOrDelete(false);
-            }
-        });
 
-        buttonSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                saveRunWithIntervalsDB();
-            }
-        });
 
         ( findViewById(R.id.buttonStart)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -450,7 +402,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         ( findViewById(R.id.buttonStop)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                confirmStopOrDelete(true);
+                confirmStop();
             }
         });
 
@@ -487,20 +439,6 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
             intervalStartRest = intervalStartRestPicker.getValue() * 1000;
     }
 
-    /**
-     * Reenter every interval in the list and notify adapter
-     *
-     * @param intervals
-     */
-    private void fixListAndAdapter(List<Interval> intervals) {
-        if (intervals != null && intervals.size() > 0) {
-            intervalsList.clear();
-            for (Interval interval : intervals) {
-                intervalsList.add(interval);
-            }
-            adapterInterval.notifyDataSetChanged();
-        }
-    }
 
     private void setRoundsText(int rounds) {
 
@@ -512,51 +450,10 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         }
     }
 
-    /**
-     *  If the service is running and also the mode is INTERVAL_IN_PROGRESS i need to start the receiver,
-     *  get the values from app_prefs and fix every ui element based on these.
-     **/
-    @Override
-    public void onResume() {
-        super.onResume();
-        ( findViewById(R.id.buttonStart)).setClickable(true);
-        if (isMyServiceRunning() && (app_preferences.getBoolean(INTERVAL_IN_PROGRESS, false))) {//service is on and i am running
-            setBroadcastReceiver();
-            intervalDistance = app_preferences.getFloat(INTERVAL_DISTANCE, 0);
-            intervalTime = app_preferences.getLong(INTERVAL_TIME, 0);
-            intervalStartRest = app_preferences.getLong(INTERVAL_START_REST, 0);
-            startTimeMillis = app_preferences.getLong(MSTART_TIME, SystemClock.uptimeMillis());
-            //mHandler.post(mUpdateTimeTask);
-            coveredDist = app_preferences.getFloat(TOTAL_DIST, 0);
-            setRoundsText(app_preferences.getInt(INTERVAL_ROUNDS, 0));
-            registerReceiver(receiver, new IntentFilter(NOTIFICATION));
-            getInRunningMode(app_preferences.getBoolean(IS_RUNNING, false),
-                    app_preferences.getBoolean(INTERVAL_COMPLETED, false),
-                    app_preferences.getInt(INTERVAL_ROUNDS, 0) == 0,
-                    app_preferences.getLong(MSTART_COUNTDOWN_TIME, SystemClock.uptimeMillis()),
-                    coveredDist);
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (countDownTimer != null) countDownTimer.cancel();
-        try {
-            if (isMyServiceRunning()) {
-                mHandler.removeCallbacks(mUpdateTimeTask);
-                unregisterReceiver(receiver);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private void setAddressText(Location loc) {
-        if (myAddress.getVisibility() == View.INVISIBLE) {
-            myAddress.setText("Currently near " + getMyLocationAddress(loc.getLatitude(), loc.getLongitude()));
-            myAddress.setVisibility(View.VISIBLE);
-        }
+
+        new LoadAsync(loc).execute();
+
     }
 
     private void setButtonVisibilities(boolean startsNow) {
@@ -579,8 +476,6 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      */
     private void showFrame() {
         flipper.setDisplayedChild(1);
-        buttonSave.setClickable(true);
-        buttonDismiss.setClickable(true);
         setRoundsText(intervalRoundsPicker.getValue());
         distanceText.setText("0 / "+(int)intervalDistance);
     }
@@ -589,14 +484,11 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         flipper.setDisplayedChild(0);
     }
 
-    private void confirmStopOrDelete(final boolean isStopRunDialog) {
-
-        String message = isStopRunDialog ? "Stop running now?" : "Delete current progress?";
-
+    private void confirmStop() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 this);
         alertDialogBuilder
-                .setMessage(message)
+                .setMessage("Stop running now?")
                 .setCancelable(false)
                 .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -605,10 +497,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
                 })
                 .setNegativeButton("Confirm", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        if (isStopRunDialog)
                             doStop();
-                        else
-                            clear();
                     }
                 });
         AlertDialog alertDialog = alertDialogBuilder.create();
@@ -623,44 +512,31 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
     private void doStop() {
         stopRunningService();
 
-        Gson gson = new Gson();
-        Type listOfObjects = new TypeToken<List<Interval>>() {}.getType();
-        String intervalsGson = app_preferences.getString(INTERVALS, "");
-        List<Interval> intervals = gson.fromJson(intervalsGson, listOfObjects);
-        fixListAndAdapter(intervals);
-
-        if (coveredDist > 0) {//an interrupted run must be added to list
-            Type listOfLocation = new TypeToken<List<Location>>() {}.getType();
-            String locsGson = app_preferences.getString(LATLONLIST, "");
-            List<Location> locationList = gson.fromJson(locsGson, listOfLocation);
-            StringBuilder sb = new StringBuilder(locationList.get(0).getLatitude() + "," + locationList.get(0).getLongitude());
-            locationList.remove(0);
-            for (Location l : locationList) {
-                sb.append("," + l.getLatitude() + "," + l.getLongitude() + "," + l.getLatitude() + "," + l.getLongitude());
-            }
-
-            intervalsList.add(new Interval(-1, sb.toString(), SystemClock.uptimeMillis() - startTimeMillis, coveredDist));
-        }
-
-        if (intervalsList.size() == 0 ){
-            clear();
-            return;
-        }
-
-        //setProgressAndVisibilityTimerAndDistance(View.GONE);
         mHandler.removeCallbacks(mUpdateTimeTask);
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
-        resetAppPrefs();
-
-
-        flipper.setDisplayedChild(2);
-
-
-
 
         coveredDist = 0;
+        if (app_preferences.getBoolean(HAS_RUN_METERS, false) ){
+            ((ExtApplication) getApplication()).setInRunningMode(false);
+            ((ExtApplication) getApplication()).setInRunningAct(false);
+            Intent intentForResultAct = new Intent(this, ActIntervalResults.class);
+            intentForResultAct.putExtra(TOTAL_DIST, app_preferences.getFloat(TOTAL_DIST, 0));
+            intentForResultAct.putExtra(TOTAL_TIME, app_preferences.getLong(TOTAL_TIME, 0));
+            intentForResultAct.putExtra(INTERVAL_TIME, intervalTime);
+            intentForResultAct.putExtra(INTERVAL_DISTANCE, intervalDistance);
+            startActivity(intentForResultAct);
+            finish();
+            return;
+        }
+        resetAppPrefs();
+
+        clearAndReturnToMain();
+
+        finish();
+        return;
+
     }
 
     /**
@@ -669,20 +545,6 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
     private void setProgressAndVisibilityTimerAndDistance(int visibility){
         progressWheel.setProgress(0);
         progressWheel.setVisibility(visibility);
-    }
-
-    /**
-     * Save the run and every interval in the list in the db
-     */
-    private void saveRunWithIntervalsDB() {
-        buttonDismiss.setClickable(false);
-        buttonSave.setClickable(false);
-        Running running = new Running(-1, "", intervalTime, new SimpleDateFormat("dd/MM/yyyy, hh:mm a").format(new Date()), intervalDistance, intervalsList);
-        Database db = new Database(getApplicationContext());
-        db.addRunning(running);
-        ((ExtApplication) getApplication()).setNewIntervalInDb(true);
-        //Toast.makeText(getApplication(), "Saved in Diary", Toast.LENGTH_SHORT).show();
-        clear();
     }
 
     private void stopRunningService() {
@@ -737,8 +599,6 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         intervalRoundsPicker.setValue(plan.getRounds());
         intervalStartRestPicker.setValue(plan.getStartRest());
         intervalRoundsPicker.disableButtonColor(plan.getRounds() == 0);
-
-        Toast.makeText(getApplication(), plan.getDescription() + " loaded", Toast.LENGTH_SHORT).show();
     }
 
     class CustomOnItemSelectedListener implements AdapterView.OnItemSelectedListener {
@@ -823,20 +683,40 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         ImageView arrow;
     }
 
-    private class LoadAsyncAds extends AsyncTask<Void, Void, Void> {
+    private class LoadAsync extends AsyncTask<Void, Void, Void> {
+
+        Location loc;
+        String addressText = "";
+
+        LoadAsync(){};
+
+        LoadAsync(Location loc){
+            this.loc = loc;
+        }
 
         protected void onPreExecute() {
         }
 
         @Override
         protected Void doInBackground(Void... unused) {
+
+            if (loc != null){
+                addressText = getMyLocationAddress(loc.getLatitude(), loc.getLongitude());
+                return null;
+            }
+
             placeAds();
             return null;
         }
 
         @Override
         protected void onPostExecute(Void result) {
-            ((AdView)findViewById(R.id.adViewInterval2)).loadAd(adRequest2);
+
+            if (loc!=null) {
+                myAddress.setText("Currently near " + addressText);
+                return;
+            }
+
             ((AdView)findViewById(R.id.adViewInterval)).loadAd(adRequest);
         }
 
@@ -853,11 +733,52 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
     @Override
     public void onBackPressed() {
         if (((ExtApplication) getApplication()).isInRunningMode()){
-            Toast.makeText(getApplication(), "You are running", Toast.LENGTH_SHORT).show();
+            confirmStop();
             return;
         }
         ((ExtApplication) getApplication()).setInRunningAct(false);
         stopRunningService();
         super.onBackPressed();
     }
+
+    /**
+     *  If the service is running and also the mode is INTERVAL_IN_PROGRESS i need to start the receiver,
+     *  get the values from app_prefs and fix every ui element based on these.
+     **/
+    @Override
+    public void onResume() {
+        super.onResume();
+        ( findViewById(R.id.buttonStart)).setClickable(true);
+        if (isMyServiceRunning() && (app_preferences.getBoolean(INTERVAL_IN_PROGRESS, false))) {//service is on and i am running
+            setBroadcastReceiver();
+            intervalDistance = app_preferences.getFloat(INTERVAL_DISTANCE, 0);
+            intervalTime = app_preferences.getLong(INTERVAL_TIME, 0);
+            intervalStartRest = app_preferences.getLong(INTERVAL_START_REST, 0);
+            startTimeMillis = app_preferences.getLong(MSTART_TIME, SystemClock.uptimeMillis());
+            //mHandler.post(mUpdateTimeTask);
+            coveredDist = app_preferences.getFloat(TOTAL_DIST, 0);
+            setRoundsText(app_preferences.getInt(INTERVAL_ROUNDS, 0));
+            registerReceiver(receiver, new IntentFilter(NOTIFICATION));
+            getInRunningMode(app_preferences.getBoolean(IS_RUNNING, false),
+                    app_preferences.getBoolean(INTERVAL_COMPLETED, false),
+                    app_preferences.getInt(INTERVAL_ROUNDS, 0) == 0,
+                    app_preferences.getLong(MSTART_COUNTDOWN_TIME, SystemClock.uptimeMillis()),
+                    coveredDist);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (countDownTimer != null) countDownTimer.cancel();
+        try {
+            if (isMyServiceRunning()) {
+                mHandler.removeCallbacks(mUpdateTimeTask);
+                unregisterReceiver(receiver);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

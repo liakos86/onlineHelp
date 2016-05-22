@@ -14,6 +14,7 @@
               android:layout_alignParentTop="true"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
+              android:layout_above="@+id/buttonNewPlan"
               />
 
 
@@ -46,6 +47,7 @@
                   android:textColorHint="@android:color/darker_gray"
                   android:singleLine="true"
                   android:ellipsize="end"
+                  android:textSize="@dimen/medium_text"
                   android:textColor="@color/primary_grey"
                   android:background="@drawable/edit_text_back"
                   android:id="@+id/planNewDescription"

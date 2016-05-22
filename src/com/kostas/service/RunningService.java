@@ -55,6 +55,11 @@ public class RunningService extends IntentService
     public static final String FIRST_LOCATION = "firstLocation";
 
     /**
+     * Tag to indicate that there is
+     */
+    public static final String HAS_RUN_METERS = "hasRunMeters";
+
+    /**
      * Intent filter
      */
     public static final String NOTIFICATION = "com.kostas.onlineHelp";
@@ -260,7 +265,7 @@ public class RunningService extends IntentService
 
     /**
      * Create a notification with a title and a message
-     * that leads to my main activity when pressed
+     * that leads to my activity_main activity when pressed
      * <p/>
      * If the sdk is >15 then I set flags like the
      * color of the light to blink
@@ -270,6 +275,8 @@ public class RunningService extends IntentService
         if (Build.VERSION.SDK_INT > 15) {
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(application);
             mBuilder.setSmallIcon(R.drawable.ic_notification_icon);
+            int color = getResources().getColor(R.color.interval_green);
+            mBuilder.setColor(color);
             mBuilder.setContentTitle("Interval in progress");
             mBuilder.setContentText("Click to get into");
 //            mBuilder.setOngoing(true);
@@ -321,7 +328,7 @@ public class RunningService extends IntentService
         locationList.clear();
         boolean completed = intervalRounds > 0 && intervals.size() >= intervalRounds;
 
-        vibrate(2000);
+        vibrate(3000);
         if (!completed) {
             speak("STOPPED");
         } else {
@@ -336,11 +343,16 @@ public class RunningService extends IntentService
         editor.putInt(COMPLETED_NUM, intervals.size());
         editor.putBoolean(IS_RUNNING, false);
         editor.putFloat(TOTAL_DIST, 0);
-        editor.putFloat(TOTAL_TIME, 0);
+        editor.putLong(TOTAL_TIME, 0);
         Type listOfIntervals = new TypeToken<List<Interval>>() {
         }.getType();
         String json = (new Gson()).toJson(intervals, listOfIntervals);
         editor.putString(INTERVALS, json);
+
+        if (!app_preferences.getBoolean(HAS_RUN_METERS, false)){
+            editor.putBoolean(HAS_RUN_METERS, true);
+        }
+
         editor.apply();
 
 
@@ -425,6 +437,10 @@ public class RunningService extends IntentService
     private Runnable mStartRunnable = new Runnable() {
 
         public void run() {
+
+            vibrate(2000);
+            speak("STARTED");
+
             mStartTime = SystemClock.uptimeMillis();
             intervalInProgress = true;
 
@@ -434,8 +450,7 @@ public class RunningService extends IntentService
             editor.putBoolean(IS_RUNNING, true);
             editor.putLong(MSTART_TIME, mStartTime);
             editor.apply();
-            vibrate(1000);
-            speak("STARTED");
+
         }
     };
 
@@ -502,12 +517,17 @@ public class RunningService extends IntentService
                     intent.putExtra(INTERVAL_TIME, totalTime);
                     sendBroadcast(intent);
                 }
-                editor.putFloat(TOTAL_DIST, currentDistance);
-                editor.putLong(TOTAL_TIME, totalTime);
+
+                if (!app_preferences.getBoolean(HAS_RUN_METERS, false)){
+                    editor.putBoolean(HAS_RUN_METERS, true);
+                }
+
                 Type listOfLocations = new TypeToken<List<Location>>() {
                 }.getType();
                 String json = (new Gson()).toJson(locationList, listOfLocations);
                 editor.putString(LATLONLIST, json);
+                editor.putFloat(TOTAL_DIST, currentDistance);
+                editor.putLong(TOTAL_TIME, totalTime);
             }
             editor.apply();
             return null;

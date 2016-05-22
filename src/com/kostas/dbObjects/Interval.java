@@ -7,6 +7,8 @@ import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
 //import android.util.Log;
+import android.os.Parcel;
+import android.os.Parcelable;
 import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 
@@ -16,7 +18,7 @@ import java.util.List;
 /**
  * Created by liakos on 19/9/2015.
  */
-public class Interval implements Serializable{
+public class Interval{
 
     private static final String TAG = Thread.currentThread().getStackTrace()[2].getClassName();
 
@@ -167,4 +169,5 @@ public class Interval implements Serializable{
                             String.valueOf(item.interval_id)
                     });
     }
+
 }

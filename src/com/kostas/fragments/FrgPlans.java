@@ -284,8 +284,6 @@ public class FrgPlans extends Fragment {
         Database db = new Database(getActivity());
         db.addPlan(newPlan);
         getPlansFromDb(getActivity(), false);
-        Toast.makeText(getActivity(), "Plan saved", Toast.LENGTH_SHORT).show();
-
 
         clearViews();
         plansFlipper.setDisplayedChild(0);//c
