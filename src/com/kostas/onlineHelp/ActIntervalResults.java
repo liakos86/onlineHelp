@@ -156,8 +156,8 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
                 sb.append("," + l.getLatitude() + "," + l.getLongitude() + "," + l.getLatitude() + "," + l.getLongitude());
             }
 
-            long startTimeMillis = app_preferences.getLong(TOTAL_TIME, 0);
-            intervalsList.add(new Interval(-1, sb.toString(), startTimeMillis, coveredDist));
+            long millis = SystemClock.uptimeMillis() - app_preferences.getLong(MSTART_TIME, 0);
+            intervalsList.add(new Interval(-1, sb.toString(), millis, coveredDist));
         }
 
         adapterInterval = new IntervalAdapterItem(this, this.getApplicationContext(),

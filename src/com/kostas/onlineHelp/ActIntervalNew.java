@@ -222,6 +222,10 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
             mHandler.post(mUpdateTimeTask);
         }
         else if (!isRunning && !isCompleted) {//from resume OR first time
+
+            distanceText.setText("0 / " + (int) intervalDistance);
+            timeText.setText(getResources().getString(R.string.zero_time));
+
             final int step = (int) (360000 / millisecondsToCount);
             //distanceProgressWheel.setVisibility(View.INVISIBLE);
             progressWheel.setVisibility(View.VISIBLE);
@@ -522,10 +526,10 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
             ((ExtApplication) getApplication()).setInRunningMode(false);
             ((ExtApplication) getApplication()).setInRunningAct(false);
             Intent intentForResultAct = new Intent(this, ActIntervalResults.class);
-            intentForResultAct.putExtra(TOTAL_DIST, app_preferences.getFloat(TOTAL_DIST, 0));
-            intentForResultAct.putExtra(TOTAL_TIME, app_preferences.getLong(TOTAL_TIME, 0));
-            intentForResultAct.putExtra(INTERVAL_TIME, intervalTime);
-            intentForResultAct.putExtra(INTERVAL_DISTANCE, intervalDistance);
+            //intentForResultAct.putExtra(TOTAL_DIST, app_preferences.getFloat(TOTAL_DIST, 0));
+            //intentForResultAct.putExtra(TOTAL_TIME, app_preferences.getLong(TOTAL_TIME, 0));
+            //intentForResultAct.putExtra(INTERVAL_TIME, intervalTime);
+            //intentForResultAct.putExtra(INTERVAL_DISTANCE, intervalDistance);
             startActivity(intentForResultAct);
             finish();
             return;

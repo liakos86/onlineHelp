@@ -300,7 +300,7 @@ public class RunningService extends IntentService
 //            notificationManager.notify(123, notification);
         } else {
 //The intent to launch when the user clicks the expanded notification
-            Intent intent2 = new Intent(this, ActMain.class);
+            Intent intent2 = new Intent(this, ActIntervalNew.class);
             intent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             PendingIntent pendIntent = PendingIntent.getActivity(this, 0, intent2, 0);
 //This constructor is deprecated. Use Notification.Builder instead
@@ -329,15 +329,18 @@ public class RunningService extends IntentService
         boolean completed = intervalRounds > 0 && intervals.size() >= intervalRounds;
 
         vibrate(3000);
+
+        String toSpeak;
         if (!completed) {
-            speak("STOPPED");
+            toSpeak = "STOPPED. ";
         } else {
-            speak("COMPLETED " + intervalRounds + " intervals");
+            toSpeak = "COMPLETED " + intervalRounds + " intervals. ";
         }
         int hours = (int) (totalTime / 3600000);
         int mins = (int) ((totalTime - (hours * 3600000)) / 60000);
         int secs = (int) ((totalTime - (hours * 3600000) - (mins * 60000)) / 1000);
-        speak(mins + " minutes and " + secs + " seconds");
+        toSpeak += mins + " minutes and " + secs + " seconds";
+        speak(toSpeak);
         SharedPreferences.Editor editor = app_preferences.edit();
         editor.putBoolean(INTERVAL_COMPLETED, completed);
         editor.putInt(COMPLETED_NUM, intervals.size());
@@ -370,16 +373,30 @@ public class RunningService extends IntentService
         totalTime = 0;
     }
 
-    private void speak(String textToSpeak) {
-        if (hasSound) {
-            application.getTtsManager().initQueue(textToSpeak);
-        }
+    private void speak(final String textToSpeak) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (hasSound) {
+                    application.getTtsManager().initQueue(textToSpeak);
+                }
+            }
+        }).start();
+
+
     }
 
-    private void vibrate(long millis){
-        if (hasVibration){
-            v.vibrate(millis);
-        }
+    private void vibrate(final long millis){
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (hasVibration) {
+                    v.vibrate(millis);
+                }
+
+            }}).start();
     }
 
     private void sendFirstLocation(Location loc){
@@ -396,6 +413,10 @@ public class RunningService extends IntentService
 
     private void refreshInterval() {
         //DURATION = (100 * pace / 6) > 2000 ? ((100 * pace / 6) < 4000 ? (long) (100 * pace / 6) : 4000) : 2000;
+
+
+      //  Toast.makeText(getApplication(),"refresh",Toast.LENGTH_SHORT).show();
+
         new PerformAsyncTask(2).execute();
     }
 
@@ -442,9 +463,19 @@ public class RunningService extends IntentService
             speak("STARTED");
 
             mStartTime = SystemClock.uptimeMillis();
+
+
+            /**
+             *
+             * TODO THIS WINDOW ALLOWS SMALL DISPLACEMENTS
+             */
+
             intervalInProgress = true;
 
             connectAndReceive();
+
+
+
             SharedPreferences.Editor editor = app_preferences.edit();
 
             editor.putBoolean(IS_RUNNING, true);
