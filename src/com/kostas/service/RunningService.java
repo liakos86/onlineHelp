@@ -228,7 +228,7 @@ public class RunningService extends IntentService
         }
 
         //every following update must be of at least 15m accurate to avoid a big straight line of many meters
-        if (location.getAccuracy() < 15) {
+        if (location.getAccuracy() < 15 && lastLocation.distanceTo(location) >= 10) {
 
             mLocationRequest.setFastestInterval(10000);
             mLocationRequest.setInterval(10000);

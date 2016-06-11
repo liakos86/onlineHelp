@@ -182,10 +182,14 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
         running.setAvgPaceText(totalPace);
 
 
-        ((ExtApplication)getApplication()).getRuns().add(0, running);
+
 
         Database db = new Database(getApplicationContext());
-        db.addRunning(running);
+        int runId = db.addRunning(running);
+        running.setRunning_id(runId);
+//setid
+        ((ExtApplication)getApplication()).getRuns().add(0, running);
+
         ((ExtApplication) getApplication()).setNewIntervalInDb(true);
         //Toast.makeText(getApplication(), "Saved in Diary", Toast.LENGTH_SHORT).show();
         clear();

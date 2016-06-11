@@ -51,7 +51,7 @@ public class Database extends SQLiteOpenHelper {
     }
     
     
-    public void addRunning(Running running) {
+    public int addRunning(Running running) {
         ContentResolver resolver = mContext.getContentResolver();
         Uri uri = resolver.insert(ContentDescriptor.Running.CONTENT_URI, Running.asContentValues(running));
 
@@ -62,6 +62,8 @@ public class Database extends SQLiteOpenHelper {
             interval.setRunning_id(runId);
             addInterval(interval);
         }
+
+        return runId;
 
     }
 
