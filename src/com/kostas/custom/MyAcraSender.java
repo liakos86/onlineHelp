@@ -9,8 +9,8 @@ import org.acra.sender.ReportSender;
 import org.acra.sender.ReportSenderException;
 
 /**
- * Created by liakos on 21/9/2015.
- */
+* Created by liakos on 21/9/2015.
+*/
 
 public class MyAcraSender implements ReportSender {
 

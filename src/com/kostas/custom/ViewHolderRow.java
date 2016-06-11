@@ -1,6 +1,5 @@
 package com.kostas.custom;
 
-import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
@@ -8,7 +7,8 @@ import android.widget.TextView;
  */
 public class ViewHolderRow {
         public TextView topText;
+        public TextView topRightText;
         public TextView bottomText;
+        public TextView bottom2Text;
         public TextView rightText;
-        public ImageView rowIcon;
 }

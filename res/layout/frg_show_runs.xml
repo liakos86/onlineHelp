@@ -29,25 +29,16 @@
                        android:textSize="@dimen/medium_text" android:gravity="center" android:layout_gravity="center"
                       />
             </LinearLayout>
+            <View android:id="@+id/hr" android:layout_below="@+id/runsInfo" android:layout_width="match_parent" android:layout_height="2dp" android:background="@color/white_back"/>
         <ExpandableListView
                 android:id="@+id/listExpRunning"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:layout_above="@+id/adViewInterval3"
-                android:layout_below="@+id/runsInfo"
+                android:layout_below="@+id/hr"
                 android:groupIndicator="@drawable/group_indicator"
                 />
 
-            <com.google.android.gms.ads.AdView
-                    android:layout_marginTop="@dimen/eight"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/adViewInterval3"
-                    app:adSize="BANNER"
-                    app:adUnitId="@string/adId3"
-                    android:layout_alignParentBottom="true"
 
-                    />
 
         </RelativeLayout>
 

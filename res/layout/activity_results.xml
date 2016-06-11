@@ -14,8 +14,23 @@
                   android:layout_height="wrap_content"
                   android:layout_marginBottom="@dimen/eight"
                   android:layout_alignParentTop="true"
-                  android:layout_above="@+id/adViewInterval2"
+                  android:layout_above="@+id/runDescription"
                 />
+
+    <EditText
+            android:textColorHint="@android:color/darker_gray"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textSize="@dimen/medium_text"
+            android:textColor="@color/primary_grey"
+            android:background="@drawable/edit_text_back"
+            android:id="@+id/runDescription"
+            android:layout_above="@+id/adViewInterval2"
+            android:paddingLeft="@dimen/eight"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/standard_view_height"
+            android:layout_marginBottom="@dimen/four_dp"
+            android:hint="@string/description_run"/>
 
         <com.google.android.gms.ads.AdView
                 android:layout_width="fill_parent"

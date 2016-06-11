@@ -213,7 +213,7 @@ public class RunningService extends IntentService
     @Override
     public void onLocationChanged(Location location) {
 
-        if (!intervalInProgress) {
+        if (!intervalInProgress || mLocationRequest.getSmallestDisplacement() < 10) {
             if (lastLocation == null){
                 sendFirstLocation(location);
             }
@@ -229,6 +229,7 @@ public class RunningService extends IntentService
 
         //every following update must be of at least 15m accurate to avoid a big straight line of many meters
         if (location.getAccuracy() < 15) {
+
             mLocationRequest.setFastestInterval(10000);
             mLocationRequest.setInterval(10000);
             //if i have a last & new loc and a right accuracy
@@ -240,7 +241,6 @@ public class RunningService extends IntentService
                 if (currentDistance >= intervalDistance) {
                     finishInterval();
                 } else if (currentDistance > 0) {
-                  // refreshInterval((location.getTime() - lastLocation.getTime()) / newDistance);
                     refreshInterval();
                 }
             }
@@ -470,11 +470,22 @@ public class RunningService extends IntentService
              * TODO THIS WINDOW ALLOWS SMALL DISPLACEMENTS
              */
 
+            if (mLocationRequest.getSmallestDisplacement() < 10) {
+
+                mLocationRequest.setInterval(DURATION);
+                mLocationRequest.setFastestInterval(DURATION - 1000);
+                mLocationRequest.setSmallestDisplacement(10);
+
+                if ( lastLocation != null){
+                    locationList.add(lastLocation);
+                }
+
+            }
+
+
+            startReceiving();
             intervalInProgress = true;
-
-            connectAndReceive();
-
-
+//            connectAndReceive();
 
             SharedPreferences.Editor editor = app_preferences.edit();
 
@@ -555,7 +566,9 @@ public class RunningService extends IntentService
 
                 Type listOfLocations = new TypeToken<List<Location>>() {
                 }.getType();
-                String json = (new Gson()).toJson(locationList, listOfLocations);
+
+                List <Location> locationListSafeCopy = new ArrayList<Location>(locationList);
+                String json = (new Gson()).toJson(locationListSafeCopy, listOfLocations);
                 editor.putString(LATLONLIST, json);
                 editor.putFloat(TOTAL_DIST, currentDistance);
                 editor.putLong(TOTAL_TIME, totalTime);

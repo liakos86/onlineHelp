@@ -3,10 +3,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -14,8 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.*;
 import com.kostas.custom.ViewHolderRow;
@@ -89,9 +84,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
      */
     boolean alreadyDrawn;
 
-    AdView adView;
-    AdRequest adRequest;
-
     TextView runsCount ;
     TextView intervalsCount;
     TextView metersCount;
@@ -112,23 +104,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         return  v;
     }
 
-    private void placeAd() {
-        String android_id = Settings.Secure.getString(getActivity().getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        SharedPreferences app_preferences  = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
-        String deviceId = app_preferences.getString("deviceId", null);
-        if (deviceId == null) {
-            deviceId = ((ExtApplication) getActivity().getApplication()).md5(android_id).toUpperCase();
-            SharedPreferences.Editor editor = app_preferences.edit();
-            editor.putString("deviceId", deviceId);
-            editor.apply();
-        }
-
-            adRequest = new AdRequest.Builder()
-                    .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                    .addTestDevice(deviceId)
-                    .build();
-    }
 
 
 
@@ -138,8 +114,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
          intervalsCount =(TextView) v.findViewById(R.id.intervalsCount);
          metersCount =(TextView) v.findViewById(R.id.metersCount);
          durationCount =(TextView) v.findViewById(R.id.durationCount);
-
-        adView = (AdView) v.findViewById(R.id.adViewInterval3);
         viewFlipper = (ViewFlipper) v.findViewById(R.id.viewFlipperRuns);
 
         openMapButton = (Button) v.findViewById(R.id.buttonShowMap);
@@ -173,9 +147,12 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
     
     private void setList(){
         intervalListView.setDivider(null);
-        new PerformAsyncTask(getActivity()).execute();
+        runs = ((ExtApplication)getActivity().getApplication()).getRuns();
+
+        computeParentAndChildRuns();
+        computeInfoTexts();
+
         runsExpListView.setDividerHeight(2);
-        runsExpListView.setClickable(true);
         adapterExp = new MyExpandableAdapter(parentItems, childItems, getActivity());
         runsExpListView.setAdapter(adapterExp);
 
@@ -245,16 +222,12 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         });
     }
 
-    public void getRunsFromDb(Activity activity, boolean fromAsync){//todo MAKE THIS SYNCHRONIZED?
-        Database db = new Database(activity);
-        runs = db.fetchRunsFromDb();
-        Collections.reverse(runs);
+    public void computeParentAndChildRuns(){
+
         if (runs.size()>0) {
             parentItems.clear();
             childItems.clear();
             for (Running running : runs) {
-                List<Interval>intervalsList =db.fetchIntervalsForRun(running.getRunning_id());
-                running.setIntervals(intervalsList);
                 String month = running.getDate().substring(3,10);
                 if (!parentItems.contains(month)){
                     parentItems.add(month);
@@ -272,11 +245,12 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
                 childItems.add(monthRuns);
             }
 
-            if (adapterExp!=null&& !fromAsync) {
+            if (adapterExp!=null) {
                 adapterExp.notifyDataSetChanged();
-                showTextNoRuns();
                 runsExpListView.expandGroup(0);
             }
+        }else{
+            viewFlipper.setDisplayedChild(3);//c
         }
     }
 
@@ -356,7 +330,9 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
                     markers.add(googleMap.addMarker(new MarkerOptions()
                                             .position(locationList.get(0))
                                             .title(String.valueOf(current.getInterval_id()))
-                                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start2))
+                                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start2)
+
+                                            )
                             )
                     );
 
@@ -406,11 +382,30 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
     private void deleteRunning(Long trId, int groupPosition, int position){
         Database db = new Database(getActivity().getBaseContext());
         db.deleteRunning(trId);
+        List<Running> runnings =  ((ExtApplication)getActivity().getApplication()).getRuns();
+        for(Running running : runnings){
+            if (running.getRunning_id() == trId){
+                runnings.remove(running);
+                break;
+            }
+        }
+
+
         ((ArrayList<Running>)childItems.get(groupPosition)).remove(position);
         adapterExp.notifyDataSetChanged();
-        getRunsFromDb(getActivity(), false);//todo find a way to remove run from list and not refetch from db
+       // computeParentAndChildRuns();//todo find a way to remove run from list and not refetch from db
         computeInfoTexts();
         showTextNoRuns();
+    }
+
+    public void refreshAfterAdd(){
+        runs = ((ExtApplication)getActivity().getApplication()).getRuns();
+
+        viewFlipper.setDisplayedChild(0);
+
+        computeParentAndChildRuns();
+        adapterExp.notifyDataSetChanged();
+        computeInfoTexts();
     }
 
     @Override
@@ -459,25 +454,31 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
             child = (ArrayList<Running>) childtems.get(groupPosition);
             ViewHolderRow holder =null;
             if (convertView == null || !(convertView.getTag() instanceof ViewHolderRow)) {
-                convertView = inflater.inflate(R.layout.list_common_row, parent, false);
+                convertView = inflater.inflate(R.layout.list_run_row, parent, false);
                 holder = new ViewHolderRow();
                 holder.rightText = (TextView) convertView
                         .findViewById(R.id.rightText);
                 holder.bottomText = (TextView) convertView
                         .findViewById(R.id.bottomText);
+                holder.bottom2Text = (TextView) convertView
+                        .findViewById(R.id.bottom2Text);
                 holder.topText =  (TextView) convertView
                         .findViewById(R.id.topText);
-                holder.rowIcon = (ImageView) convertView
-                        .findViewById(R.id.rowIcon);
+                holder.topRightText =  (TextView) convertView
+                        .findViewById(R.id.topRightText);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolderRow) convertView.getTag();
             }
 
-            holder.rowIcon.setImageDrawable(getResources().getDrawable(R.drawable.interval_50));
-                holder.bottomText.setText((int) child.get(childPosition).getDistance() + " meters with " + ((int) (child.get(childPosition).getTime() / 1000)) + " secs rest");
-                holder.topText.setText(child.get(childPosition).getDate());
-                holder.rightText.setText(String.valueOf(child.get(childPosition).getIntervals().size()) + " sessions");
+            Running run = child.get(childPosition);
+
+            holder.bottomText.setText((int) run.getDistance() + " meters with " + ((int) (run.getTime() / 1000)) + " secs rest");
+            holder.bottom2Text.setText( run.getDescription().length()>0? run.getDescription() : "No description" );
+
+            holder.topText.setText(run.getDate());
+            holder.topRightText.setText("Avg Pace: "+run.getAvgPaceText());
+            holder.rightText.setText(String.valueOf(run.getIntervals().size()) + " sessions");
 
                 convertView.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
@@ -593,36 +594,36 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         }
     }
 
-    private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
-        private Activity activity;
-        private List<Running> newRuns;
-
-        public PerformAsyncTask(Activity activity) {
-            this.activity = activity;
-        }
-
-        protected void onPreExecute() {
-            runsExpListView.setClickable(false);
-        }
-
-        @Override
-        protected Void doInBackground(Void... unused) {
-            getRunsFromDb(activity, true);
-            placeAd();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            runsExpListView.setClickable(true);
-            if (adapterExp!=null) {
-                adapterExp.notifyDataSetChanged();
-                showTextNoRuns();
-            }
-            adView.loadAd(adRequest);
-            computeInfoTexts();
-        }
-    }
+//    private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
+//        private Activity activity;
+//        private List<Running> newRuns;
+//
+//        public PerformAsyncTask(Activity activity) {
+//            this.activity = activity;
+//        }
+//
+//        protected void onPreExecute() {
+//            runsExpListView.setClickable(false);
+//        }
+//
+//        @Override
+//        protected Void doInBackground(Void... unused) {
+//            computeParentAndChildRuns(activity, true);
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Void result) {
+//            runsExpListView.setClickable(true);
+//            if (adapterExp!=null) {
+//                adapterExp.notifyDataSetChanged();
+//                showTextNoRuns();
+//            }
+//            computeInfoTexts();
+//
+//
+//        }
+//    }
 
     @Override
     public void onResume() {

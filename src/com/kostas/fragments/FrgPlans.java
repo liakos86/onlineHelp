@@ -55,7 +55,7 @@ public class FrgPlans extends Fragment {
         plansListView = (ListView) v.findViewById(R.id.plansList);
         new PerformAsyncTask(getActivity()).execute();
         plansFlipper = (ViewFlipper) v.findViewById(R.id.plansFlipper);
-        adapterPlans = new PlansAdapterItem(getActivity().getApplicationContext(), R.layout.list_common_row, plans);
+        adapterPlans = new PlansAdapterItem(getActivity().getApplicationContext(), R.layout.list_plan_row, plans);
         plansListView.setAdapter(adapterPlans);
         planIntervalTimePicker = (NumberPickerKostas) v.findViewById(R.id.intervalTimePicker);
         planIntervalTimePicker.setValue(10);
@@ -191,7 +191,7 @@ public class FrgPlans extends Fragment {
 
             ViewHolderRow holder =null;
             if (convertView == null || !(convertView.getTag() instanceof ViewHolderRow)) {
-                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_common_row, parent, false);
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_plan_row, parent, false);
 
                 holder = new ViewHolderRow();
 
@@ -200,9 +200,6 @@ public class FrgPlans extends Fragment {
                         .findViewById(R.id.topText);
                 holder.bottomText =  (TextView) convertView
                         .findViewById(R.id.bottomText);
-                holder.rowIcon = (ImageView) convertView
-                        .findViewById(R.id.rowIcon);
-
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolderRow) convertView.getTag();
@@ -212,8 +209,6 @@ public class FrgPlans extends Fragment {
             final Plan plan = plans.get(position);
             holder.topText.setText(plan.getDescription());
             holder.bottomText.setText( plan.getMeters()+"m with "+plan.getSeconds()+"secs rest"+ (plan.getRounds()>0 ? " x"+plan.getRounds()+" rounds" : "" ));
-            holder.rowIcon.setImageDrawable(getResources().getDrawable(R.drawable.plan_50));
-
 //            if (position%2==0)
 //                convertView.setBackgroundDrawable(getResources().getDrawable(R.drawable.plan_odd_row));
 //            else

@@ -27,7 +27,7 @@
 
         <!--<meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>-->
 
-        <activity android:name=".ActMain"
+        <activity android:name=".ActSplash"
                   android:screenOrientation="portrait"
                   android:windowSoftInputMode="adjustPan"
                   android:launchMode="singleTask"
@@ -36,6 +36,13 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+
+        <activity android:name=".ActMain"
+                  android:screenOrientation="portrait"
+                  android:windowSoftInputMode="adjustPan"
+                  android:launchMode="singleTask"
+                  android:label="@string/app_name">
         </activity>
 
         <activity android:name=".ActIntervalNew"
@@ -56,6 +63,7 @@
                   android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
                   android:theme="@android:style/Theme.Translucent" />
 
+
         <!--<activity android:name="com.facebook.FacebookActivity"-->
                   <!--android:configChanges=-->
                           <!--"keyboard|keyboardHidden|screenLayout|screenSize|orientation"-->
@@ -73,6 +81,8 @@
 
         <provider android:name="com.kostas.model.DataProvider"
                   android:authorities="com.kostas.contentprovider"/>
+
+
 
         <!--<provider android:authorities="com.facebook.app.FacebookContentProvider{1733286690224529}"-->
                   <!--android:name="com.facebook.FacebookContentProvider"-->

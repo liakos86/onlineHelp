@@ -6,7 +6,7 @@
               android:layout_height="match_parent">
 
     <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:src="@drawable/interval_50"
+            android:src="@drawable/interval_100"
             android:layout_centerInParent="true"/>
 
     <TextView android:layout_above="@+id/loginButton"

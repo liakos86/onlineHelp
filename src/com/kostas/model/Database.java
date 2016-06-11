@@ -112,6 +112,7 @@ public class Database extends SQLiteOpenHelper {
                 ContentDescriptor.Running.Cols.DATE,
                 ContentDescriptor.Running.Cols.ID,
                 ContentDescriptor.Running.Cols.TIME,
+                ContentDescriptor.Running.Cols.AVGPACETEXT,
                 ContentDescriptor.Running.Cols.DISTANCE
 
         };
@@ -119,7 +120,8 @@ public class Database extends SQLiteOpenHelper {
         int sDatePosition = 1;
         int sIdPosition = 2;
         int sTimePosition = 3;
-        int sDistPosition = 4;
+        int sPacePosition = 4;
+        int sDistPosition = 5;
 
 
         Cursor c = mContext.getContentResolver().query(ContentDescriptor.Running.CONTENT_URI, FROM,
@@ -133,13 +135,17 @@ public class Database extends SQLiteOpenHelper {
             while (c.moveToNext()) {
 
 
-
-                St.add(new Running(c.getLong(sIdPosition),
+                Running newRun = new Running(c.getLong(sIdPosition),
                         c.getString(sDescPosition),
                         c.getLong(sTimePosition),
                         c.getString(sDatePosition),
                         c.getFloat(sDistPosition)
-                      ));
+                );
+
+                newRun.setAvgPaceText(c.getString(sPacePosition));
+
+
+                St.add(newRun);
             }
         }
         c.close();
@@ -157,6 +163,7 @@ public class Database extends SQLiteOpenHelper {
                 ContentDescriptor.Interval.Cols.LATLONLIST,
                 ContentDescriptor.Interval.Cols.MILLISECONDS,
                 ContentDescriptor.Interval.Cols.DISTANCE,
+                ContentDescriptor.Interval.Cols.PACETEXT,
                 ContentDescriptor.Interval.Cols.FASTEST
         };
 
@@ -164,7 +171,8 @@ public class Database extends SQLiteOpenHelper {
         int sLatPosition = 1;
         int sMillisPosition = 2;
         int sDistancePosition = 3;
-        int sFastestPosition = 4;
+        int sPacePosition = 4;
+        int sFastestPosition = 5;
 
         Cursor c = mContext.getContentResolver().query(ContentDescriptor.Interval.CONTENT_URI, FROM,
                 ContentDescriptor.Interval.Cols.RUNNING_ID+" = "+String.valueOf(id),
@@ -178,6 +186,7 @@ public class Database extends SQLiteOpenHelper {
                 Interval interval = new Interval(c.getLong(sIdPosition),c.getString(sLatPosition),
                         c.getLong(sMillisPosition), c.getFloat(sDistancePosition));
                 interval.setFastest(c.getInt(sFastestPosition)==1);
+                interval.setPaceText(c.getString(sPacePosition));
                 St.add(interval);
             }
         }

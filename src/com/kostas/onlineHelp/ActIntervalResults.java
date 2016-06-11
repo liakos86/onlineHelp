@@ -31,6 +31,8 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
     AdRequest adRequest;
     Button buttonSave;
     Button buttonDismiss;
+    EditText descText;
+    String totalPace;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,6 +71,7 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
         completedIntervalsListView = (ListView) findViewById(R.id.completedIntervals);
         buttonDismiss = (Button) findViewById(R.id.buttonDismissInterval);
         buttonSave = (Button) findViewById(R.id.buttonSaveRunWithIntervals);
+        descText = ((EditText) findViewById(R.id.runDescription));
     }
 
     /**
@@ -144,7 +147,6 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
         String intervalsGson = app_preferences.getString(INTERVALS, "");
         ArrayList<Interval> intervalsListJson = gson.fromJson(intervalsGson, listOfObjects);
         intervalsList = intervalsListJson != null ? intervalsListJson : new ArrayList<Interval>();
-
         float coveredDist = app_preferences.getFloat(TOTAL_DIST, 0);
         if (coveredDist > 0) {//an interrupted run must be added to list
             Type listOfLocation = new TypeToken<List<Location>>() {}.getType();
@@ -159,7 +161,7 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
             long millis = SystemClock.uptimeMillis() - app_preferences.getLong(MSTART_TIME, 0);
             intervalsList.add(new Interval(-1, sb.toString(), millis, coveredDist));
         }
-
+        totalPace = computeTotalPace();
         adapterInterval = new IntervalAdapterItem(this, this.getApplicationContext(),
                 R.layout.list_interval_row, intervalsList);
         completedIntervalsListView.setAdapter(adapterInterval);
@@ -173,12 +175,52 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
         buttonSave.setClickable(false);
         long intervalTime = app_preferences.getLong(INTERVAL_TIME, 0);
         float intervalDistance = app_preferences.getFloat(INTERVAL_DISTANCE, 0);
-        Running running = new Running(-1, "", intervalTime, new SimpleDateFormat("dd/MM/yyyy, hh:mm a").format(new Date()), intervalDistance, intervalsList);
+
+
+
+        Running running = new Running(-1, descText.getText().toString().trim(), intervalTime, new SimpleDateFormat("dd/MM/yyyy, HH:mm").format(new Date()), intervalDistance, intervalsList);
+        running.setAvgPaceText(totalPace);
+
+
+        ((ExtApplication)getApplication()).getRuns().add(0, running);
+
         Database db = new Database(getApplicationContext());
         db.addRunning(running);
         ((ExtApplication) getApplication()).setNewIntervalInDb(true);
         //Toast.makeText(getApplication(), "Saved in Diary", Toast.LENGTH_SHORT).show();
         clear();
+    }
+
+    String computeTotalPace(){
+
+
+        long totalTime = 0;
+        float totalDistance = 0;
+
+        for (Interval interval : intervalsList) {
+
+            totalTime += interval.getMilliseconds();
+            totalDistance += interval.getDistance();
+
+            // object item based on the position
+            long intervalTime = interval.getMilliseconds();
+            float pace = intervalTime / interval.getDistance();
+
+            int paceMinutes = (int) (pace / 60);
+            int paceSeconds = (int) (pace - (paceMinutes * 60));
+
+            String paceText = paceMinutes<60 ?   String.format("%02d", paceMinutes)+"m "+String.format("%02d", paceSeconds)+"s" : "over 1 hour";
+
+
+            interval.setPaceText(paceText);
+        }
+
+        float totalPace = totalTime / totalDistance;
+        int paceMinutes = (int) (totalPace / 60);
+        int paceSeconds = (int) (totalPace - (paceMinutes * 60));
+
+        return paceMinutes<60 ?   String.format("%02d", paceMinutes)+"m "+String.format("%02d", paceSeconds)+"s" : "over 1 hour";
+
     }
 
 

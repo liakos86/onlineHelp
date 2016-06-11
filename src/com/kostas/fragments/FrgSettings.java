@@ -41,7 +41,7 @@ public class FrgSettings extends Fragment {
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
                 shareIntent.setAction(Intent.ACTION_SEND);
                 shareIntent.setType("text/plain");
-                shareIntent.putExtra(Intent.EXTRA_TEXT, "www.google.com");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.facebook_page));
                 startActivity(Intent.createChooser(shareIntent, getResources().getString(R.string.shareTitle)));
             }
         });

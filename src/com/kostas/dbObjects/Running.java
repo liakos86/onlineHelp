@@ -27,6 +27,7 @@ public class Running {
     private float distance;
     private long time;
     private String description;
+    private String avgPaceText;
     private List<Interval> intervals;
 
     //todo after solving zoom issue, add field
@@ -96,6 +97,14 @@ public class Running {
         this.distance = distance;
     }
 
+    public String getAvgPaceText() {
+        return avgPaceText;
+    }
+
+    public void setAvgPaceText(String avgPaceText) {
+        this.avgPaceText = avgPaceText;
+    }
+
     public List<Interval> getIntervals() {
         return intervals;
     }
@@ -131,6 +140,7 @@ public class Running {
             toRet.put(ContentDescriptor.Running.Cols.DATE, item.date);
             toRet.put(ContentDescriptor.Running.Cols.DESCRIPTION, item.description);
             toRet.put(ContentDescriptor.Running.Cols.TIME, item.time);
+            toRet.put(ContentDescriptor.Running.Cols.AVGPACETEXT, item.avgPaceText);
             toRet.put(ContentDescriptor.Running.Cols.DISTANCE, item.distance);
 
             return toRet;
@@ -148,6 +158,7 @@ public class Running {
             toRet.date = cursor.getString(cursor.getColumnIndex(ContentDescriptor.Running.Cols.DATE));
             toRet.description = cursor.getString(cursor.getColumnIndex(ContentDescriptor.Running.Cols.DESCRIPTION));
             toRet.time = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.Running.Cols.TIME));
+            toRet.avgPaceText = cursor.getString(cursor.getColumnIndex(ContentDescriptor.Running.Cols.AVGPACETEXT));
             toRet.distance = cursor.getFloat(cursor.getColumnIndex(ContentDescriptor.Running.Cols.DISTANCE));
 
             return toRet;

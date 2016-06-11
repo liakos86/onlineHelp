@@ -84,6 +84,7 @@ public class ContentDescriptor {
             public static final String DATE = "date";
             public static final String DISTANCE = "distance";
             public static final String TIME = "time";
+            public static final String AVGPACETEXT = "avgpacetext";
             public static final String DESCRIPTION = "description";
 
         }
@@ -102,6 +103,7 @@ public class ContentDescriptor {
                     + String.format(sFrmTextNotNull, Cols.DATE) + " , "
                      + String.format(sFrmText, Cols.DESCRIPTION) + " , "
                       + String.format(sFrmTextNotNull, Cols.TIME) + " , "
+                    + String.format(sFrmTextNotNull, Cols.AVGPACETEXT) + " , "
                     + String.format(sFrmTextNotNull, Cols.DISTANCE) + " , "
 
                     + String.format(sFrmPrimaryKey, Cols.ID) + ")";
@@ -134,6 +136,7 @@ public class ContentDescriptor {
             public static final String MILLISECONDS = "milliseconds";
             public static final String LATLONLIST = "latlonlist";
             public static final String DISTANCE = "distance";
+            public static final String PACETEXT = "pacetext";
             public static final String FASTEST = "fastest";
         }
 
@@ -152,6 +155,7 @@ public class ContentDescriptor {
                     + String.format(sFrmTextNotNull, Cols.MILLISECONDS) + " , "
                     + String.format(sFrmTextNotNull, Cols.LATLONLIST) + " , "
                     + String.format(sFrmTextNotNull, Cols.DISTANCE) + " , "
+                    + String.format(sFrmTextNotNull, Cols.PACETEXT) + " , "
                     + String.format(sFrmInt, Cols.FASTEST) + " , "
                     + String.format(sFrmPrimaryKey, Cols.ID) + ")";
         }

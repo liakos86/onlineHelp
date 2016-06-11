@@ -17,5 +17,6 @@
     <dimen name="standard_view_height">48dp</dimen>
     <dimen name="map_icon_size">100dp</dimen>
     <dimen name="list_view_height">64dp</dimen>
-    <dimen name="circular_image_size">70dp</dimen>
+    <dimen name="circular_button_size">70dp</dimen>
+    <dimen name="list_run_row">90dp</dimen>
 </resources>

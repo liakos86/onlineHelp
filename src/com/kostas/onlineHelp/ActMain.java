@@ -114,8 +114,7 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
         }else{
             MyPagerAdapter adapter = (MyPagerAdapter) mPager.getAdapter();
             if (((ExtApplication) getApplication()).isNewIntervalInDb() && adapter.fragments[0] != null) {
-                ((FrgShowRuns)adapter.fragments[0]).getRunsFromDb(this, false);
-                ((FrgShowRuns)adapter.fragments[0]).computeInfoTexts();
+                ((FrgShowRuns)adapter.fragments[0]).refreshAfterAdd();
                 ((ExtApplication) getApplication()).setNewIntervalInDb(false);
             }
         }

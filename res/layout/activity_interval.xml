@@ -188,9 +188,9 @@
         <ImageButton
                 android:layout_alignParentBottom="true"
                 android:layout_margin="@dimen/ten_device_pixels"
-                android:layout_width="@dimen/circular_image_size"
+                android:layout_width="@dimen/circular_button_size"
                 android:visibility="invisible"
-                android:layout_height="@dimen/circular_image_size"
+                android:layout_height="@dimen/circular_button_size"
                 android:src="@drawable/stop_32"
                 android:background="@drawable/circle_red"
                 android:id="@+id/buttonStop"
@@ -199,8 +199,8 @@
         <ImageButton
                android:layout_alignParentBottom="true"
                 android:layout_margin="@dimen/ten_device_pixels"
-                android:layout_width="@dimen/circular_image_size"
-                android:layout_height="@dimen/circular_image_size"
+                android:layout_width="@dimen/circular_button_size"
+                android:layout_height="@dimen/circular_button_size"
                 android:src="@drawable/return_32"
                 android:background="@drawable/circle_red"
                 android:id="@+id/buttonBack"

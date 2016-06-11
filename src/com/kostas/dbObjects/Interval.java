@@ -28,6 +28,7 @@ public class Interval{
     private long milliseconds;
     private float distance;
     private boolean isFastest;
+    private String paceText;
 
     public Interval(){}
 
@@ -102,6 +103,14 @@ public class Interval{
         this.distance = distance;
     }
 
+    public String getPaceText() {
+        return paceText;
+    }
+
+    public void setPaceText(String paceText) {
+        this.paceText = paceText;
+    }
+
     public static Interval getFromId(Context context, long id) {
         //Log.v(TAG, String.format("Requesting item [%d]", id));
         synchronized (context) {
@@ -130,6 +139,7 @@ public class Interval{
             toRet.put(ContentDescriptor.Interval.Cols.MILLISECONDS, item.milliseconds);
             toRet.put(ContentDescriptor.Interval.Cols.LATLONLIST, item.latLonList);
             toRet.put(ContentDescriptor.Interval.Cols.DISTANCE, item.distance);
+            toRet.put(ContentDescriptor.Interval.Cols.PACETEXT, item.paceText);
             toRet.put(ContentDescriptor.Interval.Cols.FASTEST, item.isFastest ? 1 : 0);
 
             return toRet;
@@ -148,6 +158,7 @@ public class Interval{
             toRet.latLonList = cursor.getString(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.LATLONLIST));
             toRet.milliseconds = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.MILLISECONDS));
             toRet.distance = cursor.getFloat(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.DISTANCE));
+            toRet.paceText = cursor.getString(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.PACETEXT));
             toRet.isFastest = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.FASTEST))==1;
             return toRet;
         }

@@ -4,8 +4,12 @@ import android.app.Application;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.widget.Toast;
+//import com.kostas.custom.MyAcraSender;
 import com.kostas.custom.MyAcraSender;
+import com.kostas.dbObjects.Running;
+import com.kostas.model.Database;
 import com.kostas.service.TTSManager;
 import org.acra.ACRA;
 import org.acra.ReportField;
@@ -15,12 +19,14 @@ import org.acra.sender.HttpSender;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.List;
 
 @ReportsCrashes(formKey = "",
         httpMethod = HttpSender.Method.POST,
         customReportContent = {ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME, ReportField.ANDROID_VERSION, ReportField.PHONE_MODEL, ReportField.CUSTOM_DATA, ReportField.STACK_TRACE, ReportField.LOGCAT},
         mode = ReportingInteractionMode.TOAST,
-        mailTo = "liakos86@gmail.com",
+        mailTo = "intervalplusrunning@gmail.com",
         resToastText = R.string.crash_toast_text)
 public class ExtApplication extends Application {
 
@@ -48,20 +54,35 @@ public class ExtApplication extends Application {
      */
     private TTSManager ttsManager;
 
+    private volatile boolean runsLoaded;
+
     /**
      * The position of the pager
      */
     private int position;
 
+    List<Running> runs;
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+
+        // The following line triggers the initialization of ACRA
+        ACRA.init(this);
+
+
+        MyAcraSender mySender = new MyAcraSender(this);
+        ACRA.getErrorReporter().addReportSender(mySender);
+    }
 
     @Override
     public void onCreate() {
         super.onCreate();
         FontsOverride.setDefaultFont(this, "MONOSPACE",  "fonts/OpenSans-Semibold.ttf");
 
-        ACRA.init(this);
-        MyAcraSender mySender = new MyAcraSender(this);
-        ACRA.getErrorReporter().addReportSender(mySender);
+
+       new PerformAsyncTask(this).execute();
+
         ttsManager = new TTSManager();
         ttsManager.init(this);
     }
@@ -84,6 +105,10 @@ public class ExtApplication extends Application {
                 .isConnectedOrConnecting();
 
         return isWifi || is3g ;
+    }
+
+    public List<Running> getRuns() {
+        return runs;
     }
 
     public boolean isInResultsAct() {
@@ -121,6 +146,44 @@ public class ExtApplication extends Application {
             //Log.v("SERVICE",e.getMessage());
         }
         return "";
+    }
+
+    private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
+        ExtApplication application;
+
+        public PerformAsyncTask(ExtApplication application) {
+            this.application = application;
+        }
+
+        protected void onPreExecute() {
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... unused) {
+            Database db = new Database(application);
+            runs = db.fetchRunsFromDb();
+            for (Running run : runs){
+                run.setIntervals(db.fetchIntervalsForRun(run.getRunning_id()));
+            }
+            Collections.reverse(runs);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+
+            setRunsLoaded(true);
+
+        }
+    }
+
+    public boolean isRunsLoaded() {
+        return runsLoaded;
+    }
+
+    public void setRunsLoaded(boolean runsLoaded) {
+        this.runsLoaded = runsLoaded;
     }
 
     public void setPosition(int position) {
