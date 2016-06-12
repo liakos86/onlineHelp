@@ -120,7 +120,7 @@
 
         <TextView android:id="@+id/noRunsText"
                   android:layout_gravity="center"  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content" android:text="@string/no_runs" android:textSize="20sp"
+                  android:layout_height="wrap_content" android:text="@string/no_runs" android:textSize="@dimen/large_text"
                   android:drawableBottom="@drawable/empty_100"/>
 
 
