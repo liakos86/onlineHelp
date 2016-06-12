@@ -1,17 +1,9 @@
 package com.kostas.onlineHelp;
 
-import android.app.ActivityManager;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.LinearLayout;
-import com.kostas.custom.NonSwipeableViewPager;
-import com.kostas.fragments.FrgShowRuns;
-import com.kostas.service.RunningService;
 
-import java.util.Map;
+import android.content.Intent;
+import android.os.Bundle;
+
 
 /**
  * Created by liakos on 9/6/2016.
