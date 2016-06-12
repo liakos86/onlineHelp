@@ -1,6 +1,7 @@
 package com.kostas.fragments;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Html;
@@ -55,6 +56,28 @@ public class FrgSettings extends Fragment {
                 Toast.makeText(getActivity(), getResources().getString(R.string.soon), Toast.LENGTH_SHORT).show();
             }
         });
+
+
+        Button contact = (Button)v.findViewById(R.id.contactButton);
+        contact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                try {
+                    String[] addresses = new String[]{"intervalplusrunning@gmail.com"};
+                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                            "mailto", "intervalplusrunning@gmail.com", null));
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Feedback to Interval+");
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, "-- write your message here --");
+                    emailIntent.putExtra(Intent.EXTRA_EMAIL, addresses);
+                    startActivity(Intent.createChooser(emailIntent, "Send your feedback..."));
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+            }
+        });
+
 
         return v;
     }

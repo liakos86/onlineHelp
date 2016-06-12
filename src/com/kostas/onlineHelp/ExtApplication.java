@@ -19,6 +19,7 @@ import org.acra.sender.HttpSender;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -61,7 +62,7 @@ public class ExtApplication extends Application {
      */
     private int position;
 
-    List<Running> runs;
+    List<Running> runs = new ArrayList<Running>();
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -81,10 +82,10 @@ public class ExtApplication extends Application {
         FontsOverride.setDefaultFont(this, "MONOSPACE",  "fonts/OpenSans-Semibold.ttf");
 
 
-       new PerformAsyncTask(this).execute();
-
+        new PerformAsyncTask(this).execute();
         ttsManager = new TTSManager();
         ttsManager.init(this);
+
     }
 
     /*
@@ -94,17 +95,15 @@ public class ExtApplication extends Application {
     public boolean isOnline() {
         ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
-        boolean is3g = manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)
-                .isConnectedOrConnecting();
-
-//        if (is3g){
-//            Toast.makeText(this, manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getSubtypeName(),Toast.LENGTH_SHORT).show();
-//        }
-
-        boolean isWifi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
-                .isConnectedOrConnecting();
-
-        return isWifi || is3g ;
+       try {
+            boolean is3g = manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)
+                    .isConnectedOrConnecting();
+            boolean isWifi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+                    .isConnectedOrConnecting();
+            return isWifi || is3g;
+        }catch (Exception e){
+            return false;
+        }
     }
 
     public List<Running> getRuns() {

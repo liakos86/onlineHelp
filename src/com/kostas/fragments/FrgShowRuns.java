@@ -147,7 +147,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
     private void setList(){
         intervalListView.setDivider(null);
         runs = ((ExtApplication)getActivity().getApplication()).getRuns();
-
         computeParentAndChildRuns();
         computeInfoTexts();
 

@@ -18,7 +18,7 @@
               android:clickable="true"
               android:layout_height="wrap_content"/>
 
-    <Button android:layout_above="@+id/shareButton"
+    <Button android:layout_above="@+id/contactButton"
             android:id="@+id/loginButton"
             android:drawableStart="@drawable/login_50"
             android:drawableLeft="@drawable/login_50"
@@ -30,6 +30,17 @@
             android:text="@string/login"/>
 
 
+
+    <Button android:id="@+id/contactButton"
+            android:paddingLeft="@dimen/eight"
+            android:drawableStart="@drawable/contact_50"
+            android:drawableLeft="@drawable/contact_50"
+            android:layout_alignParentBottom="false"
+            android:layout_marginBottom="@dimen/ten_device_pixels"
+            android:layout_above="@+id/shareButton"
+            style="@style/buttonStyle"
+            android:background="@drawable/plus_minus_selector"
+            android:text="@string/contact"/>
 
     <Button android:id="@+id/shareButton"
             android:paddingLeft="@dimen/eight"
