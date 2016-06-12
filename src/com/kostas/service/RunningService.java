@@ -441,7 +441,7 @@ public class RunningService extends IntentService
 
 
         } catch (Exception e) {
-            Log.v("LATLNG", "Crash");
+            //Log.v("LATLNG", "Crash");
 
         } finally {
             super.onDestroy();

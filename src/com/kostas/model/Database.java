@@ -2,13 +2,11 @@
 package com.kostas.model;
 
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
-import android.util.Log;
 import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Plan;
 import com.kostas.dbObjects.Running;
@@ -41,8 +39,8 @@ public class Database extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.w("Database", "Upgrading database from version " + oldVersion + " to " + newVersion
-                + ", which will destroy all old data");
+//        Log.w("Database", "Upgrading database from version " + oldVersion + " to " + newVersion
+//                + ", which will destroy all old data");
             db.execSQL("drop table if exists " + ContentDescriptor.Running.TABLE_NAME);
         db.execSQL("drop table if exists " + ContentDescriptor.Interval.TABLE_NAME);
         db.execSQL("drop table if exists " + ContentDescriptor.Plan.TABLE_NAME);

@@ -75,7 +75,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
     /**
      * Open the map for the interval, close the current interval and go to runs list
      */
-    Button openMapButton, closeIntervalsButton;//, shareButton;
+    Button openMapButton, closeIntervalsButton;
 
     Button buttonNewRun;
 
@@ -135,14 +135,13 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         for (Interval interval : running.getIntervals()){
             intervals.add(interval);
         }
-        viewFlipper.setDisplayedChild(1);//c
+        viewFlipper.setDisplayedChild(1);
         adapterInterval.notifyDataSetChanged();
         if (googleMap!=null) {
             drawMap();
         }else{
             Toast.makeText(getActivity(), "Google maps not present...", Toast.LENGTH_SHORT).show();
         }
-//        new PerformAsyncTask(getActivity(), true).execute();
     }
     
     private void setList(){
@@ -169,19 +168,14 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
         runsExpListView.expandGroup(0);
 
-        //int right = (int) (getResources().getDisplayMetrics().widthPixels - TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics()));
-
         DisplayMetrics metrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
-       // int width = metrics.widthPixels;
         int right = (int) (getResources().getDisplayMetrics().widthPixels - TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics()));
 
         //placing the indicator 'right' pixels from the right of the view
         if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
-           // runsExpListView.setIndicatorBounds(width-GetPixelFromDips(40), width-GetPixelFromDips(20));
             runsExpListView.setIndicatorBounds(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
         } else {
-   //         runsExpListView.setIndicatorBoundsRelative(width-GetPixelFromDips(40), width-GetPixelFromDips(20));
          runsExpListView.setIndicatorBoundsRelative(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
         }
 
@@ -196,7 +190,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
                     googleMap.clear();
                     alreadyDrawn = false;
                 }
-                viewFlipper.setDisplayedChild(0);//c
+                viewFlipper.setDisplayedChild(0);
             }
         });
 
@@ -205,14 +199,14 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
             public void onClick(View view) {
                 viewFlipper.setDisplayedChild(1);
             }
-        });//c
+        });
 
         openMapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 viewFlipper.setDisplayedChild(2);
             }
-        });//c
+        });
 
         buttonNewRun.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -250,7 +244,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
                 runsExpListView.expandGroup(0);
             }
         }else{
-            viewFlipper.setDisplayedChild(3);//c
+            viewFlipper.setDisplayedChild(3);
         }
     }
 
@@ -318,7 +312,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
                         westPoint = lonPoint;
                         left = new LatLng(latPoint, lonPoint);
                     }
-//               if (j%2==0)
                     locationList.add(new LatLng(latPoint, lonPoint));
                 }
                 int currSize = locationList.size() - 1;
@@ -353,7 +346,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
             try {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 200));
             } catch (Exception e) {
-                //Log.v("LATLNG", "MAP CRASH");
+                e.printStackTrace();
             }
         }
     }
@@ -393,7 +386,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
         ((ArrayList<Running>)childItems.get(groupPosition)).remove(position);
         adapterExp.notifyDataSetChanged();
-       // computeParentAndChildRuns();//todo find a way to remove run from list and not refetch from db
         computeInfoTexts();
         showTextNoRuns();
     }
@@ -515,7 +507,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
             try {
                  month = Integer.valueOf(parentItems.get(groupPosition).split("/")[0]);
             }catch (Exception e){
-                //Log.v("LATLNG", "month error");
+                e.printStackTrace();
             }
             String[] months = getResources().getStringArray(R.array.months);
             String monthName= months[month-1];
@@ -588,47 +580,15 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         }
 
         if (empty){
-           viewFlipper.setDisplayedChild(3);//c
+           viewFlipper.setDisplayedChild(3);
         }else{
-            viewFlipper.setDisplayedChild(0);//c
+            viewFlipper.setDisplayedChild(0);
         }
     }
-
-//    private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
-//        private Activity activity;
-//        private List<Running> newRuns;
-//
-//        public PerformAsyncTask(Activity activity) {
-//            this.activity = activity;
-//        }
-//
-//        protected void onPreExecute() {
-//            runsExpListView.setClickable(false);
-//        }
-//
-//        @Override
-//        protected Void doInBackground(Void... unused) {
-//            computeParentAndChildRuns(activity, true);
-//            return null;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Void result) {
-//            runsExpListView.setClickable(true);
-//            if (adapterExp!=null) {
-//                adapterExp.notifyDataSetChanged();
-//                showTextNoRuns();
-//            }
-//            computeInfoTexts();
-//
-//
-//        }
-//    }
 
     @Override
     public void onResume() {
         super.onResume();
-        //showTextNoRuns();
     }
 
     public static FrgShowRuns init(int val) {

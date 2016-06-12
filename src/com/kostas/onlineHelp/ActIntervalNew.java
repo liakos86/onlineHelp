@@ -3,7 +3,6 @@ package com.kostas.onlineHelp;
 import static com.kostas.service.RunningService.*;
 import android.app.*;
 import android.content.*;
-import android.graphics.Point;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -11,7 +10,6 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.*;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.*;
 import android.widget.*;
 import com.google.android.gms.ads.AdRequest;
@@ -82,7 +80,6 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         setViewsAndButtons();
         getPlansFromDb();
         if (((ExtApplication) getApplication()).isOnline()) {
-            //Toast.makeText(getApplication(), "online", Toast.LENGTH_SHORT).show();
             new LoadAsync().execute();
         }
         setListeners();
@@ -218,7 +215,6 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         if (isRunning && !isCompleted) {//from resume
             setDistanceProgress(distanceCovered);
             progressWheel.setVisibility(View.VISIBLE);
-            //distanceProgressWheel.setVisibility(View.VISIBLE);
             mHandler.post(mUpdateTimeTask);
         }
         else if (!isRunning && !isCompleted) {//from resume OR first time
@@ -227,7 +223,6 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
             timeText.setText(getResources().getString(R.string.zero_time));
 
             final int step = (int) (360000 / millisecondsToCount);
-            //distanceProgressWheel.setVisibility(View.INVISIBLE);
             progressWheel.setVisibility(View.VISIBLE);
             progressWheel.setText((int) ((millisecondsToCount - (SystemClock.uptimeMillis() - startOfCountdown)) / 1000) + " secs");
 
@@ -285,7 +280,6 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         }
 
         setRoundsText(intervalRoundsPicker.getValue());
-        //distanceProgressWheel.setVisibility(View.INVISIBLE);
         progressWheel.setVisibility(View.VISIBLE);
         progressWheel.setProgress(360);
         final int step = (int) (360000 / intervalTime);
@@ -526,10 +520,6 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
             ((ExtApplication) getApplication()).setInRunningMode(false);
             ((ExtApplication) getApplication()).setInRunningAct(false);
             Intent intentForResultAct = new Intent(this, ActIntervalResults.class);
-            //intentForResultAct.putExtra(TOTAL_DIST, app_preferences.getFloat(TOTAL_DIST, 0));
-            //intentForResultAct.putExtra(TOTAL_TIME, app_preferences.getLong(TOTAL_TIME, 0));
-            //intentForResultAct.putExtra(INTERVAL_TIME, intervalTime);
-            //intentForResultAct.putExtra(INTERVAL_DISTANCE, intervalDistance);
             startActivity(intentForResultAct);
             finish();
             return;
@@ -556,7 +546,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
             stopService(new Intent(getBaseContext(), RunningService.class));
             unregisterReceiver(receiver);
         } catch (Exception e) {
-            Log.v("LATLNG", "Exception: Receiver was not registered");
+            e.printStackTrace();
         }
     }
 
@@ -616,7 +606,6 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         @Override
         public void onNothingSelected(AdapterView<?> arg0) {
             Toast.makeText(getApplication(), "nothing", Toast.LENGTH_SHORT).show();
-            // Nothing
         }
 
     }

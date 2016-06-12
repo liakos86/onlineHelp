@@ -10,7 +10,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 
 public class DataProvider extends ContentProvider {
     private static final String TAG = Thread.currentThread().getStackTrace()[2].getClassName()
@@ -76,16 +75,16 @@ public class DataProvider extends ContentProvider {
     public Cursor query(final Uri uri, final String[] projection, final String selection,
                         final String[] selectionArgs, final String sortOrder) {
         //Log.v(TAG, String.format("Query for uri [%s]", uri));
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            if (projection != null) {
-                String proj = "projection: ";
-                for (int i = 0; i < projection.length; i++)
-                    proj += String.format(" [%s] ", projection[i]);
-                Log.v(TAG, proj);
-            } else{
-                Log.v(TAG, "to projection einai null");
-            }
-        }
+//        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+//            if (projection != null) {
+//                String proj = "projection: ";
+//                for (int i = 0; i < projection.length; i++)
+//                    proj += String.format(" [%s] ", projection[i]);
+//                Log.v(TAG, proj);
+//            } else{
+//                Log.v(TAG, "to projection einai null");
+//            }
+//        }
         SQLiteDatabase db = database.getReadableDatabase();
         Cursor toRet = null;
         final int match = ContentDescriptor.URI_MATCHER.match(uri);
@@ -210,7 +209,7 @@ public class DataProvider extends ContentProvider {
             // END Plan
 
             default:
-                Log.d(TAG, String.format("Could not handle matcher [%d]", match));
+//                Log.d(TAG, String.format("Could not handle matcher [%d]", match));
         }
         if (toRet != null) {
             toRet.setNotificationUri(getContext().getContentResolver(), uri);

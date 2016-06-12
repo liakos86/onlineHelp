@@ -87,14 +87,14 @@ public class FrgPlans extends Fragment {
             public void onClick(View view) {
                 plansFlipper.setDisplayedChild(1);
             }
-        });//c
+        });
 
         buttonNewPlan2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 plansFlipper.setDisplayedChild(1);
             }
-        });//c
+        });
 
         buttonSavePlan.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,7 +108,7 @@ public class FrgPlans extends Fragment {
             public void onClick(View view) {
                 clearViews();
                 if (plans.size()>0) {
-                    plansFlipper.setDisplayedChild(0);//c
+                    plansFlipper.setDisplayedChild(0);
                 }else{
                     plansFlipper.setDisplayedChild(2);
                 }
@@ -146,9 +146,9 @@ public class FrgPlans extends Fragment {
      */
     private void showTextNoPlans(){
         if (plans.size()==0){
-            plansFlipper.setDisplayedChild(2);//c
+            plansFlipper.setDisplayedChild(2);
         }else{
-            plansFlipper.setDisplayedChild(0);//c
+            plansFlipper.setDisplayedChild(0);
         }
     }
 
@@ -209,11 +209,6 @@ public class FrgPlans extends Fragment {
             final Plan plan = plans.get(position);
             holder.topText.setText(plan.getDescription());
             holder.bottomText.setText( plan.getMeters()+"m with "+plan.getSeconds()+"secs rest"+ (plan.getRounds()>0 ? " x"+plan.getRounds()+" rounds" : "" ));
-//            if (position%2==0)
-//                convertView.setBackgroundDrawable(getResources().getDrawable(R.drawable.plan_odd_row));
-//            else
-//                convertView.setBackgroundDrawable(getResources().getDrawable(R.drawable.plan_even_row));
-
 
             convertView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
@@ -281,7 +276,7 @@ public class FrgPlans extends Fragment {
         getPlansFromDb(getActivity(), false);
 
         clearViews();
-        plansFlipper.setDisplayedChild(0);//c
+        plansFlipper.setDisplayedChild(0);
 
     }
 
