@@ -280,6 +280,7 @@ public class FrgPlans extends Fragment {
 
     }
 
+    //haha
 
     private void deletePlan(Long trId, int position){
         Database db = new Database(getActivity().getBaseContext());
