@@ -19,6 +19,7 @@
               android:layout_height="wrap_content"/>
 
     <Button android:layout_above="@+id/contactButton"
+            android:visibility="invisible"
             android:id="@+id/loginButton"
             android:drawableStart="@drawable/login_50"
             android:drawableLeft="@drawable/login_50"

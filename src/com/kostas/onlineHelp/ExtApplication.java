@@ -16,6 +16,7 @@ import org.acra.ReportField;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 import org.acra.sender.HttpSender;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -102,7 +103,7 @@ public class ExtApplication extends Application {
                     .isConnectedOrConnecting();
             return isWifi || is3g;
         }catch (Exception e){
-            return false;
+            return true;
         }
     }
 
@@ -119,6 +120,7 @@ public class ExtApplication extends Application {
     }
 
     /**
+     * TODO: ALWAYS REMOVE BEFORE COMMIT
      * For testing purposes returns an md5 hash of the device to add testing ads
      * @param s
      * @return
@@ -175,6 +177,17 @@ public class ExtApplication extends Application {
             setRunsLoaded(true);
 
         }
+    }
+
+
+    /**
+     * Builds a new HttpClient with the same CookieStore than the previous one.
+     * This allows to follow the http session, without keeping in memory the
+     * full DefaultHttpClient.
+     */
+    public DefaultHttpClient getHttpClient() {
+        final DefaultHttpClient httpClient = new DefaultHttpClient();
+        return httpClient;
     }
 
     public boolean isRunsLoaded() {

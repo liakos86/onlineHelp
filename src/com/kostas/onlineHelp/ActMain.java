@@ -107,6 +107,10 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
     protected void onResume() {
         super.onResume();
         SharedPreferences app_preferences = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = app_preferences.edit();
+        editor.remove("mongoId").apply();
+
         if ((isMyServiceRunning() && (app_preferences.getBoolean(RunningService.INTERVAL_IN_PROGRESS, false)))||(((ExtApplication) getApplication()).isInRunningAct())) {//service is on
             startIntervalAct();
         }else  if (((ExtApplication) getApplication()).isInResultsAct()) {
