@@ -87,6 +87,7 @@ public class ExtApplication extends Application {
         ttsManager = new TTSManager();
         ttsManager.init(this);
 
+
     }
 
     /*

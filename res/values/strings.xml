@@ -50,6 +50,8 @@
     <string name="runner_path">/api/1/databases/auction/collections/runner/</string>
     <string name="runnerCollection">https://api.mongolab.com/api/1/databases/auction/collections/runner/</string>
 
+    <string name="friends">Friends</string>
+
 
 
 </resources>

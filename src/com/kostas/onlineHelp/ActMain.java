@@ -30,7 +30,7 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
     /**
      * The total size of the pager objects
      */
-    static final int PAGER_SIZE = 3;
+    static final int PAGER_SIZE = 4;
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -42,8 +42,12 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setupPager();
+
+
 //        FacebookSdk.sdkInitialize(getApplicationContext());
     }
+
+
 
     /**
      * Initializes the pager, sets adapter and listener
@@ -51,7 +55,7 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
      */
     private void setupPager() {
         mPager = (NonSwipeableViewPager) findViewById(R.id.pager);
-        mPager.setOffscreenPageLimit(2);
+        mPager.setOffscreenPageLimit(3);
         mPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(),  PAGER_SIZE));
         setBottomButtons(mPager);
         setSelectedBottomButton(bottomButtons, 0);
@@ -108,8 +112,8 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
         super.onResume();
         SharedPreferences app_preferences = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        SharedPreferences.Editor editor = app_preferences.edit();
-        editor.remove("mongoId").apply();
+//        SharedPreferences.Editor editor = app_preferences.edit();
+//        editor.remove("mongoId").apply();
 
         if ((isMyServiceRunning() && (app_preferences.getBoolean(RunningService.INTERVAL_IN_PROGRESS, false)))||(((ExtApplication) getApplication()).isInRunningAct())) {//service is on
             startIntervalAct();

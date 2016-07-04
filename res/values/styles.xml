@@ -6,9 +6,22 @@
            parent="@android:style/Theme.Holo.Light">
         <item name="android:background">@android:color/transparent</item>
         <item name="android:typeface">monospace</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
         <item name="android:textColor">@color/white_back</item>
+        <item name="android:actionBarStyle">@style/CustomIntervalTheme.ActionBarStyle</item>
+    </style>
+
+    <style name="CustomIntervalTheme.ActionBarStyle"
+           parent="@android:style/Widget.Holo.Light.ActionBar" >
+        <item name="android:background">@color/primary_grey</item>
+        <item name="android:titleTextStyle">@style/CustomIntervalTheme.ActionBarStyle.TitleTextStyle</item>
+        <item name="android:icon">@null</item>
+
+    </style>
+
+    <style name="CustomIntervalTheme.ActionBarStyle.TitleTextStyle"
+           parent="@android:style/Widget.Holo.Light.ActionBar" >
+       <item name="android:textColor">@color/interval_blue</item>
+
     </style>
 
     <style name="spinner_style">
@@ -25,6 +38,10 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="BottomTab.Inactive">
+        <item name="android:background">@color/secondary_grey</item>
     </style>
 
     <style name="BottomTabImage">

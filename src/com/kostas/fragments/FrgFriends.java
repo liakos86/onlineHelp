@@ -1,20 +1,34 @@
-package com.kostas.onlineHelp;
+package com.kostas.fragments;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
+import com.kostas.custom.NumberPickerKostas;
+import com.kostas.custom.ViewHolderRow;
+import com.kostas.dbObjects.Plan;
+import com.kostas.model.Database;
 import com.kostas.mongo.SyncHelper;
+import com.kostas.onlineHelp.ActMain;
+import com.kostas.onlineHelp.ExtApplication;
+import com.kostas.onlineHelp.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Created by liakos on 3/7/2016.
+ * Created by liakos on 10/10/2015.
  */
-public class ActLoginOrRegister extends BaseFrgActivityWithBottomButtons {
+public class FrgFriends extends Fragment {
 
     String username, password, email;
 
@@ -29,31 +43,45 @@ public class ActLoginOrRegister extends BaseFrgActivityWithBottomButtons {
 
     SyncHelper sh;
 
-
+    ViewFlipper friendsFlipper;
+    
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.act_login_register);
+    }
 
-        setViewsAndListeners();
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+        View v = inflater.inflate(R.layout.frg_friends, container, false);
 
-        sh = new SyncHelper(this);
 
+        setViewsAndListeners(v);
+
+        sh = new SyncHelper(getActivity());
+
+        setTitleActionBar();
+        
+        return  v;
     }
 
 
-    private void setViewsAndListeners(){
 
 
-        buttonRegister = (Button) findViewById(R.id.buttonRegister);
-        buttonLogin = (Button) findViewById(R.id.buttonLogin);
-        textLogin = (TextView) findViewById(R.id.textLogin);
-        textRegister = (TextView) findViewById(R.id.textRegister);
-        textForgot = (TextView) findViewById(R.id.textForgot);
+    private void setViewsAndListeners(View v){
 
-        editUsername = (EditText) findViewById(R.id.user_name);
-        editPassword = (EditText) findViewById(R.id.user_pass);
-        editEmail = (EditText) findViewById(R.id.user_email);
+        friendsFlipper = (ViewFlipper) v.findViewById(R.id.friends_flipper);
+
+        buttonRegister = (Button) v.findViewById(R.id.buttonRegister);
+        buttonLogin = (Button) v.findViewById(R.id.buttonLogin);
+        textLogin = (TextView) v.findViewById(R.id.textLogin);
+        textRegister = (TextView) v.findViewById(R.id.textRegister);
+        textForgot = (TextView) v.findViewById(R.id.textForgot);
+
+        editUsername = (EditText) v.findViewById(R.id.user_name);
+        editPassword = (EditText) v.findViewById(R.id.user_pass);
+        editEmail = (EditText) v.findViewById(R.id.user_email);
 
         buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,7 +93,7 @@ public class ActLoginOrRegister extends BaseFrgActivityWithBottomButtons {
         textLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               //hide and show
+                //hide and show
                 buttonRegister.setVisibility(View.GONE);
                 buttonLogin.setVisibility(View.VISIBLE);
                 textLogin.setVisibility(View.GONE);
@@ -112,33 +140,33 @@ public class ActLoginOrRegister extends BaseFrgActivityWithBottomButtons {
         if (type==0){//register
 
             if (username.length()==0||password.length()==0||email.length()==0){
-                Toast.makeText(this, "Please fill in all fields!", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "Please fill in all fields!", Toast.LENGTH_LONG).show();
                 return;
             }
 
         }else{//login
             if ((username.length()== 0 && email.length()== 0)||password.length()==0){
-                Toast.makeText(this, "Please fill in username or email & password!", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "Please fill in username or email & password!", Toast.LENGTH_LONG).show();
                 return;
             }
 
 
             if (username.length()> 0 && email.length()> 0){
-                Toast.makeText(this, "Login only with username or email", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "Login only with username or email", Toast.LENGTH_LONG).show();
                 return;
             }
         }
 
 
         if (email.length() > 0 && !isValidEmail(email)){
-            Toast.makeText(this, "Please fill in a valid email!", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), "Please fill in a valid email!", Toast.LENGTH_LONG).show();
             return;
         }
 
         //if type==1 we get uer by shared prefs id
-        if (((ExtApplication)getApplication()).isOnline()) {
+        if (((ExtApplication)getActivity().getApplication()).isOnline()) {
 
-            new insertOrGetUser((ExtApplication)getApplication(), type).execute();
+            new insertOrGetUser((ExtApplication)getActivity().getApplication(), type).execute();
         }
     }
 
@@ -150,10 +178,6 @@ public class ActLoginOrRegister extends BaseFrgActivityWithBottomButtons {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
 
     }
-
-
-
-
 
 
     private class insertOrGetUser extends AsyncTask<Void, Void, Integer> {
@@ -174,7 +198,7 @@ public class ActLoginOrRegister extends BaseFrgActivityWithBottomButtons {
 
 
             if (type == 1)
-                    return sh.getMongoUser(email, username, password);
+                return sh.getMongoUser(email, username, password);
             else
                 return sh.insertMongoUser(email, username, password);
 
@@ -199,16 +223,41 @@ public class ActLoginOrRegister extends BaseFrgActivityWithBottomButtons {
             }else if (result==2){
                 //((ActMainTest)getActivity()).getFirstLeaderboard();
                 Toast.makeText(app, "User found", Toast.LENGTH_LONG).show();
+                setTitleActionBar();
+                friendsFlipper.setDisplayedChild(1);
             }else if (result==3){
-              Toast.makeText(app, "User inserted", Toast.LENGTH_LONG).show();
-
-          }
+                Toast.makeText(app, "User inserted", Toast.LENGTH_LONG).show();
+                setTitleActionBar();
+                friendsFlipper.setDisplayedChild(1);
+            }
 
         }
 
 
     }
 
+    public void setTitleActionBar(){
+        SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
 
+        if (app_preferences.getString("mongoId", null) != null){
+            getActivity().setTitle(app_preferences.getString("username", null));
+            friendsFlipper.setDisplayedChild(1);
+        }
+
+//        SharedPreferences.Editor editor = app_preferences.edit();
+//        editor.remove("mongoId").apply();
+    }
+    
+    
+
+    public static FrgFriends init(int val) {
+        FrgFriends truitonList = new FrgFriends();
+
+        // Supply val input as an argument.
+        Bundle args = new Bundle();
+        args.putInt("val", val);
+        truitonList.setArguments(args);
+        return truitonList;
+    }
 
 }

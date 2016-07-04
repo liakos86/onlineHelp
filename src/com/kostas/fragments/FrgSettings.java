@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.kostas.onlineHelp.ActLoginOrRegister;
 import com.kostas.onlineHelp.ActMain;
 import com.kostas.onlineHelp.R;
 import org.w3c.dom.Text;
@@ -50,25 +49,6 @@ public class FrgSettings extends Fragment {
                 startActivity(Intent.createChooser(shareIntent, getResources().getString(R.string.shareTitle)));
             }
         });
-
-        Button b2=(Button)v.findViewById(R.id.loginButton);
-
-
-
-        b2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Intent intent = new Intent(getActivity(), ActLoginOrRegister.class);
-                startActivity(intent);
-
-                //Toast.makeText(getActivity(), getResources().getString(R.string.soon), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        SharedPreferences prefs = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
-        String mongoId = prefs.getString("mongoId", null);
-        b2.setVisibility(( mongoId == null) ? View.VISIBLE : View.INVISIBLE);
 
 
         Button contact = (Button)v.findViewById(R.id.contactButton);
