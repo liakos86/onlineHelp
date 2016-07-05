@@ -70,7 +70,19 @@
 </LinearLayout>
 
 
-<LinearLayout
+    <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
+
+        <ListView
+                android:id="@+id/listFriendRequests"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_above="@+id/infoText"
+
+                />
+
+        <TextView android:layout_above="@+id/add_friend_linear" android:gravity="center"  android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/infoText" android:textSize="@dimen/small_text"/>
+<LinearLayout android:layout_alignParentBottom="true" android:id="@+id/add_friend_linear"
 android:padding="2dp" android:layout_margin="6dp"
 android:layout_width="match_parent"
 android:layout_height="wrap_content"
@@ -78,6 +90,8 @@ android:orientation="horizontal" >
 <EditText android:paddingLeft="4dp" android:layout_gravity="center_vertical|left"  android:textColor="@color/primary_grey" android:background="@android:color/white" android:layout_weight="2" android:id="@+id/editNewFriend"  android:drawablePadding="4dp" android:layout_width="0dp" android:layout_height="48dp" android:hint="search friend"/>
 <Button android:layout_gravity="center_vertical" android:textColor="@color/white_back"   android:layout_weight="1" android:id="@+id/buttonAddFriend"  android:layout_width="0dp" android:background="@drawable/bottom_button_background" android:text="Add" android:layout_height="wrap_content" />
 </LinearLayout>
+
+    </RelativeLayout>
 
 
 </ViewFlipper>

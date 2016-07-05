@@ -16,6 +16,7 @@ import android.widget.*;
 import com.kostas.custom.NumberPickerKostas;
 import com.kostas.custom.ViewHolderRow;
 import com.kostas.dbObjects.Plan;
+import com.kostas.dbObjects.User;
 import com.kostas.model.Database;
 import com.kostas.mongo.SyncHelper;
 import com.kostas.onlineHelp.ActMain;
@@ -23,6 +24,7 @@ import com.kostas.onlineHelp.ExtApplication;
 import com.kostas.onlineHelp.R;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -32,7 +34,7 @@ public class FrgFriends extends Fragment {
 
     String username, password, email;
 
-    EditText editUsername, editPassword, editEmail;
+    EditText editUsername, editPassword, editEmail, friendName;
 
     TextView textLogin, textRegister, textForgot;
 
@@ -40,10 +42,20 @@ public class FrgFriends extends Fragment {
 
     int type = 0 ;//register
 
+    ListView friendRequestsList;
+
 
     SyncHelper sh;
 
     ViewFlipper friendsFlipper;
+
+    Button addFriend;
+
+    TextView infoText;
+
+    RequestsAdapterItem requestsAdapter;
+
+    List<String> friendRequests = new ArrayList<String>();
     
     
     @Override
@@ -71,9 +83,21 @@ public class FrgFriends extends Fragment {
 
     private void setViewsAndListeners(View v){
 
+
+        SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
+
+        String friends = app_preferences.getString("friendRequests", "");
+        friendRequests = Arrays.asList(friends.split(" "));
+
+        friendRequestsList = ((ListView) v.findViewById(R.id.listFriendRequests));
+
+        infoText = (TextView) v.findViewById(R.id.infoText);
+
         friendsFlipper = (ViewFlipper) v.findViewById(R.id.friends_flipper);
 
         buttonRegister = (Button) v.findViewById(R.id.buttonRegister);
+        addFriend = (Button)v.findViewById(R.id.buttonAddFriend);
+
         buttonLogin = (Button) v.findViewById(R.id.buttonLogin);
         textLogin = (TextView) v.findViewById(R.id.textLogin);
         textRegister = (TextView) v.findViewById(R.id.textRegister);
@@ -82,6 +106,12 @@ public class FrgFriends extends Fragment {
         editUsername = (EditText) v.findViewById(R.id.user_name);
         editPassword = (EditText) v.findViewById(R.id.user_pass);
         editEmail = (EditText) v.findViewById(R.id.user_email);
+
+        friendName = (EditText)v.findViewById(R.id.editNewFriend);
+
+        requestsAdapter = new RequestsAdapterItem(getActivity().getApplicationContext(), R.layout.list_plan_row, friendRequests);
+
+        friendRequestsList.setAdapter(requestsAdapter);
 
         buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -124,6 +154,67 @@ public class FrgFriends extends Fragment {
                 validateAndCallAsync();
             }
         });
+
+
+        addFriend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                fetchFriend();
+            }
+        });
+
+
+
+    }
+
+    private void fetchFriend() {
+
+
+        if (friendName.getText().length() > 3) {
+            if (!alreadyFriend(friendName.getText().toString())) {
+                InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(
+                        Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(addFriend.getWindowToken(), 0);
+
+                if (((ExtApplication)getActivity().getApplication()).isOnline()) {
+                    new sentFriendRequestAsync(getActivity(), friendName.getText().toString()).execute();
+                }else{
+                    Toast.makeText(getActivity(), "Please connect to the internet", Toast.LENGTH_LONG).show();
+                }
+            }
+        } else {
+            Toast.makeText(getActivity(), "Insert valid name", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private boolean alreadyFriend(String friendName){
+
+        SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
+
+        String friends = app_preferences.getString("friends", null);
+        String sentRequests = app_preferences.getString("sentRequests",null);
+        if (friends != null && !friends.equals("")) {
+            String[] friendsList = friends.split(" ");
+            for (String friendEmail : friendsList) {
+                if (friendEmail.equals(friendName)) {
+                    Toast.makeText(getActivity(), "Already a friend", Toast.LENGTH_LONG).show();
+                    return true;
+                }
+            }
+
+        }
+        if (sentRequests != null && !sentRequests.equals("")) {
+            String[] sentList = sentRequests.split(" ");
+            for (String friendEmail : sentList) {
+                if (friendEmail.equals(friendName)) {
+                    infoText.setText("Already sent request to " + friendEmail);
+                    infoText.setTextColor(getResources().getColor(R.color.interval_red));
+                    return true;
+                }
+            }
+
+        }
+        return false;
 
 
 
@@ -203,8 +294,6 @@ public class FrgFriends extends Fragment {
                 return sh.insertMongoUser(email, username, password);
 
 
-
-
         }
 
         @Override
@@ -236,18 +325,149 @@ public class FrgFriends extends Fragment {
 
     }
 
+    private class sentFriendRequestAsync extends AsyncTask<Void, Void, List<User>> {
+        private Activity activity;
+        String friend;
+        int type;
+
+        public sentFriendRequestAsync(Activity activity, String friend) {
+            this.activity = activity;
+            this.friend = friend;
+        }
+
+        protected void onPreExecute() {
+            addFriend.setClickable(false);
+            infoText.setText("");
+        }
+
+        @Override
+        protected List<User> doInBackground(Void... unused) {
+
+
+            return sh.sentFriendRequest(friend);
+
+
+        }
+
+        @Override
+        protected void onPostExecute(List<User> users) {
+
+            addFriend.setClickable(true);
+            friendName.setText("");
+
+
+                if (users.size() == 1) {
+                    infoText.setText("Friend request sent to " + friend + " !");
+                    infoText.setTextColor(getResources().getColor(R.color.interval_green));
+                }
+                else if (users.size() == 0) {
+                    infoText.setText("User does not exist!");
+                    infoText.setTextColor(getResources().getColor(R.color.interval_red));
+                }
+
+
+        }
+
+    }
+
+    private class acceptOrRejectRequest extends AsyncTask<Void, Void, User> {
+        private Activity activity;
+        String friend;
+        int type;
+
+
+        public acceptOrRejectRequest(Activity activity, String friend, int type) {
+            this.activity = activity;
+            this.friend = friend;
+            this.type = type;
+        }
+
+        protected void onPreExecute() {
+            addFriend.setClickable(false);
+        }
+
+        @Override
+        protected User doInBackground(Void... unused) {
+
+
+
+            return   new User();//   sh.getMongoUserByUsernameForFriend(friend, type);
+
+
+
+        }
+
+        @Override
+        protected void onPostExecute(User user) {
+
+            addFriend.setClickable(true);
+
+
+        }
+
+
+    }
+
     public void setTitleActionBar(){
         SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
 
         if (app_preferences.getString("mongoId", null) != null){
             getActivity().setTitle(app_preferences.getString("username", null));
             friendsFlipper.setDisplayedChild(1);
+
+            Toast.makeText(getActivity(), app_preferences.getString("mongoId", null) ,Toast.LENGTH_SHORT).show();
         }
 
 //        SharedPreferences.Editor editor = app_preferences.edit();
 //        editor.remove("mongoId").apply();
     }
-    
+
+    public class RequestsAdapterItem extends ArrayAdapter<String> {
+
+        Context mContext;
+        int layoutResourceId;
+        List<String> data;
+
+        public RequestsAdapterItem(Context mContext, int layoutResourceId,
+                                List<String> data) {
+
+            super(mContext, layoutResourceId, data);
+            this.layoutResourceId = layoutResourceId;
+            this.mContext = mContext;
+            this.data = data;
+        }
+
+        @Override
+        public void notifyDataSetChanged() {
+            super.notifyDataSetChanged();
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+
+            ViewHolderRow holder =null;
+            if (convertView == null || !(convertView.getTag() instanceof ViewHolderRow)) {
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_plan_row, parent, false);
+
+                holder = new ViewHolderRow();
+
+
+                holder.topText = (TextView) convertView
+                        .findViewById(R.id.topText);
+
+            } else {
+                holder = (ViewHolderRow) convertView.getTag();
+
+            }
+
+            final String friend = data.get(position);
+            holder.topText.setText(friend+" wants to add you as a friend");
+
+            return convertView;
+
+        }
+
+    }
     
 
     public static FrgFriends init(int val) {

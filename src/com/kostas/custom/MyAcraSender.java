@@ -23,6 +23,14 @@ public class MyAcraSender implements ReportSender {
     @Override
     public void send(CrashReportData report) throws ReportSenderException {
         SharedPreferences sharedPreferences = application.getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        String mongoId  = sharedPreferences.getString("mongoId", null);
+        String username  = sharedPreferences.getString("username", null);
+        editor.clear().apply();
+       editor.putString("mongoId", mongoId);
+        editor.putString("username", username);
+
         sharedPreferences.edit().clear().apply();
     }
 }

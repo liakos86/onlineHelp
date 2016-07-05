@@ -1,13 +1,17 @@
 package com.kostas.onlineHelp;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 import com.kostas.custom.NonSwipeableViewPager;
+import com.kostas.dbObjects.User;
 import com.kostas.fragments.FrgShowRuns;
+import com.kostas.mongo.SyncHelper;
 import com.kostas.service.RunningService;
 
 import java.util.Map;
@@ -43,6 +47,7 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
         setContentView(R.layout.activity_main);
         setupPager();
 
+        new AsyncLoadFriends(this).execute();
 
 //        FacebookSdk.sdkInitialize(getApplicationContext());
     }
@@ -105,6 +110,38 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
             }
         }
         return false;
+    }
+
+    private class AsyncLoadFriends extends AsyncTask<Void, Void, Void> {
+        private Activity activity;
+
+        public AsyncLoadFriends(Activity activity) {
+            this.activity = activity;
+        }
+
+        protected void onPreExecute() {
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... unused) {
+
+
+            SyncHelper sh = new SyncHelper(activity);
+           sh.getMyMongoUser();
+
+            return null;
+
+        }
+
+        @Override
+        protected void onPostExecute(Void params) {
+
+
+
+        }
+
+
     }
 
     @Override

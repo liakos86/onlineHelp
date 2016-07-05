@@ -18,6 +18,7 @@ public class Running {
 
     private static final String TAG = Thread.currentThread().getStackTrace()[2].getClassName();
 
+    private ObjectId _id;
     private long running_id;
     private String date;
     private float distance;
@@ -25,12 +26,7 @@ public class Running {
     private String description;
     private String avgPaceText;
     private List<Interval> intervals;
-
-    //todo after solving zoom issue, add field
-    //int zoomLevel;
-
-
-
+    private boolean isShared;
 
     public Running(){}
 
@@ -51,6 +47,10 @@ public class Running {
         this.date = date;
         this.description = description;
         this.distance = distance;
+    }
+
+    public ObjectId get_id() {
+        return _id;
     }
 
     public String getDate() {

@@ -3,6 +3,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
@@ -20,6 +22,7 @@ import com.kostas.model.Database;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.kostas.mongo.SyncHelper;
 import com.kostas.onlineHelp.*;
 import com.kostas.custom.MapWrapperLayout;
 
@@ -77,8 +80,9 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
      */
     Button openMapButton, closeIntervalsButton;
 
-    Button buttonNewRun;
+    Button buttonNewRun, shareFriendsButton;
 
+    SyncHelper sh;
     /**
      * If the map is drawn we dont need to redraw
      */
@@ -110,6 +114,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
     private void initializeViews(View v){
 
+        sh = new SyncHelper(getActivity());
          runsCount = (TextView) v.findViewById(R.id.runsCount);
          intervalsCount =(TextView) v.findViewById(R.id.intervalsCount);
          metersCount =(TextView) v.findViewById(R.id.metersCount);
@@ -122,7 +127,20 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         runsExpListView = (ExpandableListView) v.findViewById(R.id.listExpRunning);
         intervalListView = (ListView) v.findViewById(R.id.listIntervals);
         buttonNewRun = (Button) v.findViewById(R.id.buttonNewRun);
+
+        shareFriendsButton = ((Button) v.findViewById(R.id.buttonShareFriends));
+
+        shareFriendsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new shareRunAsync((ExtApplication)getActivity().getApplication()).execute();
+
+
+            }
+        });
     }
+
+
 
     public void initializeMap(){
        ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapListKostas)).getMapAsync(this);
@@ -585,9 +603,55 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         }
     }
 
+    private class shareRunAsync extends AsyncTask<Void, Void, Integer> {
+        private ExtApplication app;
+
+        public shareRunAsync(ExtApplication app) {
+            this.app = app;
+        }
+
+        protected void onPreExecute() {
+            shareFriendsButton.setClickable(false);
+        }
+
+        @Override
+        protected Integer doInBackground(Void... unused) {
+
+
+           return  sh.shareRunToMongo(currentRun);
+
+
+
+
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+
+            shareFriendsButton.setClickable(true);
+
+//            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+//            imm.hideSoftInputFromWindow(getWindow().getWindowToken(), 0);
+
+            if (result==0) {
+                Toast.makeText(app, "Share failed", Toast.LENGTH_LONG).show();
+
+            }else if (result==1){
+                Toast.makeText(app, "Run shared", Toast.LENGTH_LONG).show();
+
+            }
+
+        }
+
+
+    }
+
     @Override
     public void onResume() {
         super.onResume();
+        SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
+        String mongoId = app_preferences.getString("mongoId",null);
+        shareFriendsButton.setVisibility(mongoId!=null? View.VISIBLE:View.GONE);
     }
 
     public static FrgShowRuns init(int val) {

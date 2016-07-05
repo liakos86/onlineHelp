@@ -22,12 +22,12 @@ public class User {
     private ObjectId _id;
     private long user_id;
     private float totalDistance;
+    private int totalIntervals;
     private long totalTime;
     private int totalScore;
     private String friends; //email list as it is unique
     private String email;
     private String friendRequests;
-    private String sentRequests;
 
     public User(){}
 
@@ -53,12 +53,12 @@ public class User {
         this.friendRequests = prefs.getString("friendRequests","");
     }
 
-    public String getSentRequests() {
-        return sentRequests;
+    public int getTotalIntervals() {
+        return totalIntervals;
     }
 
-    public void setSentRequests(String sentRequests) {
-        this.sentRequests = sentRequests;
+    public void setTotalIntervals(int totalIntervals) {
+        this.totalIntervals = totalIntervals;
     }
 
     public String getFriendRequests() {

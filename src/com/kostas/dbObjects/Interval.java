@@ -24,6 +24,7 @@ public class Interval{
 
     private long interval_id;
     private long running_id;
+    private String running_mongo_id;
     private String latLonList;
     private long milliseconds;
     private float distance;
@@ -54,6 +55,13 @@ public class Interval{
 
     }
 
+    public String getRunning_mongo_id() {
+        return running_mongo_id;
+    }
+
+    public void setRunning_mongo_id(String running_mongo_id) {
+        this.running_mongo_id = running_mongo_id;
+    }
 
     public boolean isFastest() {
         return isFastest;

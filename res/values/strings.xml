@@ -43,7 +43,9 @@
     <string name="icons8"><a href="https://icons8.com/register/?key=Qdg6">Icons powered by Icons8</a></string>
     <string name="facebook_page">https://www.facebook.com/intervalPlus0/</string>
 
-    <string name="challenge_path">/api/1/databases/auction/collections/workout</string>
+    <string name="running_collection_mongo_path">/api/1/databases/auction/collections/intervalRun</string>
+    <string name="interval_collection_mongo_path">/api/1/databases/auction/collections/intervalSession</string>
+
     <string name="runner_url">https://api.mongolab.com/api/1/databases/auction/collections/runner?apiKey=fft3Q2J8bB2l-meOoBHZK_z3E_b5cuBz</string>
     <string name="apiKey">fft3Q2J8bB2l-meOoBHZK_z3E_b5cuBz</string>
     <string name="auth_url">api.mongolab.com</string>

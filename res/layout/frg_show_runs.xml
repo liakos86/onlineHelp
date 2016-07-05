@@ -44,13 +44,28 @@
 
         <RelativeLayout  android:layout_width="fill_parent" android:layout_height="fill_parent">
 
+
         <ListView
                 android:id="@+id/listIntervals"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/buttonShowMap"
                 android:layout_alignParentTop="true"
+                android:layout_above="@+id/buttonShareFriends"
+
                 />
+
+            <Button style="@style/buttonStyle"
+                    android:layout_margin="@dimen/ten_device_pixels"
+                    android:layout_above="@+id/buttonShowMap"
+                    android:text="Share with Friends"
+                    android:background="@drawable/share_button_selector"
+                    android:id="@+id/buttonShareFriends"
+                    android:layout_alignParentTop="true"
+
+                    />
+
+
+
 
             <View android:id="@+id/strut"
                   android:layout_width="0dp"
