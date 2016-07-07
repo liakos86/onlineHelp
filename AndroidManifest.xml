@@ -90,5 +90,6 @@
                   <!--android:exported="true"/>-->
 
         <service android:name="com.kostas.service.RunningService" />
+        <service android:name="com.kostas.service.MongoUpdateService" />
     </application>
 </manifest>

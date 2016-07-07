@@ -114,7 +114,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
     private void initializeViews(View v){
 
-        sh = new SyncHelper(getActivity());
+        sh = new SyncHelper((ExtApplication)getActivity().getApplication());
          runsCount = (TextView) v.findViewById(R.id.runsCount);
          intervalsCount =(TextView) v.findViewById(R.id.intervalsCount);
          metersCount =(TextView) v.findViewById(R.id.metersCount);
@@ -502,6 +502,10 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
                     public void onClick(View view) {
                         currentRun = child.get(childPosition);
                         showIntervalsForRun(child.get(childPosition));
+                        if (currentRun.isShared()){
+                            shareFriendsButton.setClickable(false);
+                            shareFriendsButton.setText("Run already shared");
+                        }
                     }
                 });
             return convertView;
@@ -628,16 +632,21 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         @Override
         protected void onPostExecute(Integer result) {
 
-            shareFriendsButton.setClickable(true);
+
 
 //            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 //            imm.hideSoftInputFromWindow(getWindow().getWindowToken(), 0);
 
             if (result==0) {
                 Toast.makeText(app, "Share failed", Toast.LENGTH_LONG).show();
+                shareFriendsButton.setClickable(true);
 
             }else if (result==1){
                 Toast.makeText(app, "Run shared", Toast.LENGTH_LONG).show();
+                Database db = new Database(app);
+                db.setSharedFlagTrue(currentRun.getRunning_id());
+
+                shareFriendsButton.setText("Run already shared");
 
             }
 
@@ -651,7 +660,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         super.onResume();
         SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
         String mongoId = app_preferences.getString("mongoId",null);
-        shareFriendsButton.setVisibility(mongoId!=null? View.VISIBLE:View.GONE);
+        shareFriendsButton.setVisibility(mongoId!=null ? View.VISIBLE:View.GONE);
     }
 
     public static FrgShowRuns init(int val) {

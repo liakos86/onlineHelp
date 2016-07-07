@@ -38,15 +38,25 @@ public class Running {
         this.description = description;
         this.distance = distance;
         this.intervals = intervals;
+
     }
 
 
-    public Running(long running_id, String description, long time, String date, float distance){
+    public Running(long running_id, String description, long time, String date, float distance, boolean isShared){
         this.running_id = running_id;
         this.time = time;
         this.date = date;
         this.description = description;
         this.distance = distance;
+        this.isShared = isShared;
+    }
+
+    public boolean isShared() {
+        return isShared;
+    }
+
+    public void setShared(boolean isShared) {
+        this.isShared = isShared;
     }
 
     public ObjectId get_id() {
@@ -138,6 +148,7 @@ public class Running {
             toRet.put(ContentDescriptor.Running.Cols.TIME, item.time);
             toRet.put(ContentDescriptor.Running.Cols.AVGPACETEXT, item.avgPaceText);
             toRet.put(ContentDescriptor.Running.Cols.DISTANCE, item.distance);
+            toRet.put(ContentDescriptor.Running.Cols.IS_SHARED, item.isShared ? 1 : 0);
 
             return toRet;
         }
@@ -156,6 +167,8 @@ public class Running {
             toRet.time = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.Running.Cols.TIME));
             toRet.avgPaceText = cursor.getString(cursor.getColumnIndex(ContentDescriptor.Running.Cols.AVGPACETEXT));
             toRet.distance = cursor.getFloat(cursor.getColumnIndex(ContentDescriptor.Running.Cols.DISTANCE));
+            toRet.isShared = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Running.Cols.IS_SHARED)) == 1;
+
 
             return toRet;
         }

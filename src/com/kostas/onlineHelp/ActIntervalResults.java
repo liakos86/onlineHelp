@@ -81,9 +81,15 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
         SharedPreferences.Editor editor = app_preferences.edit();
         boolean hasNoSound = app_preferences.getBoolean(NO_SOUND, false);
         boolean hasNoVibration = app_preferences.getBoolean(NO_VIBRATION, false);
+        String mongoId  = app_preferences.getString("mongoId", null);
+        String username  = app_preferences.getString("username", null);
+
+
         editor.clear().apply();
         editor.putBoolean(NO_SOUND, hasNoSound);
         editor.putBoolean(NO_VIBRATION, hasNoVibration);
+        editor.putString("mongoId", mongoId);
+        editor.putString("username", username);
         editor.apply();
     }
 

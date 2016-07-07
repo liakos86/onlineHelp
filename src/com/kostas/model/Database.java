@@ -2,6 +2,7 @@
 package com.kostas.model;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,10 +18,12 @@ import java.util.List;
 public class Database extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "interval_runner.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     // this is also considered as invalid id by the server
     public static final long INVALID_ID = -1;
     private Context mContext;
+
+    private static final String DATABASE_ALTER_RUNNING_1 = "ALTER TABLE running ADD COLUMN IS_SHARED INTEGER default 0;";
 
     public Database(Context ctx) {
         super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -39,13 +42,12 @@ public class Database extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-//        Log.w("Database", "Upgrading database from version " + oldVersion + " to " + newVersion
-//                + ", which will destroy all old data");
-            db.execSQL("drop table if exists " + ContentDescriptor.Running.TABLE_NAME);
-        db.execSQL("drop table if exists " + ContentDescriptor.Interval.TABLE_NAME);
-        db.execSQL("drop table if exists " + ContentDescriptor.Plan.TABLE_NAME);
 
-            onCreate(db); // run onCreate to get new database
+
+        if (oldVersion < 2) {
+            db.execSQL(DATABASE_ALTER_RUNNING_1);
+        }
+
     }
     
     
@@ -113,7 +115,8 @@ public class Database extends SQLiteOpenHelper {
                 ContentDescriptor.Running.Cols.ID,
                 ContentDescriptor.Running.Cols.TIME,
                 ContentDescriptor.Running.Cols.AVGPACETEXT,
-                ContentDescriptor.Running.Cols.DISTANCE
+                ContentDescriptor.Running.Cols.DISTANCE,
+                ContentDescriptor.Running.Cols.IS_SHARED
 
         };
         int sDescPosition = 0;
@@ -122,6 +125,7 @@ public class Database extends SQLiteOpenHelper {
         int sTimePosition = 3;
         int sPacePosition = 4;
         int sDistPosition = 5;
+        int sIsSharedPosition = 6;
 
 
         Cursor c = mContext.getContentResolver().query(ContentDescriptor.Running.CONTENT_URI, FROM,
@@ -139,7 +143,8 @@ public class Database extends SQLiteOpenHelper {
                         c.getString(sDescPosition),
                         c.getLong(sTimePosition),
                         c.getString(sDatePosition),
-                        c.getFloat(sDistPosition)
+                        c.getFloat(sDistPosition),
+                        c.getInt(sIsSharedPosition)==1
                 );
 
                 newRun.setAvgPaceText(c.getString(sPacePosition));
@@ -244,6 +249,15 @@ public class Database extends SQLiteOpenHelper {
         return St;
 
     }
+
+    public void setSharedFlagTrue(Long runningId){
+        ContentResolver resolver = mContext.getContentResolver();
+        ContentValues values = new ContentValues();
+        values.put(ContentDescriptor.Running.Cols.IS_SHARED, 1);
+        resolver.update(ContentDescriptor.Running.CONTENT_URI, values, ContentDescriptor.Running.Cols.ID + " = '"+runningId+"'", null);
+
+    }
+
 
 
 

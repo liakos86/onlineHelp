@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent"
+                android:layout_height="wrap_content" android:background="@drawable/grey_no_gradient_interval"  android:padding="@dimen/ten_device_pixels" android:minHeight="@dimen/request_view_height"
+        >
+
+
+
+    <TextView android:layout_alignParentTop="true"  android:layout_marginLeft="@dimen/eight" android:id="@+id/topText" android:textSize="@dimen/medium_text" android:textColor="@color/white_back"  android:layout_width="wrap_content" android:layout_height="wrap_content" android:textStyle="bold"/>
+
+   <Button android:layout_width="80dp" android:text="accept" android:layout_height="30dp" android:id="@+id/accept_request_button" android:layout_alignParentBottom="true" android:layout_alignParentLeft="true" android:background="@drawable/plus_minus_selector"/>
+    <Button android:layout_width="80dp" android:text="reject" android:layout_height="30dp" android:id="@+id/reject_request_button" android:layout_alignParentBottom="true" android:layout_alignParentRight="true" android:background="@drawable/close_button_selector"/>
+
+
+</RelativeLayout>

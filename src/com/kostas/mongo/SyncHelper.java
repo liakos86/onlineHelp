@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.kostas.dbObjects.Interval;
@@ -33,7 +34,6 @@ import org.json.JSONObject;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -44,22 +44,20 @@ public class SyncHelper {
             .substring(0, 23);
     private ExtApplication application;
     Database dbHelper;
-    String running_collection, interval_collection, authUrl, apiKey, runnerPath;
+    String running_collection, interval_collection, runner_collection, authUrl, apiKey ;
     DefaultHttpClient client;
     private SharedPreferences app_preferences;
 
-    private Activity activity;
 
-    public SyncHelper(Activity activity) {
+    public SyncHelper(ExtApplication application) {
 
-        this.activity = activity;
-        running_collection = activity.getResources().getString(R.string.running_collection_mongo_path);
-        interval_collection = activity.getResources().getString(R.string.interval_collection_mongo_path);
-        authUrl = activity.getResources().getString(R.string.auth_url);
-        apiKey = activity.getResources().getString(R.string.apiKey);
-        runnerPath = activity.getResources().getString(R.string.runner_path);
-        application = (ExtApplication) activity.getApplicationContext();
-        app_preferences = this.activity.getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
+        this.application = application;
+        running_collection = application.getResources().getString(R.string.running_collection_mongo_path);
+        interval_collection = application.getResources().getString(R.string.interval_collection_mongo_path);
+        authUrl = application.getResources().getString(R.string.auth_url);
+        apiKey = application.getResources().getString(R.string.apiKey);
+        runner_collection = application.getResources().getString(R.string.runner_collection_mongo_path);
+        app_preferences = application.getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
         dbHelper = new Database(application);
         client = application.getHttpClient();
 
@@ -77,7 +75,7 @@ public class SyncHelper {
             uri = new Uri.Builder()
                     .scheme("https")
                     .authority(authUrl)
-                    .path(runnerPath)
+                    .path(runner_collection)
                     .appendQueryParameter("apiKey", apiKey)
                     .build();
 
@@ -166,7 +164,7 @@ public class SyncHelper {
     /**
      * Refresh my friends list and my friend requests
      */
-    public void getMyMongoUser() {
+    public int getMyMongoUser() {
 
         Log.v(TAG, "Fetching my user");
 
@@ -177,7 +175,7 @@ public class SyncHelper {
          Uri   uri = new Uri.Builder()
                     .scheme("https")
                     .authority(authUrl)
-                    .path(runnerPath)
+                    .path(runner_collection)
                     .appendQueryParameter("q", query)
                     .appendQueryParameter("apiKey", apiKey)
                     .appendQueryParameter("fo", "true")
@@ -229,18 +227,25 @@ public class SyncHelper {
 
             SharedPreferences.Editor editor = app_preferences.edit();
 
-            editor.putString("friends", user2.getFriends());
-            editor.putString("friendRequests", user2.getFriendRequests());
-            editor.apply();
-
+            if (user2 != null) {
+                editor.putString("friends", user2.getFriends());
+                editor.putString("friendRequests", user2.getFriendRequests());
+                editor.apply();
+            }else{
+                editor.putString("mongoId", null);
+                editor.putString("friends", null);
+                editor.putString("friendRequests", null);
+                editor.apply();
+                return -1;
+            }
 
         } catch (Exception e) {
             Log.e(TAG, "Exception fetching user", e);
-
+            return -1;
         }
 
         Log.v(TAG, String.format("Fetching existing user - done"));
-
+        return 0;
     }
 
 
@@ -263,7 +268,7 @@ public class SyncHelper {
              uri = new Uri.Builder()
                     .scheme("https")
                     .authority(authUrl)
-                    .path(runnerPath)
+                    .path(runner_collection)
                     .appendQueryParameter("q", query)
                     .appendQueryParameter("apiKey", apiKey)
                      .appendQueryParameter("fo", "true")
@@ -718,7 +723,7 @@ public class SyncHelper {
 //        Uri uri = new Uri.Builder()
 //                .scheme("https")
 //                .authority(authUrl)
-//                .path(runnerPath)
+//                .path(runner_collection)
 //                .appendQueryParameter("q", query)
 //                .appendQueryParameter("apiKey", apiKey)
 //                .build();
@@ -824,7 +829,7 @@ public class SyncHelper {
             Uri uri = new Uri.Builder()
                     .scheme("https")
                     .authority(authUrl)
-                    .path(runnerPath)
+                    .path(runner_collection)
                     .appendQueryParameter("q", query)
                     .appendQueryParameter("s", "{'totalScore': -1}")
                     .appendQueryParameter("apiKey", apiKey)
@@ -902,12 +907,7 @@ public class SyncHelper {
 
             Log.v(TAG, String.format("Fetching leader or friend - done"));
 
-
             return users;
-
-
-
-
     }
 
     public User getMongoUserByUsernameForFriend(String username) {// 1 send request, 0 accept, 2 reject, else just get user
@@ -918,20 +918,14 @@ public class SyncHelper {
 
         User user = null;
 
-        Uri uri=null;
-
-            uri = new Uri.Builder()
+        Uri uri = new Uri.Builder()
                     .scheme("https")
                     .authority(authUrl)
-                    .path(runnerPath)
+                    .path(runner_collection)
                     .appendQueryParameter("q", "{ 'username':'"+username+"' }")
                     .appendQueryParameter("fo", "true")
                     .appendQueryParameter("apiKey", apiKey)
                     .build();
-
-
-
-
 
         DefaultHttpClient client = application.getHttpClient();
         client.setParams(getMyParams());
@@ -985,7 +979,8 @@ public class SyncHelper {
 
             // refresh other users requests
 
-                uploadNewFriendOrRequest(user.getFriendRequests() + " " + myUsername, user.getUsername());
+            String currentRequests = user.getFriendRequests() != null ? user.getFriendRequests()+" " : "";
+                uploadNewFriendOrRequest(currentRequests  + myUsername, user.getUsername());
                 SharedPreferences.Editor editor = app_preferences.edit();
                 editor.putString("sentRequests",  app_preferences.getString("sentRequests","")+user.getUsername());
                 editor.commit();
@@ -1024,7 +1019,7 @@ public class SyncHelper {
         Uri uri = new Uri.Builder()
                 .scheme("https")
                 .authority(authUrl)
-                .path(runnerPath)
+                .path(runner_collection)
                 .appendQueryParameter("q", query)
                 .appendQueryParameter("apiKey", apiKey)
                 .build();
@@ -1103,6 +1098,336 @@ public class SyncHelper {
         return true;
 
     }
+
+    public User acceptOrRejectFriend(String username, int type) {// 1 send request, 0 accept, 2 reject, else just get user
+
+        Log.v(TAG, "Fetching user");
+
+        String myUsername = app_preferences.getString("username", "");
+
+        User user = null;
+
+        Uri uri=null;
+
+        uri = new Uri.Builder()
+                .scheme("https")
+                .authority(authUrl)
+                .path(runner_collection)
+                .appendQueryParameter("q", "{ 'username':'"+username+"' }")
+                .appendQueryParameter("fo", "true")
+                .appendQueryParameter("apiKey", apiKey)
+                .build();
+
+
+
+
+
+        DefaultHttpClient client = application.getHttpClient();
+        client.setParams(getMyParams());
+
+
+
+        try {
+
+            HttpResponse response;
+
+
+            HttpGet httpRequest = new HttpGet(uri.toString());
+            setDefaultGetHeaders(httpRequest);
+            Log.v(TAG, "Fetching user - requesting");
+            response = client.execute(httpRequest);
+
+
+
+            Log.v(TAG, "Fetching user - responce received");
+
+            HttpEntity entity = response.getEntity();
+
+            StatusLine statusLine = response.getStatusLine();
+
+            Log.v(TAG, String.format("Fetching user - status [%s]", statusLine));
+
+            if (statusLine.getStatusCode() >= 300) {
+//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
+                Log.e(TAG,statusLine.getStatusCode()+" - "+statusLine.getReasonPhrase());
+            }
+
+            String resultString = null;
+
+            if (entity != null) {
+                InputStream instream = entity.getContent();
+                Header contentEncoding = response.getFirstHeader("Content-Encoding");
+                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+                    instream = new GZIPInputStream(instream);
+                }
+                resultString = Utils.convertStreamToString(instream);
+
+                instream.close();
+            }
+
+            Log.v(TAG, String.format("Deserialising [%s]", resultString));
+
+            Gson gson = new Gson();
+            user = (User) gson.fromJson(resultString,
+                    new TypeToken<User>() {
+                    }.getType());
+
+            // refresh other users requests
+           if (type==0|| type==2) {
+
+                //add friend to both users list
+
+
+                if ((type==0)&&((user.getFriends()==null || !user.getFriends().contains(myUsername) )&& !app_preferences.getString("friends", "").contains(user.getUsername()))){
+                    fixFriendsListForUser(user.getFriends() + " " + myUsername, user.getUsername(), type);
+                    fixFriendsListForUser(app_preferences.getString("friends", "") + " " + user.getUsername(), myUsername, type);
+                }
+
+                //remove his name
+                String  newFriendRequests = app_preferences.getString("friendRequests","").replace(" " + user.getUsername() + " ", " ");
+                newFriendRequests = newFriendRequests.replace(user.getUsername() + " ", " ");
+                newFriendRequests = newFriendRequests.replace(" "+user.getUsername(), " ");
+                newFriendRequests = newFriendRequests.replace(user.getUsername(), "");
+               fixFriendsListForUser(newFriendRequests, myUsername, 1);
+
+                SharedPreferences.Editor editor = app_preferences.edit();
+                editor.putString("friendRequests", newFriendRequests);
+                if (type==0) {
+                    editor.putString("friends", app_preferences.getString("friends", "") + " " + user.getUsername());
+                }
+                editor.commit();
+
+//                Toast.makeText(getApplication(), "Friend added!", Toast.LENGTH_LONG).show();
+
+
+
+            }
+
+//            Log.v(TAG, String.format("Fetching parts - ready to insert 1 user", 1));
+
+        } catch (Exception e) {
+            Log.e(TAG, "Exception fetching user", e);
+            return user;
+        }
+
+        Log.v(TAG, String.format("Fetching user - done"));
+
+
+
+        return user;
+
+    }
+
+
+    public boolean fixFriendsListForUser(String friends,String username, int type){
+
+
+        Log.v(TAG, "Uploading new friend");
+
+        String query = "{'username': '"+username+"'}";
+
+
+
+
+
+
+
+//        https://api.mongolab.com/api/1/databases/auction/collections/runner?
+//        q={ $or: [ { "email": "liak@liak.gr" }, { "email": "liak2@liak.gr" } ] }
+//        &apiKey=fft3Q2J8bB2l-meOoBHZK_z3E_b5cuBz
+
+
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .authority(authUrl)
+                .path(runner_collection)
+                .appendQueryParameter("q", query)
+                .appendQueryParameter("apiKey", apiKey)
+                .build();
+
+
+        DefaultHttpClient client = application.getHttpClient();
+        client.setParams(getMyParams());
+
+
+        try {
+            JSONObject obj = new JSONObject();
+
+            if (type==0)
+                obj.put("friends" , friends);
+            else if (type==1)
+                obj.put("friendRequests" , friends);
+
+            JSONObject lastObj = new JSONObject();
+            lastObj.put("$set", obj);
+
+            StringEntity se = new StringEntity(lastObj.toString());
+
+
+
+            HttpPut httpRequest = new HttpPut(uri.toString());
+
+            httpRequest.setEntity(se);
+
+
+            setDefaultPutHeaders(httpRequest);
+
+            Log.v(TAG, "new friend - requesting");
+            HttpResponse response = client.execute(httpRequest);
+            Log.v(TAG, "new friend - responce received");
+
+            HttpEntity entity = response.getEntity();
+
+            StatusLine statusLine = response.getStatusLine();
+
+            Log.v(TAG, String.format("Fetching stores - status [%s]", statusLine));
+
+            if (statusLine.getStatusCode() >= 300) {
+//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
+                Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
+                return false;
+            }
+
+            String resultString = null;
+
+            if (entity != null) {
+                InputStream instream = entity.getContent();
+                Header contentEncoding = response.getFirstHeader("Content-Encoding");
+                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+                    instream = new GZIPInputStream(instream);
+                }
+                resultString = Utils.convertStreamToString(instream);
+
+                instream.close();
+            }
+
+            Log.v(TAG, String.format("Deserialising [%s]", resultString));
+
+
+
+//            dbHelper.deleteAllStores();
+
+            Log.v(TAG, String.format("Fetching parts - new friend added"));
+
+//            for (int i = 0; i < StoreList.size(); i++) {
+//                dbHelper.addSite(StoreList.get(i));
+//                ll_rows++;
+//            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "Exception inserting friend", e);
+            return false;
+        }
+
+        Log.v(TAG, String.format("uploaded friend - done"));
+        return true;
+
+    }
+
+    public List<User> getFriendsList(){//0 leaderboard
+
+        List<User> users = new ArrayList<User>();
+
+
+        Log.v(TAG, "Fetching friends");
+
+        String[] friendsArray;
+        String query;
+
+        String friendsList = app_preferences.getString("friends", "");
+
+
+                friendsArray = friendsList.split(" ");
+                int length = friendsArray.length;
+                query = "{ $or: [";
+                for (int i = 0; i < length - 1; i++) {
+                    query += "{ 'username': '" + friendsArray[i] + "'},";
+                }
+                query += "{ 'username': '" + friendsArray[length - 1] + "'}";
+                query += "] }";
+
+
+
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .authority(authUrl)
+                .path(runner_collection)
+                .appendQueryParameter("q", query)
+                .appendQueryParameter("s", "{'totalScore': -1}")
+                .appendQueryParameter("apiKey", apiKey)
+                .build();
+
+
+        DefaultHttpClient client = application.getHttpClient();
+        client.setParams(getMyParams());
+
+
+        try {
+
+            HttpGet httpRequest = new HttpGet(uri.toString());
+
+
+            setDefaultGetHeaders(httpRequest);
+
+            Log.v(TAG, "Fetching friends - requesting");
+            HttpResponse response = client.execute(httpRequest);
+            Log.v(TAG, "Fetching friends - responce received");
+
+            HttpEntity entity = response.getEntity();
+
+            StatusLine statusLine = response.getStatusLine();
+
+            Log.v(TAG, String.format("Fetching stores - status [%s]", statusLine));
+
+            if (statusLine.getStatusCode() >= 300) {
+//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
+                Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
+            }
+
+            String resultString = null;
+
+            if (entity != null) {
+                InputStream instream = entity.getContent();
+                Header contentEncoding = response.getFirstHeader("Content-Encoding");
+                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+                    instream = new GZIPInputStream(instream);
+                }
+                resultString = Utils.convertStreamToString(instream);
+
+                instream.close();
+            }
+
+            Log.v(TAG, String.format("Deserialising [%s]", resultString));
+
+            Gson gson = new Gson();
+
+
+            users = (List<User>) gson.fromJson(resultString,
+                    new TypeToken<List<User>>() {
+                    }.getType());
+
+                //dbHelper.deleteLeaderboard();
+                if (users!=null && users.size()>0){
+                    for (User u:users) {
+                        u.setUser_id(-1l);
+                       // dbHelper.addLeader(u);
+                    }
+                }
+
+            Log.v(TAG, String.format("Fetching parts - retrieved [%d] users", users.size()));
+
+        } catch (Exception e) {
+            Log.e(TAG, "Exception fetching leaderboard or friend", e);
+            return users;
+        }
+
+        Log.v(TAG, String.format("Fetching leader or friend - done"));
+
+
+        return users;
+    }
+
+
 //
 //    public void replyToChallenge(String opponentName, boolean won, float distance) {
 //
@@ -1230,7 +1555,7 @@ public class SyncHelper {
 //        Uri uri = new Uri.Builder()
 //                .scheme("https")
 //                .authority(authUrl)
-//                .path(runnerPath)
+//                .path(runner_collection)
 //                .appendQueryParameter("q", query)
 //                .appendQueryParameter("apiKey", apiKey)
 //                .build();

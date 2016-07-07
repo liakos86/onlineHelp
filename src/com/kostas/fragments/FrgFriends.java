@@ -71,7 +71,7 @@ public class FrgFriends extends Fragment {
 
         setViewsAndListeners(v);
 
-        sh = new SyncHelper(getActivity());
+        sh = new SyncHelper((ExtApplication)getActivity().getApplication());
 
         setTitleActionBar();
         
@@ -87,7 +87,16 @@ public class FrgFriends extends Fragment {
         SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
 
         String friends = app_preferences.getString("friendRequests", "");
-        friendRequests = Arrays.asList(friends.split(" "));
+        friends = friends.replace("null ", "");
+        String[]friendsArray  = new String[]{};
+        if (friends.length() > 3) {
+            friendsArray = friends.split(" ");
+        }
+
+        for (String friend : friendsArray){
+            friendRequests.add(friend);
+        }
+
 
         friendRequestsList = ((ListView) v.findViewById(R.id.listFriendRequests));
 
@@ -384,14 +393,14 @@ public class FrgFriends extends Fragment {
 
         protected void onPreExecute() {
             addFriend.setClickable(false);
+            friendRequestsList.setClickable(false);
         }
 
         @Override
         protected User doInBackground(Void... unused) {
 
 
-
-            return   new User();//   sh.getMongoUserByUsernameForFriend(friend, type);
+            return sh.acceptOrRejectFriend(friend, type);
 
 
 
@@ -401,6 +410,17 @@ public class FrgFriends extends Fragment {
         protected void onPostExecute(User user) {
 
             addFriend.setClickable(true);
+            friendRequestsList.setClickable(true);
+
+            friendRequests.clear();
+            for (String fr : friendRequests){
+                if (!fr.equals(friend)){
+                    friendRequests.add(fr);
+                }
+            }
+
+
+            requestsAdapter.notifyDataSetChanged();
 
 
         }
@@ -445,28 +465,50 @@ public class FrgFriends extends Fragment {
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
 
-            ViewHolderRow holder =null;
+            ViewHolderRequestRow holder =null;
             if (convertView == null || !(convertView.getTag() instanceof ViewHolderRow)) {
-                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_plan_row, parent, false);
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_request_row, parent, false);
 
-                holder = new ViewHolderRow();
+                holder = new ViewHolderRequestRow();
 
 
                 holder.topText = (TextView) convertView
                         .findViewById(R.id.topText);
 
+                holder.acceptButton = ((Button) convertView.findViewById(R.id.accept_request_button));
+                holder.rejectButton = ((Button) convertView.findViewById(R.id.reject_request_button));
+
             } else {
-                holder = (ViewHolderRow) convertView.getTag();
+                holder = (ViewHolderRequestRow) convertView.getTag();
 
             }
 
             final String friend = data.get(position);
             holder.topText.setText(friend+" wants to add you as a friend");
 
+            holder.acceptButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new acceptOrRejectRequest(getActivity(), friend, 0).execute();
+                }
+            });
+
+            holder.rejectButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new acceptOrRejectRequest(getActivity(), friend, 2).execute();
+                }
+            });
+
             return convertView;
 
         }
 
+    }
+
+    private class ViewHolderRequestRow{
+        TextView topText;
+        Button acceptButton, rejectButton;
     }
     
 

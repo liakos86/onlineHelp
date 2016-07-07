@@ -1,7 +1,9 @@
 package com.kostas.onlineHelp;
 
+import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -10,6 +12,8 @@ import android.widget.Toast;
 import com.kostas.custom.MyAcraSender;
 import com.kostas.dbObjects.Running;
 import com.kostas.model.Database;
+import com.kostas.service.MongoUpdateService;
+import com.kostas.service.RunningService;
 import com.kostas.service.TTSManager;
 import org.acra.ACRA;
 import org.acra.ReportField;
@@ -87,6 +91,11 @@ public class ExtApplication extends Application {
         ttsManager = new TTSManager();
         ttsManager.init(this);
 
+        if (!isMyServiceRunning(MongoUpdateService.class)) {
+            Intent intent = new Intent(getBaseContext(), MongoUpdateService.class);
+            startService(intent);
+        }
+
 
     }
 
@@ -106,6 +115,16 @@ public class ExtApplication extends Application {
         }catch (Exception e){
             return true;
         }
+    }
+
+    public boolean isMyServiceRunning(Class serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<Running> getRuns() {

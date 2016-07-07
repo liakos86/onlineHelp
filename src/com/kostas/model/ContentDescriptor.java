@@ -86,6 +86,7 @@ public class ContentDescriptor {
             public static final String TIME = "time";
             public static final String AVGPACETEXT = "avgpacetext";
             public static final String DESCRIPTION = "description";
+            public static final String IS_SHARED = "IS_SHARED";
 
         }
 
@@ -105,6 +106,7 @@ public class ContentDescriptor {
                       + String.format(sFrmTextNotNull, Cols.TIME) + " , "
                     + String.format(sFrmTextNotNull, Cols.AVGPACETEXT) + " , "
                     + String.format(sFrmTextNotNull, Cols.DISTANCE) + " , "
+                    + String.format(sFrmInt, Cols.IS_SHARED) + " , "
 
                     + String.format(sFrmPrimaryKey, Cols.ID) + ")";
         }

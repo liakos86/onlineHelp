@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import com.kostas.custom.NonSwipeableViewPager;
 import com.kostas.dbObjects.User;
 import com.kostas.fragments.FrgShowRuns;
@@ -47,7 +48,12 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
         setContentView(R.layout.activity_main);
         setupPager();
 
-        new AsyncLoadFriends(this).execute();
+
+        SharedPreferences app_preferences = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+
+        if (app_preferences.getString("mongoId", null) != null) {
+            new AsyncLoadFriends((ExtApplication)getApplication()).execute();
+        }
 
 //        FacebookSdk.sdkInitialize(getApplicationContext());
     }
@@ -112,11 +118,11 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
         return false;
     }
 
-    private class AsyncLoadFriends extends AsyncTask<Void, Void, Void> {
-        private Activity activity;
+    private class AsyncLoadFriends extends AsyncTask<Void, Void, Integer> {
+        private ExtApplication application;
 
-        public AsyncLoadFriends(Activity activity) {
-            this.activity = activity;
+        public AsyncLoadFriends(ExtApplication application) {
+            this.application = application;
         }
 
         protected void onPreExecute() {
@@ -124,20 +130,23 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
         }
 
         @Override
-        protected Void doInBackground(Void... unused) {
+        protected Integer doInBackground(Void... unused) {
 
 
-            SyncHelper sh = new SyncHelper(activity);
-           sh.getMyMongoUser();
+            SyncHelper sh = new SyncHelper(application);
+         return sh.getMyMongoUser();
 
-            return null;
+
+
 
         }
 
         @Override
-        protected void onPostExecute(Void params) {
+        protected void onPostExecute(Integer result) {
 
-
+            if (result == -1){
+                Toast.makeText(getApplication(), "User profile could not be loaded", Toast.LENGTH_SHORT).show();
+            }
 
         }
 
