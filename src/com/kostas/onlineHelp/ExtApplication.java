@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -85,7 +86,6 @@ public class ExtApplication extends Application {
     public void onCreate() {
         super.onCreate();
         FontsOverride.setDefaultFont(this, "MONOSPACE",  "fonts/OpenSans-Semibold.ttf");
-
 
         new PerformAsyncTask(this).execute();
         ttsManager = new TTSManager();

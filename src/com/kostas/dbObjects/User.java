@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
+import com.kostas.model.ContentDescriptor;
+import com.kostas.model.Database;
 
 import java.util.List;
 
@@ -23,34 +25,61 @@ public class User {
     private long user_id;
     private float totalDistance;
     private int totalIntervals;
+    private int totalRuns;
     private long totalTime;
-    private int totalScore;
-    private String friends; //email list as it is unique
+    private String friends;
     private String email;
     private String friendRequests;
+    private int sharedRunsNum;
+    private String mongoId;
 
     public User(){}
 
+
     public User(
             long user_id,
+            String mongoId,
             String username,
-             int totalChallenges,
-            int wonChallenges,
-            int totalScore){
+            String email,
+            String friends,
+            String friendRequests,
+            int sharedRunsNum,
+
+            float totalDistance,
+            int totalIntervals,
+            int totalRuns,
+            long totalTime
+
+
+            ){
         this.user_id = user_id;
+        this.mongoId = mongoId;
         this.username = username;
-        this.totalScore = totalScore;
+        this.email = email;
+        this.friends = friends;
+        this.friendRequests = friendRequests;
+        this.sharedRunsNum = sharedRunsNum;
+        this.totalDistance = totalDistance;
+        this.totalIntervals = totalIntervals;
+        this.totalRuns = totalRuns;
+        this.totalTime = totalTime;
 
     }
 
-    public User(SharedPreferences prefs){
-        this._id = new ObjectId(prefs.getString("mongoId",null));
-        this.username = prefs.getString("username", "");
-        this.totalDistance = prefs.getFloat("totalDistance", 0);
-        this.totalScore = prefs.getInt("totalScore",0);
-        this.totalTime = prefs.getLong("totalTime",0);
-        this.friends = prefs.getString("friends","");
-        this.friendRequests = prefs.getString("friendRequests","");
+    public String getMongoId() {
+        return mongoId;
+    }
+
+    public void setMongoId(String mongoId) {
+        this.mongoId = mongoId;
+    }
+
+    public int getSharedRunsNum() {
+        return sharedRunsNum;
+    }
+
+    public void setSharedRunsNum(int sharedRunsNum) {
+        this.sharedRunsNum = sharedRunsNum;
     }
 
     public int getTotalIntervals() {
@@ -83,14 +112,6 @@ public class User {
 
     public void set_id(ObjectId _id) {
         this._id = _id;
-    }
-
-    public int getTotalScore() {
-        return totalScore;
-    }
-
-    public void setTotalScore(int totalScore) {
-        this.totalScore = totalScore;
     }
 
     public float getTotalDistance() {
@@ -133,57 +154,79 @@ public class User {
         this.email = email;
     }
 
+    public int getTotalRuns() {
+        return totalRuns;
+    }
 
-//    public static User getFromId(Context context, long id) {
-//        Log.v(TAG, String.format("Requesting item [%d]", id));
-//        synchronized (context) {
-//            Cursor cursor = null;
-//            try {
-//                cursor = context.getContentResolver()
-//                        .query(Uri.withAppendedPath(ContentDescriptor.User.CONTENT_URI,
-//                                String.valueOf(id)), null, null, null, null);
-//                cursor.moveToFirst();
-//                return createFromCursor(cursor);
-//            } finally {
-//                if (cursor != null)
-//                    cursor.close();
-//            }
-//        }
-//    }
+    public void setTotalRuns(int totalRuns) {
+        this.totalRuns = totalRuns;
+    }
+
+    public static User getFromId(Context context, long id) {
+        Log.v(TAG, String.format("Requesting item [%d]", id));
+        synchronized (context) {
+            Cursor cursor = null;
+            try {
+                cursor = context.getContentResolver()
+                        .query(Uri.withAppendedPath(ContentDescriptor.User.CONTENT_URI,
+                                String.valueOf(id)), null, null, null, null);
+                cursor.moveToFirst();
+                return createFromCursor(cursor);
+            } finally {
+                if (cursor != null)
+                    cursor.close();
+            }
+        }
+    }
 //
-//    public static ContentValues asContentValues(User item) {
-//        if (item == null)
-//            return null;
-//        synchronized (item) {
-//            ContentValues toRet = new ContentValues();
-//
-//            toRet.put(ContentDescriptor.User.Cols.ID, item.user_id);
-//            toRet.put(ContentDescriptor.User.Cols.USERNAME, item.username);
-//            toRet.put(ContentDescriptor.User.Cols.TOTAL_CHALLENGES, item.totalChallenges);
-//            toRet.put(ContentDescriptor.User.Cols.WON_CHALLENGES, item.wonChallenges);
-//            toRet.put(ContentDescriptor.User.Cols.TOTAL_SCORE, item.totalScore);
-//
-//
-//            return toRet;
-//        }
-//    }
-//
-//    public static User createFromCursor(Cursor cursor) {
-//        synchronized (cursor) {
-//            if (cursor.isClosed() || cursor.isAfterLast() || cursor.isBeforeFirst()) {
-//                Log.v(TAG, String.format("Requesting entity but no valid cursor"));
-//                return null;
-//            }
-//            User toRet = new User();
-//            toRet.user_id = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.User.Cols.ID));
-//            toRet.username = cursor.getString(cursor.getColumnIndex(ContentDescriptor.User.Cols.USERNAME));
-//            toRet.totalChallenges = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.User.Cols.TOTAL_CHALLENGES));
-//            toRet.wonChallenges = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.User.Cols.WON_CHALLENGES));
-//            toRet.totalScore = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.User.Cols.TOTAL_SCORE));
-//
-//            return toRet;
-//        }
-//    }
+    public static ContentValues asContentValues(User item) {
+        if (item == null)
+            return null;
+        synchronized (item) {
+            ContentValues toRet = new ContentValues();
+
+            toRet.put(ContentDescriptor.User.Cols.ID, item.user_id);
+            toRet.put(ContentDescriptor.User.Cols.USERNAME, item.username);
+            toRet.put(ContentDescriptor.User.Cols.EMAIL, item.email);
+            toRet.put(ContentDescriptor.User.Cols.FRIENDS, item.friends);
+            toRet.put(ContentDescriptor.User.Cols.FRIEND_REQUESTS, item.friendRequests);
+            toRet.put(ContentDescriptor.User.Cols.MONGO_ID, item.mongoId);
+            toRet.put(ContentDescriptor.User.Cols.TOTAL_DISTANCE, item.totalDistance);
+            toRet.put(ContentDescriptor.User.Cols.TOTAL_INTERVALS, item.totalIntervals);
+            toRet.put(ContentDescriptor.User.Cols.FRIEND_REQUESTS, item.friendRequests);
+            toRet.put(ContentDescriptor.User.Cols.TOTAL_RUNS, item.totalRuns);
+            toRet.put(ContentDescriptor.User.Cols.TOTAL_TIME, item.totalTime);
+            toRet.put(ContentDescriptor.User.Cols.SHARED_RUNS_NUM, item.sharedRunsNum);
+
+
+
+            return toRet;
+        }
+    }
+
+    public static User createFromCursor(Cursor cursor) {
+        synchronized (cursor) {
+            if (cursor.isClosed() || cursor.isAfterLast() || cursor.isBeforeFirst()) {
+                Log.v(TAG, String.format("Requesting entity but no valid cursor"));
+                return null;
+            }
+            User toRet = new User();
+            toRet.user_id = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.User.Cols.ID));
+            toRet.username = cursor.getString(cursor.getColumnIndex(ContentDescriptor.User.Cols.USERNAME));
+            toRet.mongoId = cursor.getString(cursor.getColumnIndex(ContentDescriptor.User.Cols.MONGO_ID));
+            toRet.email = cursor.getString(cursor.getColumnIndex(ContentDescriptor.User.Cols.EMAIL));
+            toRet.sharedRunsNum = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.User.Cols.SHARED_RUNS_NUM));
+            toRet.friends = cursor.getString(cursor.getColumnIndex(ContentDescriptor.User.Cols.FRIENDS));
+            toRet.friendRequests = cursor.getString(cursor.getColumnIndex(ContentDescriptor.User.Cols.FRIEND_REQUESTS));
+            toRet.totalDistance = cursor.getFloat(cursor.getColumnIndex(ContentDescriptor.User.Cols.TOTAL_DISTANCE));
+            toRet.totalTime = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.User.Cols.TOTAL_TIME));
+            toRet.totalIntervals = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.User.Cols.TOTAL_INTERVALS));
+            toRet.totalRuns = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.User.Cols.TOTAL_RUNS));
+
+
+            return toRet;
+        }
+    }
 
     /**
      * let the id decide if we have an insert or an update
@@ -191,16 +234,16 @@ public class User {
      * @param resolver
      * @param item
      */
-//    public static void save(ContentResolver resolver, User item) {
-//        if (item.user_id == Database.INVALID_ID)
-//            resolver.insert(ContentDescriptor.User.CONTENT_URI, User.asContentValues(item));
-//        else
-//            resolver.update(ContentDescriptor.User.CONTENT_URI, User.asContentValues(item),
-//                    String.format("%s=?", ContentDescriptor.User.Cols.ID),
-//                    new String[]{
-//                            String.valueOf(item.user_id)
-//                    });
-//    }
+    public static void save(ContentResolver resolver, User item) {
+        if (item.user_id == Database.INVALID_ID)
+            resolver.insert(ContentDescriptor.User.CONTENT_URI, User.asContentValues(item));
+        else
+            resolver.update(ContentDescriptor.User.CONTENT_URI, User.asContentValues(item),
+                    String.format("%s=?", ContentDescriptor.User.Cols.ID),
+                    new String[]{
+                            String.valueOf(item.user_id)
+                    });
+    }
 
 
 

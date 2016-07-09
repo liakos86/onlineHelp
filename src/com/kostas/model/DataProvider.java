@@ -63,6 +63,16 @@ public class DataProvider extends ContentProvider {
 
             case ContentDescriptor.Plan.PATH_FOR_ID_TOKEN:
                 return ContentDescriptor.Plan.CONTENT_ITEM_TYPE;
+
+
+            case ContentDescriptor.User.PATH_TOKEN:
+            case ContentDescriptor.User.PATH_START_LETTERS_TOKEN:
+                return ContentDescriptor.User.CONTENT_TYPE_DIR;
+
+
+
+            case ContentDescriptor.User.PATH_FOR_ID_TOKEN:
+                return ContentDescriptor.User.CONTENT_ITEM_TYPE;
                 
 
           
@@ -208,6 +218,45 @@ public class DataProvider extends ContentProvider {
             break;
             // END Plan
 
+            //START User
+            case ContentDescriptor.User.PATH_TOKEN: {
+                String searchFor = uri.getQueryParameter(ContentDescriptor.PARAM_SEARCH);
+                SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
+                builder.setTables(ContentDescriptor.User.TABLE_NAME);
+
+                if (!TextUtils.isEmpty(searchFor)) {
+                    String where = String.format(sWhereLike, ContentDescriptor.User.Cols.USERNAME, searchFor);
+                    where += " OR " + (String.format(sWhereLike, ContentDescriptor.User.Cols.USERNAME, searchFor));
+                    //Log.v(TAG, String.format("where [%s]", where));
+                    builder.appendWhere(where);
+                }
+
+                toRet = builder.query(db, projection, selection, selectionArgs, null, null,
+                        sortOrder);
+            }
+            break;
+            case ContentDescriptor.User.PATH_START_LETTERS_TOKEN: {
+                SQLiteDatabase rdb = database.getReadableDatabase();
+                toRet = rdb
+                        .rawQuery(
+                                "select distinct substr(username, 1, 1) from user order by 1 asc",
+                                null);
+            }
+            break;
+            case ContentDescriptor.User.PATH_FOR_ID_TOKEN: {
+                String id = uri.getLastPathSegment();
+                //Log.v(TAG, String.format("querying for [%s]", id));
+                SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
+                builder.setTables(ContentDescriptor.User.TABLE_NAME);
+                toRet = builder.query(db, projection,
+                        String.format(sWhere, ContentDescriptor.User.Cols.ID), new String[]{
+                                id
+                        },
+                        null, null, null, sortOrder);
+            }
+            break;
+            // END User
+
             default:
 //                Log.d(TAG, String.format("Could not handle matcher [%d]", match));
         }
@@ -247,6 +296,14 @@ public class DataProvider extends ContentProvider {
             }
             break;
             //End Interval
+
+            //User
+            case ContentDescriptor.User.PATH_TOKEN: {
+                id = db.insert(ContentDescriptor.User.TABLE_NAME, null,
+                        adjustIdField(values, ContentDescriptor.User.Cols.ID));
+            }
+            break;
+            //End User
 
 
             default: {
@@ -289,6 +346,14 @@ public class DataProvider extends ContentProvider {
             }
             break;
             //End Plan
+
+            //User
+            case ContentDescriptor.User.PATH_TOKEN: {
+                toRet = db.update(ContentDescriptor.User.TABLE_NAME, values, selection,
+                        selectionArgs);
+            }
+            break;
+            //End User
            
 
             default: {
@@ -326,6 +391,13 @@ public class DataProvider extends ContentProvider {
             }
             break;
             //Interval
+
+            //User
+            case ContentDescriptor.User.PATH_TOKEN: {
+                toRet = db.delete(ContentDescriptor.User.TABLE_NAME, selection, selectionArgs);
+            }
+            break;
+            //User
 
 
             default: {

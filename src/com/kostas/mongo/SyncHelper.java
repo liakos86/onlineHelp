@@ -137,11 +137,12 @@ public class SyncHelper {
                 return 0; //no user found
             }
 
+            user2.setMongoId(user2.get_id().get$oid());//it comes with object, I unpack to store in db
+            dbHelper.addUser(user2);
 
             SharedPreferences.Editor editor = app_preferences.edit();
             editor.putString("mongoId", user2.get_id().get$oid());
             editor.putString("username", user2.getUsername());
-            editor.putInt("totalScore", user2.getTotalScore());
             editor.putLong("totalTime", user2.getTotalTime());
             editor.putFloat("totalDistance", user2.getTotalDistance());
             editor.putString("friends", user2.getFriends());
@@ -330,10 +331,15 @@ public class SyncHelper {
             }
 
 
+            if (dbHelper.fetchUser(user2.getUsername()).getMongoId() == null) {
+                user2.setMongoId(user2.get_id().get$oid());//it comes with object, I unpack to store in db
+                dbHelper.addUser(user2);
+            }
+
+
                SharedPreferences.Editor editor = app_preferences.edit();
                editor.putString("mongoId", user2.get_id().get$oid());
                 editor.putString("username", user2.getUsername());
-                editor.putInt("totalScore", user2.getTotalScore());
                 editor.putLong("totalTime", user2.getTotalTime());
                 editor.putFloat("totalDistance", user2.getTotalDistance());
                 editor.putString("friends", user2.getFriends());
@@ -1324,36 +1330,31 @@ public class SyncHelper {
 
     }
 
-    public List<User> getFriendsList(){//0 leaderboard
+    public List<User> getUsersByUsernamesList(ArrayList<String>usernames){//0 leaderboard
 
-        List<User> users = new ArrayList<User>();
+        List<User>users = new ArrayList<User>();
+        if (usernames.size() == 0){
+            return users;
+        }
 
-
-        Log.v(TAG, "Fetching friends");
-
-        String[] friendsArray;
+        Log.v(TAG, "Fetching users");
         String query;
 
-        String friendsList = app_preferences.getString("friends", "");
+        int size = usernames.size();
 
-
-                friendsArray = friendsList.split(" ");
-                int length = friendsArray.length;
-                query = "{ $or: [";
-                for (int i = 0; i < length - 1; i++) {
-                    query += "{ 'username': '" + friendsArray[i] + "'},";
-                }
-                query += "{ 'username': '" + friendsArray[length - 1] + "'}";
-                query += "] }";
-
-
+        query = "{ $or: [";
+        for (int i = 0; i < size - 1; i++) {
+            query += "{ 'username': '" + usernames.get(i).trim() + "'},";
+        }
+        query += "{ 'username': '" + usernames.get(size-1).trim() + "'}";
+        query += "] }";
 
         Uri uri = new Uri.Builder()
                 .scheme("https")
                 .authority(authUrl)
                 .path(runner_collection)
                 .appendQueryParameter("q", query)
-                .appendQueryParameter("s", "{'totalScore': -1}")
+                .appendQueryParameter("s", "{'totalRuns': -1}")
                 .appendQueryParameter("apiKey", apiKey)
                 .build();
 
@@ -1406,13 +1407,6 @@ public class SyncHelper {
                     new TypeToken<List<User>>() {
                     }.getType());
 
-                //dbHelper.deleteLeaderboard();
-                if (users!=null && users.size()>0){
-                    for (User u:users) {
-                        u.setUser_id(-1l);
-                       // dbHelper.addLeader(u);
-                    }
-                }
 
             Log.v(TAG, String.format("Fetching parts - retrieved [%d] users", users.size()));
 

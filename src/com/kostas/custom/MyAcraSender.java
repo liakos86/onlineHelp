@@ -31,6 +31,6 @@ public class MyAcraSender implements ReportSender {
        editor.putString("mongoId", mongoId);
         editor.putString("username", username);
 
-        sharedPreferences.edit().clear().apply();
+        editor.apply();
     }
 }

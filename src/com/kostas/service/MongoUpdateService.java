@@ -18,6 +18,7 @@ import com.kostas.onlineHelp.ActMain;
 import com.kostas.onlineHelp.ExtApplication;
 import com.kostas.onlineHelp.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -32,13 +33,18 @@ public class MongoUpdateService extends IntentService
              Database db;
 
 
-             List<String> friendRequests;
 
-             List<User> friends;
+             User meFromDb;
+
+             User meFromMongo;
+
+             List<User> friendsFromDb;
+
+             List<User> friendsFromMongo;
 
 
              private enum CallTypes{
-                 FETCH_FRIENDS(0), FETCH_REQUESTS(1), FETCH_NEW_FRIEND_RUNS(2);
+                 FETCH_FRIENDS(0), FETCH_FRIEND_RUNS(1);
 
                  private int value;
 
@@ -91,7 +97,17 @@ public class MongoUpdateService extends IntentService
             //editor.putBoolean(INTERVAL_IN_PROGRESS, false).apply();
 
 
+        String myUsername = app_preferences.getString("username", "");
 
+        friendsFromDb = db.fetchUsersFromDb();
+
+        for (User user : friendsFromDb){
+
+            if (myUsername.equals(user.getUsername())){
+                meFromDb = user;
+            }
+
+        }
 
 
 
@@ -128,7 +144,7 @@ public class MongoUpdateService extends IntentService
      * If the sdk is >15 then I set flags like the
      * color of the light to blink
      */
-    private void createForegroundNotification() {
+    private void createForegroundNotification(String message) {
 
         NotificationManager notificationManager =
                 (NotificationManager) application.getSystemService(android.content.Context.NOTIFICATION_SERVICE);
@@ -140,8 +156,8 @@ public class MongoUpdateService extends IntentService
             mBuilder.setSmallIcon(R.drawable.ic_notification_icon);
             int color = getResources().getColor(R.color.interval_green);
             mBuilder.setColor(color);
-            mBuilder.setContentTitle("Friends updated");
-            mBuilder.setContentText("Click to get into");
+            mBuilder.setContentTitle(message);
+            mBuilder.setContentText("Click for info");
 //            mBuilder.setOngoing(true);
             Intent resultIntent = new Intent(application, ActMain.class);
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(application);
@@ -167,15 +183,59 @@ public class MongoUpdateService extends IntentService
             intent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             PendingIntent pendIntent = PendingIntent.getActivity(this, 0, intent2, 0);
 //This constructor is deprecated. Use Notification.Builder instead
-            Notification notice = new Notification(R.drawable.ic_notification_icon, "Friends updated", System.currentTimeMillis());
+            Notification notice = new Notification(R.drawable.ic_notification_icon, message, System.currentTimeMillis());
 //This method is deprecated. Use Notification.Builder instead.
-            notice.setLatestEventInfo(this, "Click to get into", "Running", pendIntent);
+            notice.setLatestEventInfo(this, "Click for info", "Running", pendIntent);
             //notice.flags |= Notification.FLAG_NO_CLEAR;
 
 
             notificationManager.notify(123, notice);
             //startForeground(myID, notice);
         }
+    }
+
+
+    private void checkForChanges(){
+
+        if (friendsFromMongo.size() > friendsFromDb.size()){
+            //todo: ???
+        }
+
+        for (User friendFromMongo : friendsFromMongo){
+
+            if (friendFromMongo.get_id().get$oid().equals(meFromDb.getMongoId())){
+                meFromMongo = friendFromMongo;
+                checkMyFriendsAndRequests();
+
+            }
+
+            for (User friendFromDb : friendsFromDb){
+
+                if (friendFromMongo.get_id().get$oid().equals(friendFromDb.getMongoId())){
+                    checkRunsForUser(friendFromDb, friendFromMongo);
+                }
+
+            }
+
+        }
+
+
+    }
+
+    private void checkMyFriendsAndRequests(){
+        if (meFromMongo.getFriends() != null && meFromDb.getFriends().trim().length() < meFromMongo.getFriends().trim().length()){
+            createForegroundNotification("You have a new friend!!!");
+        }
+
+        if (meFromMongo.getFriendRequests() != null && meFromDb.getFriendRequests().trim().length() < meFromMongo.getFriendRequests().trim().length()){
+            createForegroundNotification("You have a new friend request!!!");
+        }
+
+    }
+
+    private void checkRunsForUser(User userDb, User userMongo){
+
+
     }
 
 
@@ -206,34 +266,20 @@ public class MongoUpdateService extends IntentService
 
         public void run() {
 
-            new PerformAsyncTask(CallTypes.FETCH_FRIENDS).execute();
+            if (meFromDb == null && app_preferences.getString("username", null) != null){
+                meFromDb = db.fetchUser(app_preferences.getString("username",""));
+            }
+
+
+            if (app_preferences.getString("username", null) != null) {
+                new PerformAsyncTask(CallTypes.FETCH_FRIENDS).execute();
+            }
 
             mHandler.postDelayed(mFriendsListRunnable, 30000);//todo: 30 minutes
 
         }
     };
 
-    private Runnable mFriendsNewRunsRunnable = new Runnable() {
-
-          public void run() {
-
-              new PerformAsyncTask(CallTypes.FETCH_NEW_FRIEND_RUNS).execute();
-
-                 mHandler.postDelayed(mFriendsNewRunsRunnable, 20000);//todo: 10 minutes
-
-            }
-     };
-
-      private Runnable mNewRequestsRunnable = new Runnable() {
-
-         public void run() {
-
-              new PerformAsyncTask(CallTypes.FETCH_REQUESTS).execute();
-
-                mHandler.postDelayed(mNewRequestsRunnable, 10000);//todo: 10 minutes
-
-            }
-      };
 
 
 
@@ -253,12 +299,28 @@ public class MongoUpdateService extends IntentService
 
         @Override
         protected Void doInBackground(Void... unused) {
-            SharedPreferences.Editor editor = app_preferences.edit();
+           // SharedPreferences.Editor editor = app_preferences.edit();
 
 
            if (type == CallTypes.FETCH_FRIENDS){
 
-                sh.getFriendsList();
+               String friends = app_preferences.getString("friends", "");
+               String[]friendsArray = friends.split(" ");
+               String myUsername = meFromDb != null ? meFromDb.getUsername() : app_preferences.getString("username", "");
+
+               ArrayList<String> usernames = new ArrayList<String>();
+               for (String name : friendsArray){
+                   usernames.add(name);
+               }
+
+               usernames.add(myUsername);
+
+               usernames.remove(null);
+               usernames.remove("");
+
+               friendsFromMongo =  sh.getUsersByUsernamesList(usernames);
+
+               checkForChanges();
 
             }
 

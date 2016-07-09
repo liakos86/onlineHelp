@@ -52,6 +52,7 @@ public class ContentDescriptor {
         Running.addToUriMatcher(authority, matcher);
         Interval.addToUriMatcher(authority, matcher);
         Plan.addToUriMatcher(authority, matcher);
+        User.addToUriMatcher(authority, matcher);
         
      
 
@@ -212,6 +213,67 @@ public class ContentDescriptor {
                     + String.format(sFrmTextNotNull, Cols.SECONDS) + " , "
                     + String.format(sFrmTextNotNull, Cols.ROUNDS) + " , "
                     + String.format(sFrmTextNotNull, Cols.START_REST) + " , "
+
+                    + String.format(sFrmPrimaryKey, Cols.ID) + ")";
+        }
+    }
+
+
+    public static class User {
+        public static final String TABLE_NAME = "user";
+        public static final String PATH = "user";
+        public static final int PATH_TOKEN = 40;
+        public static final String PATH_FOR_ID = "user/#";
+        public static final String PATH_FOR_ID_WA = "user/*";
+        public static final int PATH_FOR_ID_TOKEN = 41;
+        public static final String PATH_START_LETTERS = "user/startletters";
+        public static final int PATH_START_LETTERS_TOKEN = 42;
+
+        public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH).build();
+
+        public static final String CONTENT_TYPE_DIR = "vnd.android.cursor.dir/vnd.com.kostas.onlineHelp.app";
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.com.kostas.onlineHelp.app";
+
+        public static class Cols {
+            public static final String ID = BaseColumns._ID; // by convention
+            public static final String USERNAME = "username";
+            public static final String MONGO_ID = "mongo_id";
+            public static final String TOTAL_DISTANCE = "total_distance";
+            public static final String TOTAL_TIME = "total_time";
+            public static final String TOTAL_RUNS = "total_runs";
+            public static final String TOTAL_INTERVALS = "total_intervals";
+            public static final String FRIENDS = "friends";
+            public static final String FRIEND_REQUESTS = "friend_requests";
+            public static final String EMAIL = "email";
+            public static final String SHARED_RUNS_NUM = "shared_runs_num";
+        }
+
+        protected static UriMatcher addToUriMatcher(String authority, UriMatcher matcher) {
+            matcher.addURI(authority, User.PATH, User.PATH_TOKEN);
+            matcher.addURI(authority, User.PATH_FOR_ID, User.PATH_FOR_ID_TOKEN);
+            matcher.addURI(authority, User.PATH_FOR_ID_WA, User.PATH_FOR_ID_TOKEN);
+            matcher.addURI(authority, User.PATH_START_LETTERS, User.PATH_START_LETTERS_TOKEN);
+            return matcher;
+        }
+
+        public static String createTable() {
+            return "CREATE TABLE " + User.TABLE_NAME + " ( "
+
+                    + String.format(sFrmIdAutoinc, Cols.ID) + " , "
+                    + String.format(sFrmTextNotNull, Cols.USERNAME) + " , "
+                    + String.format(sFrmTextNotNull, Cols.MONGO_ID) + " , "
+
+                    + String.format(sFrmFloat, Cols.TOTAL_DISTANCE) + " , "
+                    + String.format(sFrmInt, Cols.TOTAL_INTERVALS) + " , "
+                    + String.format(sFrmFloat, Cols.TOTAL_TIME) + " , "
+                    + String.format(sFrmInt, Cols.TOTAL_RUNS) + " , "
+
+                    + String.format(sFrmTextNotNull, Cols.FRIENDS) + " , "
+                    + String.format(sFrmTextNotNull, Cols.FRIEND_REQUESTS) + " , "
+
+
+                    + String.format(sFrmInt, Cols.SHARED_RUNS_NUM) + " , "
+                    + String.format(sFrmTextNotNull, Cols.EMAIL) + " , "
 
                     + String.format(sFrmPrimaryKey, Cols.ID) + ")";
         }
