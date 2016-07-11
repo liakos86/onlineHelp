@@ -66,6 +66,19 @@ public class User {
 
     }
 
+    public User(SharedPreferences sp){
+        this.mongoId = sp.getString("mongoId", null);
+        this.username = sp.getString("username",null);
+        this.email = sp.getString("email", null);
+        this.friends = sp.getString("friends", null);
+        this.friendRequests = sp.getString("friendRequests", null);
+        this.sharedRunsNum = sp.getInt("sharedRunsNum", 0);
+        this.totalDistance = sp.getFloat("totalDistance", 0);
+        this.totalIntervals = sp.getInt("totalIntervals", 0);
+        this.totalRuns = sp.getInt("totalRuns", 0);
+        this.totalTime = sp.getLong("totalTime", 0);
+    }
+
     public String getMongoId() {
         return mongoId;
     }

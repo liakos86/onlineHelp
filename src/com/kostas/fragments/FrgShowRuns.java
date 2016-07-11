@@ -621,7 +621,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         @Override
         protected Integer doInBackground(Void... unused) {
 
-
            return  sh.shareRunToMongo(currentRun);
 
 

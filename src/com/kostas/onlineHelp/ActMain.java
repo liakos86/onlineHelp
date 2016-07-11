@@ -49,11 +49,11 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
         setupPager();
 
 
-        SharedPreferences app_preferences = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-
-        if (app_preferences.getString("mongoId", null) != null) {
-            new AsyncLoadFriends((ExtApplication)getApplication()).execute();
-        }
+//        SharedPreferences app_preferences = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+//
+//        if (app_preferences.getString("mongoId", null) != null) {
+//            new AsyncLoadFriends((ExtApplication)getApplication()).execute();
+//        }
 
 //        FacebookSdk.sdkInitialize(getApplicationContext());
     }
@@ -118,40 +118,40 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
         return false;
     }
 
-    private class AsyncLoadFriends extends AsyncTask<Void, Void, Integer> {
-        private ExtApplication application;
-
-        public AsyncLoadFriends(ExtApplication application) {
-            this.application = application;
-        }
-
-        protected void onPreExecute() {
-
-        }
-
-        @Override
-        protected Integer doInBackground(Void... unused) {
-
-
-            SyncHelper sh = new SyncHelper(application);
-         return sh.getMyMongoUser();
-
-
-
-
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-
-            if (result == -1){
-                Toast.makeText(getApplication(), "User profile could not be loaded", Toast.LENGTH_SHORT).show();
-            }
-
-        }
-
-
-    }
+//    private class AsyncLoadFriends extends AsyncTask<Void, Void, Integer> {
+//        private ExtApplication application;
+//
+//        public AsyncLoadFriends(ExtApplication application) {
+//            this.application = application;
+//        }
+//
+//        protected void onPreExecute() {
+//
+//        }
+//
+//        @Override
+//        protected Integer doInBackground(Void... unused) {
+//
+//
+//            SyncHelper sh = new SyncHelper(application);
+//         return sh.getMyMongoUser();
+//
+//
+//
+//
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Integer result) {
+//
+//            if (result == -1){
+//                Toast.makeText(getApplication(), "User profile could not be loaded", Toast.LENGTH_SHORT).show();
+//            }
+//
+//        }
+//
+//
+//    }
 
     @Override
     protected void onResume() {

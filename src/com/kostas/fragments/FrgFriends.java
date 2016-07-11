@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.test.mock.MockApplication;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +18,15 @@ import android.widget.*;
 import com.kostas.custom.NumberPickerKostas;
 import com.kostas.custom.ViewHolderRow;
 import com.kostas.dbObjects.Plan;
+import com.kostas.dbObjects.Running;
 import com.kostas.dbObjects.User;
+import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 import com.kostas.mongo.SyncHelper;
 import com.kostas.onlineHelp.ActMain;
 import com.kostas.onlineHelp.ExtApplication;
 import com.kostas.onlineHelp.R;
+import com.kostas.service.MongoUpdateService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +49,8 @@ public class FrgFriends extends Fragment {
 
     ListView friendRequestsList;
 
+    ListView friendRunsList;
+
 
     SyncHelper sh;
 
@@ -54,6 +61,9 @@ public class FrgFriends extends Fragment {
     TextView infoText;
 
     RequestsAdapterItem requestsAdapter;
+    RunningAdapterItem runsAdapter;
+
+    List<Running> friendRuns = new ArrayList<Running>();
 
     List<String> friendRequests = new ArrayList<String>();
     
@@ -73,7 +83,12 @@ public class FrgFriends extends Fragment {
 
         sh = new SyncHelper((ExtApplication)getActivity().getApplication());
 
-        setTitleActionBar();
+//        setTitleActionBar();
+
+        setCorrectFlipperChild();
+
+
+
         
         return  v;
     }
@@ -99,6 +114,7 @@ public class FrgFriends extends Fragment {
 
 
         friendRequestsList = ((ListView) v.findViewById(R.id.listFriendRequests));
+        friendRunsList = ((ListView) v.findViewById(R.id.listFriendRuns));
 
         infoText = (TextView) v.findViewById(R.id.infoText);
 
@@ -121,6 +137,15 @@ public class FrgFriends extends Fragment {
         requestsAdapter = new RequestsAdapterItem(getActivity().getApplicationContext(), R.layout.list_plan_row, friendRequests);
 
         friendRequestsList.setAdapter(requestsAdapter);
+
+        Database db = new Database((ExtApplication)getActivity().getApplication());
+
+        friendRuns = db.fetchRunsFromDb(ContentDescriptor.RunningFriend.CONTENT_URI, ContentDescriptor.IntervalFriend.CONTENT_URI);
+
+
+        runsAdapter = new RunningAdapterItem(getActivity().getApplicationContext(), R.layout.list_run_row, friendRuns);
+
+        friendRunsList.setAdapter(runsAdapter);
 
         buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -279,6 +304,13 @@ public class FrgFriends extends Fragment {
 
     }
 
+    private void startMongoService(){
+        if (!((ExtApplication)getActivity().getApplication()).isMyServiceRunning(MongoUpdateService.class)) {
+            Intent intent = new Intent(getActivity().getBaseContext(), MongoUpdateService.class);
+            getActivity().startService(intent);
+        }
+    }
+
 
     private class insertOrGetUser extends AsyncTask<Void, Void, Integer> {
         private ExtApplication app;
@@ -321,15 +353,18 @@ public class FrgFriends extends Fragment {
             }else if (result==2){
                 //((ActMainTest)getActivity()).getFirstLeaderboard();
                 Toast.makeText(app, "User found", Toast.LENGTH_LONG).show();
-                setTitleActionBar();
+//                setTitleActionBar();
                 friendsFlipper.setDisplayedChild(1);
             }else if (result==3){
                 Toast.makeText(app, "User inserted", Toast.LENGTH_LONG).show();
-                setTitleActionBar();
+//                setTitleActionBar();
                 friendsFlipper.setDisplayedChild(1);
             }
 
+            startMongoService();
         }
+
+
 
 
     }
@@ -428,18 +463,24 @@ public class FrgFriends extends Fragment {
 
     }
 
-    public void setTitleActionBar(){
+    public void setCorrectFlipperChild(){
         SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
 
         if (app_preferences.getString("mongoId", null) != null){
-            getActivity().setTitle(app_preferences.getString("username", null));
+            ((ExtApplication) getActivity().getApplication()).setMe(new User(app_preferences));
             friendsFlipper.setDisplayedChild(1);
-
-            Toast.makeText(getActivity(), app_preferences.getString("mongoId", null) ,Toast.LENGTH_SHORT).show();
+            startMongoService();
+        }else{
+            friendsFlipper.setDisplayedChild(0);
+            prepareForLogin();
         }
 
-//        SharedPreferences.Editor editor = app_preferences.edit();
-//        editor.remove("mongoId").apply();
+    }
+
+    private void prepareForLogin(){
+        Database db = new Database(getContext());
+        db.deleteAllFriendRuns();
+        db.deleteAllFriends();
     }
 
     public class RequestsAdapterItem extends ArrayAdapter<String> {
@@ -499,6 +540,67 @@ public class FrgFriends extends Fragment {
                     new acceptOrRejectRequest(getActivity(), friend, 2).execute();
                 }
             });
+
+            return convertView;
+
+        }
+
+    }
+
+    public class RunningAdapterItem extends ArrayAdapter<Running> {
+
+        Context mContext;
+        int layoutResourceId;
+        List<Running> data;
+        LayoutInflater inflater;
+
+        public RunningAdapterItem(Context mContext, int layoutResourceId,
+                                   List<Running> data) {
+
+            super(mContext, layoutResourceId, data);
+            this.layoutResourceId = layoutResourceId;
+            this.mContext = mContext;
+            this.data = data;
+            this.inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+
+        @Override
+        public void notifyDataSetChanged() {
+            super.notifyDataSetChanged();
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+
+            ViewHolderRow holder =null;
+            if (convertView == null || !(convertView.getTag() instanceof ViewHolderRow)) {
+                convertView = inflater.inflate(R.layout.list_run_row, parent, false);
+                holder = new ViewHolderRow();
+                holder.rightText = (TextView) convertView
+                        .findViewById(R.id.rightText);
+                holder.bottomText = (TextView) convertView
+                        .findViewById(R.id.bottomText);
+                holder.bottom2Text = (TextView) convertView
+                        .findViewById(R.id.bottom2Text);
+                holder.topText =  (TextView) convertView
+                        .findViewById(R.id.topText);
+                holder.topRightText =  (TextView) convertView
+                        .findViewById(R.id.topRightText);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolderRow) convertView.getTag();
+            }
+
+            Running run = data.get(position);
+
+            holder.bottomText.setText(run.getUsername()+": "+(int) run.getDistance() + " meters with " + ((int) (run.getTime() / 1000)) + " secs rest");
+            holder.bottom2Text.setText( run.getDescription().length()>0? run.getDescription() : "No description" );
+
+            holder.topText.setText(run.getDate());
+            holder.topRightText.setText("Avg Pace: "+run.getAvgPaceText());
+            holder.rightText.setText(String.valueOf(run.getIntervals().size()) + " sessions");
+
+
 
             return convertView;
 

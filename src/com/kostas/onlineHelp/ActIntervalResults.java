@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Running;
+import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 
 import java.lang.reflect.Type;
@@ -190,8 +191,8 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
 
 
 
-        Database db = new Database(getApplicationContext());
-        int runId = db.addRunning(running);
+        Database db = new Database((ExtApplication)getApplication());
+        int runId = db.addRunning(running, ContentDescriptor.Running.CONTENT_URI, ContentDescriptor.Interval.CONTENT_URI);
         running.setRunning_id(runId);
         ((ExtApplication)getApplication()).getRuns().add(0, running);
 

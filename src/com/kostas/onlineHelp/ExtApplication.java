@@ -12,6 +12,8 @@ import android.widget.Toast;
 //import com.kostas.custom.MyAcraSender;
 import com.kostas.custom.MyAcraSender;
 import com.kostas.dbObjects.Running;
+import com.kostas.dbObjects.User;
+import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 import com.kostas.service.MongoUpdateService;
 import com.kostas.service.RunningService;
@@ -70,6 +72,8 @@ public class ExtApplication extends Application {
 
     List<Running> runs = new ArrayList<Running>();
 
+    User me;
+
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
@@ -91,10 +95,7 @@ public class ExtApplication extends Application {
         ttsManager = new TTSManager();
         ttsManager.init(this);
 
-        if (!isMyServiceRunning(MongoUpdateService.class)) {
-            Intent intent = new Intent(getBaseContext(), MongoUpdateService.class);
-            startService(intent);
-        }
+
 
 
     }
@@ -183,10 +184,8 @@ public class ExtApplication extends Application {
         @Override
         protected Void doInBackground(Void... unused) {
             Database db = new Database(application);
-            runs = db.fetchRunsFromDb();
-            for (Running run : runs){
-                run.setIntervals(db.fetchIntervalsForRun(run.getRunning_id()));
-            }
+            runs = db.fetchRunsFromDb(ContentDescriptor.Running.CONTENT_URI, ContentDescriptor.Interval.CONTENT_URI);
+
             Collections.reverse(runs);
             return null;
         }
@@ -208,6 +207,14 @@ public class ExtApplication extends Application {
     public DefaultHttpClient getHttpClient() {
         final DefaultHttpClient httpClient = new DefaultHttpClient();
         return httpClient;
+    }
+
+    public User getMe() {
+        return me;
+    }
+
+    public void setMe(User me) {
+        this.me = me;
     }
 
     public boolean isRunsLoaded() {

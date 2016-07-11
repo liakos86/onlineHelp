@@ -12,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Running;
 import com.kostas.dbObjects.User;
+import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 import com.kostas.onlineHelp.ActMain;
 import com.kostas.onlineHelp.ExtApplication;
@@ -48,7 +49,6 @@ public class SyncHelper {
     DefaultHttpClient client;
     private SharedPreferences app_preferences;
 
-
     public SyncHelper(ExtApplication application) {
 
         this.application = application;
@@ -62,7 +62,6 @@ public class SyncHelper {
         client = application.getHttpClient();
 
     }
-
 
     public int insertMongoUser(String email, String username, String password){
 
@@ -162,95 +161,6 @@ public class SyncHelper {
         return returnCode;
     }
 
-    /**
-     * Refresh my friends list and my friend requests
-     */
-    public int getMyMongoUser() {
-
-        Log.v(TAG, "Fetching my user");
-
-
-             String   query =  "{ 'username':'"+app_preferences.getString("username","")+"' }";
-
-
-         Uri   uri = new Uri.Builder()
-                    .scheme("https")
-                    .authority(authUrl)
-                    .path(runner_collection)
-                    .appendQueryParameter("q", query)
-                    .appendQueryParameter("apiKey", apiKey)
-                    .appendQueryParameter("fo", "true")
-                    .build();
-
-        DefaultHttpClient client = application.getHttpClient();
-        client.setParams(getMyParams());
-
-        try {
-
-            HttpResponse response;
-
-            HttpGet httpRequest = new HttpGet(uri.toString());
-            setDefaultGetHeaders(httpRequest);
-            Log.v(TAG, "fetching existing user");
-            response = client.execute(httpRequest);
-
-            Log.v(TAG, "user acquisition- response received");
-
-            HttpEntity entity = response.getEntity();
-
-            StatusLine statusLine = response.getStatusLine();
-
-            if (statusLine.getStatusCode() >= 300) {
-//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
-                Log.e(TAG,statusLine.getStatusCode()+" - "+statusLine.getReasonPhrase());
-            }
-
-            String resultString = null;
-
-            if (entity != null) {
-                InputStream instream = entity.getContent();
-                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-                    instream = new GZIPInputStream(instream);
-                }
-                resultString = Utils.convertStreamToString(instream);
-
-                instream.close();
-            }
-
-            Log.v(TAG, String.format("Deserialising [%s]", resultString));
-
-            Gson gson = new Gson();
-            User user2 = (User) gson.fromJson(resultString,
-                    new TypeToken<User>() {
-                    }.getType());
-
-
-            SharedPreferences.Editor editor = app_preferences.edit();
-
-            if (user2 != null) {
-                editor.putString("friends", user2.getFriends());
-                editor.putString("friendRequests", user2.getFriendRequests());
-                editor.apply();
-            }else{
-                editor.putString("mongoId", null);
-                editor.putString("friends", null);
-                editor.putString("friendRequests", null);
-                editor.apply();
-                return -1;
-            }
-
-        } catch (Exception e) {
-            Log.e(TAG, "Exception fetching user", e);
-            return -1;
-        }
-
-        Log.v(TAG, String.format("Fetching existing user - done"));
-        return 0;
-    }
-
-
-    //fixme commit
     public int getMongoUser(String email, String username, String password) {
 
         Log.v(TAG, "Fetching user");
@@ -376,164 +286,6 @@ public class SyncHelper {
 
     }
 
-//    public List<Running> getMongoChallenges() {
-//
-//        Log.v(TAG, "Fetching challenges for me");
-//
-//        List<Running>challenges = new ArrayList<Running>();
-//
-//        List<Running>challengesExtClosed = new ArrayList<Running>();
-//
-//        List<Running>challengesDBClosed = new ArrayList<Running>();
-//
-//
-//        String query = "  " +
-//                "{   $or: [";
-//
-//        query += "{ 'user_name': '" + app_preferences.getString("username","") + "'},";
-//
-//        query += "{ 'opponent_name': '" + app_preferences.getString("username","") + "'}";
-//
-//        query += "]  } ";
-////todo add status query
-////        query += ", 'status': '0'     }   ";
-//
-//          Uri  uri = new Uri.Builder()
-//                    .scheme("https")
-//                    .authority(authUrl)
-//                    .path(running_collection)
-//                    .appendQueryParameter("q", query)
-//                    .appendQueryParameter("apiKey", apiKey)
-//                    .build();
-//
-//
-//        DefaultHttpClient client = application.getHttpClient();
-//        client.setParams(getMyParams());
-//
-//
-//
-//        try {
-//
-//            HttpResponse response;
-//
-//
-//                HttpGet httpRequest = new HttpGet(uri.toString());
-//                setDefaultGetHeaders(httpRequest);
-//                Log.v(TAG, "Fetching challenges - requesting");
-//                response = client.execute(httpRequest);
-//
-//
-//
-//            Log.v(TAG, "Fetching challenges - responce received");
-//
-//            HttpEntity entity = response.getEntity();
-//
-//            StatusLine statusLine = response.getStatusLine();
-//
-//            Log.v(TAG, String.format("Fetching challenges - status [%s]", statusLine));
-//
-//            if (statusLine.getStatusCode() >= 300) {
-////                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
-//                Log.e(TAG,statusLine.getStatusCode()+" - "+statusLine.getReasonPhrase());
-//            }
-//
-//            String resultString = null;
-//
-//            if (entity != null) {
-//                InputStream instream = entity.getContent();
-//                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-//                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-//                    instream = new GZIPInputStream(instream);
-//                }
-//                resultString = Utils.convertStreamToString(instream);
-//
-//                instream.close();
-//            }
-//
-//            Log.v(TAG, String.format("Deserialising [%s]", resultString));
-//
-//            Gson gson = new Gson();
-//            challenges = (List<Running>) gson.fromJson(resultString,
-//                    new TypeToken<List<Running>>() {
-//                    }.getType());
-//
-//            dbHelper.deleteAllOpenChallenges();
-//
-//
-//
-////            Log.v(TAG, String.format("Fetching parts - ready to insert [%d] parts", StoreList.size()));
-//            int size = challenges.size();
-//            for (int i = 0; i < size; i++) {
-//
-//
-//                //if closed challenge and user has responded to it (not created!)
-//                if ( challenges.get(i).getStatus()==1 ){
-//                    challengesExtClosed.add(challenges.get(i));
-//                    challenges.remove(i);
-//                    --i;
-//                    --size;
-//                }else if ( challenges.get(i).getStatus()==0)  {
-//                    challenges.get(i).setType(1);
-//                    challenges.get(i).setRunning_id(-1);
-//                    dbHelper.addRunning(challenges.get(i));
-//                }
-////                ll_rows++;
-//            }
-//
-//
-//            challengesDBClosed = dbHelper.fetchClosedRunsFromDb();
-//            int sizeClosed = challengesDBClosed.size();
-//
-//            size = challengesExtClosed.size();
-//            for (int j=0; j<size; j++){
-//
-//                boolean exists=false;
-//
-//                for (int k=0; k<sizeClosed; k++){
-//
-//                    if (challengesExtClosed.get(j).get_id().get$oid().equals(challengesDBClosed.get(k).getMongoId())){
-//                        exists=true;
-//                        continue;
-//                    }
-//
-//                }
-//
-//                if (!exists) {
-//
-//                    challengesExtClosed.get(j).setMongoId(challengesExtClosed.get(j).get_id().get$oid());
-//                    challengesExtClosed.get(j).setRunning_id(-1);
-//                    challengesExtClosed.get(j).setType(1);
-//                    challengesDBClosed.add(challengesExtClosed.get(j));
-//                    dbHelper.addRunning(challengesExtClosed.get(j));
-//                }
-//
-//
-//
-//            }
-//
-//
-//
-//            for (Running run:challengesDBClosed){
-//                challenges.add(run);
-//                if (run.getDeleted()!=1 && run.getWinner()!=null && (run.getUser_name().equals(app_preferences.getString("username","")))){
-//                    deleteChallenge(run.getMongoId());
-//                    dbHelper.setDeletedFlag(run.getMongoId());
-//                }
-//            }
-//
-//        } catch (Exception e) {
-//            Log.e(TAG, "Exception fetching challenges", e);
-//            return challenges;
-//        }
-//
-//        Log.v(TAG, String.format("Fetching challenges - done"));
-//
-//
-//
-//        return challenges;
-//
-//    }
-//
     public int shareRunToMongo(Running runToShare) {
 
         Log.v(TAG, "sharing run");
@@ -553,6 +305,8 @@ public class SyncHelper {
 
         try {
 
+            User me  = application.getMe();
+
             JSONObject workout = new JSONObject();
             workout.put("username", app_preferences.getString("username",""));
             workout.put("time", runToShare.getTime());
@@ -560,10 +314,10 @@ public class SyncHelper {
             workout.put("distance", runToShare.getDistance());
             workout.put("avgPaceText", runToShare.getAvgPaceText());
             workout.put("description", runToShare.getDescription());
+            workout.put("sharedId", me.getSharedRunsNum()+1);
 
 
-
-            StringEntity se = new StringEntity( workout.toString());
+                    StringEntity se = new StringEntity(workout.toString());
             setDefaultPostHeaders(httpPost);
             httpPost.setEntity(se);
 
@@ -609,6 +363,9 @@ public class SyncHelper {
             if (run == null || run.get_id() == null){
                 return 0;
             }
+
+            me.setSharedRunsNum(me.getSharedRunsNum() + 1);
+            dbHelper.updateUserRuns(me.getMongoId(), me.getSharedRunsNum());
 
             for (Interval interval : runToShare.getIntervals()){
                 interval.setRunning_mongo_id(run.get_id().get$oid());
@@ -717,93 +474,6 @@ public class SyncHelper {
 
     }
 
-//
-//    public void updateTimeAndDistance(String username){
-//
-//
-//        Log.v(TAG, "Saving time and dist");
-//
-//        String query = "{'username': '"+username+"'}";
-//
-//
-//        Uri uri = new Uri.Builder()
-//                .scheme("https")
-//                .authority(authUrl)
-//                .path(runner_collection)
-//                .appendQueryParameter("q", query)
-//                .appendQueryParameter("apiKey", apiKey)
-//                .build();
-//
-//
-//        DefaultHttpClient client = application.getHttpClient();
-//        client.setParams(getMyParams());
-//
-//
-//        try {
-//            JSONObject obj = new JSONObject();
-//
-//
-//            obj.put("totalDistance" , app_preferences.getFloat("totalDistance",0));
-//
-//            obj.put("totalTime" , app_preferences.getLong("totalTime", 0));
-//
-//
-//            JSONObject lastObj = new JSONObject();
-//            lastObj.put("$set", obj);
-//
-//            StringEntity se = new StringEntity(lastObj.toString());
-//
-//
-//
-//            HttpPut httpRequest = new HttpPut(uri.toString());
-//
-//            httpRequest.setEntity(se);
-//
-//
-//            setDefaultPutHeaders(httpRequest);
-//
-//            Log.v(TAG, "setting user stats - requesting");
-//            HttpResponse response = client.execute(httpRequest);
-//            Log.v(TAG, "setting finished - responce received");
-//
-//            HttpEntity entity = response.getEntity();
-//
-//            StatusLine statusLine = response.getStatusLine();
-//
-//            Log.v(TAG, String.format("Setting time & dist - status [%s]", statusLine));
-//
-//            if (statusLine.getStatusCode() >= 300) {
-////                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
-//                Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
-//                return;
-//            }
-//
-//            String resultString = null;
-//
-//            if (entity != null) {
-//                InputStream instream = entity.getContent();
-//                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-//                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-//                    instream = new GZIPInputStream(instream);
-//                }
-//                resultString = Utils.convertStreamToString(instream);
-//
-//                instream.close();
-//            }
-//
-//            Log.v(TAG, String.format("Deserialising [%s]", resultString));
-//
-//
-//
-////            dbHelper.deleteAllStores();
-//
-//            Log.v(TAG, String.format("Uploaded user time and dist"));
-//
-//        } catch (Exception e) {
-//            Log.e(TAG, "Exception uploading user stats", e);
-//        }
-//    }
-//
     public List<User> sentFriendRequest(String friend){
 
         List<User> users = new ArrayList<User>();
@@ -811,8 +481,6 @@ public class SyncHelper {
 
             Log.v(TAG, "Fetching user "+friend);
 
-
-            String[] friendsArray;
             String query;
 
             if (friend == null || friend.equals("")) {
@@ -1007,8 +675,7 @@ public class SyncHelper {
         return user;
 
     }
-//
-//
+
     public boolean uploadNewFriendOrRequest(String friends,String username){
 
 
@@ -1187,6 +854,7 @@ public class SyncHelper {
                 if ((type==0)&&((user.getFriends()==null || !user.getFriends().contains(myUsername) )&& !app_preferences.getString("friends", "").contains(user.getUsername()))){
                     fixFriendsListForUser(user.getFriends() + " " + myUsername, user.getUsername(), type);
                     fixFriendsListForUser(app_preferences.getString("friends", "") + " " + user.getUsername(), myUsername, type);
+                    dbHelper.addUser(user);
                 }
 
                 //remove his name
@@ -1223,7 +891,6 @@ public class SyncHelper {
         return user;
 
     }
-
 
     public boolean fixFriendsListForUser(String friends,String username, int type){
 
@@ -1419,6 +1086,274 @@ public class SyncHelper {
 
 
         return users;
+    }
+
+
+    public List<Running> getNewRunsForUsers(List<User> users) {
+
+        List<Running> newRuns = new ArrayList<Running>();
+
+        for (User user : users){
+            if (user.getMongoId() == null){
+                users.remove(user);
+            }
+            //newRuns.addAll(getRunForUser(user.getUsername(), user.getSharedRunsNum()));
+        }
+
+
+
+        String query = "{";
+
+
+        for (User user : users) {
+
+            query += "{ $or: [";
+
+
+            query += "{ $and: [";
+            query += "{ 'username': '" + user.getUsername() + "' ,";
+            query += " 'sharedId': " + user.getSharedRunsNum() + "}";
+            query += "] }";
+
+
+            query += "] }";
+
+        }
+
+        query+= "}";
+
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .authority(authUrl)
+                .path(interval_collection)
+                .appendQueryParameter("q", query)
+                .appendQueryParameter("apiKey", apiKey)
+                .build();
+
+
+        DefaultHttpClient client = application.getHttpClient();
+        client.setParams(getMyParams());
+
+
+        try {
+
+            HttpGet httpRequest = new HttpGet(uri.toString());
+
+
+            setDefaultGetHeaders(httpRequest);
+
+            HttpResponse response = client.execute(httpRequest);
+
+            HttpEntity entity = response.getEntity();
+
+            StatusLine statusLine = response.getStatusLine();
+
+            Log.v(TAG, String.format("Fetching stores - status [%s]", statusLine));
+
+            if (statusLine.getStatusCode() >= 300) {
+//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
+                Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
+            }
+
+            String resultString = null;
+
+            if (entity != null) {
+                InputStream instream = entity.getContent();
+                Header contentEncoding = response.getFirstHeader("Content-Encoding");
+                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+                    instream = new GZIPInputStream(instream);
+                }
+                resultString = Utils.convertStreamToString(instream);
+
+                instream.close();
+            }
+
+            Log.v(TAG, String.format("Deserialising [%s]", resultString));
+
+            Gson gson = new Gson();
+
+
+            newRuns = (List<Running>) gson.fromJson(resultString,
+                    new TypeToken<List<Running>>() {
+                    }.getType());
+
+
+
+        } catch (Exception e) {
+            Log.e(TAG, "Exception fetching leaderboard or friend", e);
+            return newRuns;
+        }
+
+
+
+
+
+
+
+
+        return newRuns;
+    }
+
+    private List<Running> getRunForUser(String username, int sharedRunId){
+
+        List<Running> newRuns = new ArrayList<Running>();
+
+        String queryAnd = "{ $and: [";
+        queryAnd += "{ 'username': '" + username + "' ,";
+        queryAnd += " 'sharedId': " + sharedRunId + "}";
+        queryAnd += "] }";
+
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .authority(authUrl)
+                .path(running_collection)
+                .appendQueryParameter("apiKey", apiKey)
+                .appendQueryParameter("q", queryAnd)
+                .build();
+
+
+
+
+//        HashMap  params = new HashMap();
+        DefaultHttpClient client = application.getHttpClient();
+        client.setParams(getMyParams());
+
+
+        try {
+
+            HttpResponse response;
+
+            HttpGet httpRequest = new HttpGet(uri.toString());
+
+            setDefaultGetHeaders(httpRequest);
+            Log.v(TAG, "fetching existing user");
+            response = client.execute(httpRequest);
+
+            Log.v(TAG, "user acquisition- response received");
+
+            HttpEntity entity = response.getEntity();
+
+            StatusLine statusLine = response.getStatusLine();
+
+            if (statusLine.getStatusCode() >= 300) {
+//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
+                Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
+            }
+
+            String resultString = null;
+
+            if (entity != null) {
+                InputStream instream = entity.getContent();
+                Header contentEncoding = response.getFirstHeader("Content-Encoding");
+                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+                    instream = new GZIPInputStream(instream);
+                }
+                resultString = Utils.convertStreamToString(instream);
+
+                instream.close();
+            }
+
+            Gson gson = new Gson();
+            newRuns = (List<Running>) gson.fromJson(resultString,
+                    new TypeToken<List<Running>>() {
+                    }.getType());
+
+            if (newRuns !=null){
+
+                for (Running run : newRuns){
+                   run.setIntervals(fetchIntervalsForRun(run));
+                }
+
+            }
+
+
+            return newRuns;
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        return newRuns;
+
+    }
+
+    public List<Interval> fetchIntervalsForRun(Running run){//0 leaderboard
+
+        List<Interval> intervals = new ArrayList<Interval>();
+
+        String query;
+
+
+        query = "{ $or: [";
+            query += "{ 'running_mongo_id': '" + run.get_id().get$oid() + "'},";
+
+        query += "] }";
+
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .authority(authUrl)
+                .path(interval_collection)
+                .appendQueryParameter("q", query)
+                .appendQueryParameter("apiKey", apiKey)
+                .build();
+
+
+        DefaultHttpClient client = application.getHttpClient();
+        client.setParams(getMyParams());
+
+
+        try {
+
+            HttpGet httpRequest = new HttpGet(uri.toString());
+
+
+            setDefaultGetHeaders(httpRequest);
+
+            HttpResponse response = client.execute(httpRequest);
+
+            HttpEntity entity = response.getEntity();
+
+            StatusLine statusLine = response.getStatusLine();
+
+            Log.v(TAG, String.format("Fetching stores - status [%s]", statusLine));
+
+            if (statusLine.getStatusCode() >= 300) {
+//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
+                Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
+            }
+
+            String resultString = null;
+
+            if (entity != null) {
+                InputStream instream = entity.getContent();
+                Header contentEncoding = response.getFirstHeader("Content-Encoding");
+                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+                    instream = new GZIPInputStream(instream);
+                }
+                resultString = Utils.convertStreamToString(instream);
+
+                instream.close();
+            }
+
+            Log.v(TAG, String.format("Deserialising [%s]", resultString));
+
+            Gson gson = new Gson();
+
+
+            intervals = (List<Interval>) gson.fromJson(resultString,
+                    new TypeToken<List<Interval>>() {
+                    }.getType());
+
+
+
+        } catch (Exception e) {
+            Log.e(TAG, "Exception fetching leaderboard or friend", e);
+            return intervals;
+        }
+
+        Log.v(TAG, String.format("Fetching leader or friend - done"));
+
+
+        return intervals;
     }
 
 

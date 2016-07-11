@@ -53,10 +53,25 @@ public class ContentDescriptor {
         Interval.addToUriMatcher(authority, matcher);
         Plan.addToUriMatcher(authority, matcher);
         User.addToUriMatcher(authority, matcher);
+        RunningFriend.addToUriMatcher(authority, matcher);
+        IntervalFriend.addToUriMatcher(authority, matcher);
         
      
 
         return matcher;
+    }
+
+    public static class RunningCols {
+        public static final String ID = BaseColumns._ID; // by convention
+        public static final String DATE = "date";
+        public static final String DISTANCE = "distance";
+        public static final String TIME = "time";
+        public static final String AVGPACETEXT = "avgpacetext";
+        public static final String DESCRIPTION = "description";
+        public static final String IS_SHARED = "IS_SHARED";
+        public static final String USERNAME = "username";
+
+
     }
 
     
@@ -80,16 +95,7 @@ public class ContentDescriptor {
         public static final String CONTENT_TYPE_DIR = "vnd.android.cursor.dir/vnd.com.kostas.onlineHelp.app";
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.com.kostas.onlineHelp.app";
 
-        public static class Cols {
-            public static final String ID = BaseColumns._ID; // by convention
-            public static final String DATE = "date";
-            public static final String DISTANCE = "distance";
-            public static final String TIME = "time";
-            public static final String AVGPACETEXT = "avgpacetext";
-            public static final String DESCRIPTION = "description";
-            public static final String IS_SHARED = "IS_SHARED";
 
-        }
 
         protected static UriMatcher addToUriMatcher(String authority, UriMatcher matcher) {
             matcher.addURI(authority, Running.PATH, Running.PATH_TOKEN);
@@ -101,30 +107,79 @@ public class ContentDescriptor {
 
         public static String createTable() { 
             return "CREATE TABLE " + Running.TABLE_NAME + " ( "
-                    + String.format(sFrmIdAutoinc, Cols.ID) + " , "
-                    + String.format(sFrmTextNotNull, Cols.DATE) + " , "
-                     + String.format(sFrmText, Cols.DESCRIPTION) + " , "
-                      + String.format(sFrmTextNotNull, Cols.TIME) + " , "
-                    + String.format(sFrmTextNotNull, Cols.AVGPACETEXT) + " , "
-                    + String.format(sFrmTextNotNull, Cols.DISTANCE) + " , "
-                    + String.format(sFrmInt, Cols.IS_SHARED) + " , "
+                    + String.format(sFrmIdAutoinc, RunningCols.ID) + " , "
+                    + String.format(sFrmTextNotNull, RunningCols.DATE) + " , "
+                     + String.format(sFrmText, RunningCols.DESCRIPTION) + " , "
+                      + String.format(sFrmTextNotNull, RunningCols.TIME) + " , "
+                    + String.format(sFrmTextNotNull, RunningCols.AVGPACETEXT) + " , "
+                    + String.format(sFrmTextNotNull, RunningCols.DISTANCE) + " , "
+                    + String.format(sFrmText, RunningCols.USERNAME) + " , "
+                    + String.format(sFrmInt, RunningCols.IS_SHARED) + " , "
 
-                    + String.format(sFrmPrimaryKey, Cols.ID) + ")";
+                    + String.format(sFrmPrimaryKey, RunningCols.ID) + ")";
+        }
+    }
+
+    public static class RunningFriend {
+        public static final String TABLE_NAME = "running_friend";
+        // content://xxxxx/running_friend
+        public static final String PATH = "running_friend";
+        public static final int PATH_TOKEN = 50;
+        // content://xxxxx/running_friend/20
+        public static final String PATH_FOR_ID = "running_friend/#";
+        // see wa1 content://xxxxx/running_friend/21
+        public static final String PATH_FOR_ID_WA = "running_friend/*";
+        public static final int PATH_FOR_ID_TOKEN = 51;
+        // content://xxxxx/simcounterdetailresponses/startletters
+        public static final String PATH_START_LETTERS = "running_friend/startletters";
+        public static final int PATH_START_LETTERS_TOKEN = 52;
+
+        public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH).build();
+
+        public static final String CONTENT_TYPE_DIR = "vnd.android.cursor.dir/vnd.com.kostas.onlineHelp.app";
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.com.kostas.onlineHelp.app";
+
+        protected static UriMatcher addToUriMatcher(String authority, UriMatcher matcher) {
+            matcher.addURI(authority, RunningFriend.PATH, RunningFriend.PATH_TOKEN);
+            matcher.addURI(authority, RunningFriend.PATH_FOR_ID, RunningFriend.PATH_FOR_ID_TOKEN);
+            matcher.addURI(authority, RunningFriend.PATH_FOR_ID_WA, RunningFriend.PATH_FOR_ID_TOKEN);
+            matcher.addURI(authority, RunningFriend.PATH_START_LETTERS, RunningFriend.PATH_START_LETTERS_TOKEN);
+            return matcher;
+        }
+
+        public static String createTable() {
+            return "CREATE TABLE " + RunningFriend.TABLE_NAME + " ( "
+                    + String.format(sFrmIdAutoinc, RunningCols.ID) + " , "
+                    + String.format(sFrmTextNotNull, RunningCols.DATE) + " , "
+                    + String.format(sFrmText, RunningCols.DESCRIPTION) + " , "
+                    + String.format(sFrmTextNotNull, RunningCols.TIME) + " , "
+                    + String.format(sFrmTextNotNull, RunningCols.AVGPACETEXT) + " , "
+                    + String.format(sFrmTextNotNull, RunningCols.DISTANCE) + " , "
+                    + String.format(sFrmText, RunningCols.USERNAME) + " , "
+                    + String.format(sFrmInt, RunningCols.IS_SHARED) + " , "
+
+                    + String.format(sFrmPrimaryKey, RunningCols.ID) + ")";
         }
     }
 
 
+    public static class IntervalCols {
+        public static final String ID = BaseColumns._ID; // by convention
+        public static final String RUNNING_ID = "running_id";
+        public static final String MILLISECONDS = "milliseconds";
+        public static final String LATLONLIST = "latlonlist";
+        public static final String DISTANCE = "distance";
+        public static final String PACETEXT = "pacetext";
+        public static final String FASTEST = "fastest";
+    }
+
     public static class Interval {
         public static final String TABLE_NAME = "interval";
-        // content://xxxxx/running
         public static final String PATH = "interval";
         public static final int PATH_TOKEN = 20;
-        // content://xxxxx/running/20
         public static final String PATH_FOR_ID = "interval/#";
-        // see wa1 content://xxxxx/running/21
         public static final String PATH_FOR_ID_WA = "interval/*";
         public static final int PATH_FOR_ID_TOKEN = 21;
-        // content://xxxxx/simcounterdetailresponses/startletters
         public static final String PATH_START_LETTERS = "interval/startletters";
         public static final int PATH_START_LETTERS_TOKEN = 22;
 
@@ -133,15 +188,7 @@ public class ContentDescriptor {
         public static final String CONTENT_TYPE_DIR = "vnd.android.cursor.dir/vnd.com.kostas.onlineHelp.app";
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.com.kostas.onlineHelp.app";
 
-        public static class Cols {
-            public static final String ID = BaseColumns._ID; // by convention
-            public static final String RUNNING_ID = "running_id";
-            public static final String MILLISECONDS = "milliseconds";
-            public static final String LATLONLIST = "latlonlist";
-            public static final String DISTANCE = "distance";
-            public static final String PACETEXT = "pacetext";
-            public static final String FASTEST = "fastest";
-        }
+
 
         protected static UriMatcher addToUriMatcher(String authority, UriMatcher matcher) {
             matcher.addURI(authority, Interval.PATH, Interval.PATH_TOKEN);
@@ -153,29 +200,61 @@ public class ContentDescriptor {
 
         public static String createTable() {
             return "CREATE TABLE " + Interval.TABLE_NAME + " ( "
-                    + String.format(sFrmIdAutoinc, Cols.ID) + " , "
-                    + String.format(sFrmTextNotNull, Cols.RUNNING_ID) + " , "
-                    + String.format(sFrmTextNotNull, Cols.MILLISECONDS) + " , "
-                    + String.format(sFrmTextNotNull, Cols.LATLONLIST) + " , "
-                    + String.format(sFrmTextNotNull, Cols.DISTANCE) + " , "
-                    + String.format(sFrmTextNotNull, Cols.PACETEXT) + " , "
-                    + String.format(sFrmInt, Cols.FASTEST) + " , "
-                    + String.format(sFrmPrimaryKey, Cols.ID) + ")";
+                    + String.format(sFrmIdAutoinc, IntervalCols.ID) + " , "
+                    + String.format(sFrmTextNotNull, IntervalCols.RUNNING_ID) + " , "
+                    + String.format(sFrmTextNotNull, IntervalCols.MILLISECONDS) + " , "
+                    + String.format(sFrmTextNotNull, IntervalCols.LATLONLIST) + " , "
+                    + String.format(sFrmTextNotNull, IntervalCols.DISTANCE) + " , "
+                    + String.format(sFrmTextNotNull, IntervalCols.PACETEXT) + " , "
+                    + String.format(sFrmInt, IntervalCols.FASTEST) + " , "
+                    + String.format(sFrmPrimaryKey, IntervalCols.ID) + ")";
+        }
+    }
+
+    public static class IntervalFriend {
+        public static final String TABLE_NAME = "interval_friend";
+        public static final String PATH = "interval_friend";
+        public static final int PATH_TOKEN = 60;
+        public static final String PATH_FOR_ID = "interval_friend/#";
+        public static final String PATH_FOR_ID_WA = "interval_friend/*";
+        public static final int PATH_FOR_ID_TOKEN = 61;
+        public static final String PATH_START_LETTERS = "interval_friend/startletters";
+        public static final int PATH_START_LETTERS_TOKEN = 62;
+
+        public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH).build();
+
+        public static final String CONTENT_TYPE_DIR = "vnd.android.cursor.dir/vnd.com.kostas.onlineHelp.app";
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.com.kostas.onlineHelp.app";
+
+        protected static UriMatcher addToUriMatcher(String authority, UriMatcher matcher) {
+            matcher.addURI(authority, IntervalFriend.PATH, IntervalFriend.PATH_TOKEN);
+            matcher.addURI(authority, IntervalFriend.PATH_FOR_ID, IntervalFriend.PATH_FOR_ID_TOKEN);
+            matcher.addURI(authority, IntervalFriend.PATH_FOR_ID_WA, IntervalFriend.PATH_FOR_ID_TOKEN);
+            matcher.addURI(authority, IntervalFriend.PATH_START_LETTERS, IntervalFriend.PATH_START_LETTERS_TOKEN);
+            return matcher;
+        }
+
+        public static String createTable() {
+            return "CREATE TABLE " + IntervalFriend.TABLE_NAME + " ( "
+                    + String.format(sFrmIdAutoinc, IntervalCols.ID) + " , "
+                    + String.format(sFrmTextNotNull, IntervalCols.RUNNING_ID) + " , "
+                    + String.format(sFrmTextNotNull, IntervalCols.MILLISECONDS) + " , "
+                    + String.format(sFrmTextNotNull, IntervalCols.LATLONLIST) + " , "
+                    + String.format(sFrmTextNotNull, IntervalCols.DISTANCE) + " , "
+                    + String.format(sFrmTextNotNull, IntervalCols.PACETEXT) + " , "
+                    + String.format(sFrmInt, IntervalCols.FASTEST) + " , "
+                    + String.format(sFrmPrimaryKey, IntervalCols.ID) + ")";
         }
     }
 
 
     public static class Plan {
         public static final String TABLE_NAME = "plan";
-        // content://xxxxx/running
         public static final String PATH = "plan";
         public static final int PATH_TOKEN = 30;
-        // content://xxxxx/running/20
         public static final String PATH_FOR_ID = "plan/#";
-        // see wa1 content://xxxxx/running/21
         public static final String PATH_FOR_ID_WA = "plan/*";
         public static final int PATH_FOR_ID_TOKEN = 31;
-        // content://xxxxx/simcounterdetailresponses/startletters
         public static final String PATH_START_LETTERS = "plan/startletters";
         public static final int PATH_START_LETTERS_TOKEN = 32;
 

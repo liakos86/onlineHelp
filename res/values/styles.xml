@@ -7,8 +7,11 @@
         <item name="android:background">@android:color/transparent</item>
         <item name="android:typeface">monospace</item>
         <item name="android:textColor">@color/white_back</item>
-        <item name="android:actionBarStyle">@style/CustomIntervalTheme.ActionBarStyle</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
+
+
 
     <style name="CustomIntervalTheme.ActionBarStyle"
            parent="@android:style/Widget.Holo.Light.ActionBar" >

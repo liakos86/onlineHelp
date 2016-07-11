@@ -12,6 +12,7 @@ import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Plan;
 import com.kostas.dbObjects.Running;
 import com.kostas.dbObjects.User;
+import com.kostas.onlineHelp.ExtApplication;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,17 +41,20 @@ public class Database extends SQLiteOpenHelper {
 
 
     private static final String DATABASE_NAME = "interval_runner.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
     // this is also considered as invalid id by the server
     public static final long INVALID_ID = -1;
-    private Context mContext;
+    private Context mApp;
 
     private static final String DATABASE_ALTER_RUNNING_1 = "ALTER TABLE running ADD COLUMN IS_SHARED INTEGER default 0;";
+    private static final String DATABASE_ALTER_RUNNING_2 = "ALTER TABLE running ADD COLUMN username TEXT;";
+
 
     public Database(Context ctx) {
         super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
-        mContext = ctx;
+        mApp = ctx;
     }
+
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -59,6 +63,8 @@ public class Database extends SQLiteOpenHelper {
         db.execSQL(ContentDescriptor.Interval.createTable());
         db.execSQL(ContentDescriptor.Plan.createTable());
         db.execSQL(ContentDescriptor.User.createTable());
+        db.execSQL(ContentDescriptor.RunningFriend.createTable());
+        db.execSQL(ContentDescriptor.IntervalFriend.createTable());
 
 
     }
@@ -69,22 +75,25 @@ public class Database extends SQLiteOpenHelper {
 
         if (oldVersion < 2) {
             db.execSQL(DATABASE_ALTER_RUNNING_1);
+            db.execSQL(DATABASE_ALTER_RUNNING_2);
             db.execSQL(ContentDescriptor.User.createTable());
+            db.execSQL(ContentDescriptor.RunningFriend.createTable());
+            db.execSQL(ContentDescriptor.IntervalFriend.createTable());
         }
 
     }
     
     
-    public int addRunning(Running running) {
-        ContentResolver resolver = mContext.getContentResolver();
-        Uri uri = resolver.insert(ContentDescriptor.Running.CONTENT_URI, Running.asContentValues(running));
+    public int addRunning(Running running, Uri runUri, Uri intervalUri) {
+        ContentResolver resolver = mApp.getContentResolver();
+        Uri uri = resolver.insert(runUri, Running.asContentValues(running));
 
         int runId = Integer.valueOf(uri.getLastPathSegment());
 
         for (Interval interval : running.getIntervals())
         {
             interval.setRunning_id(runId);
-            addInterval(interval);
+            addInterval(interval, intervalUri);
         }
 
         return runId;
@@ -93,30 +102,24 @@ public class Database extends SQLiteOpenHelper {
 
 
     public void deleteRunning(Long id){
-        ContentResolver resolver = mContext.getContentResolver();
-        resolver.delete(ContentDescriptor.Running.CONTENT_URI, ContentDescriptor.Running.Cols.ID + "=" + String.valueOf(id), null);
-        resolver.delete(ContentDescriptor.Interval.CONTENT_URI,ContentDescriptor.Interval.Cols.RUNNING_ID + "=" + String.valueOf(id), null);
+        ContentResolver resolver = mApp.getContentResolver();
+        resolver.delete(ContentDescriptor.Running.CONTENT_URI, ContentDescriptor.RunningCols.ID + "=" + String.valueOf(id), null);
+        resolver.delete(ContentDescriptor.Interval.CONTENT_URI,ContentDescriptor.IntervalCols.RUNNING_ID + "=" + String.valueOf(id), null);
 
     }
 
-    public void addInterval(Interval interval) {
-        ContentResolver resolver = mContext.getContentResolver();
-        resolver.insert(ContentDescriptor.Interval.CONTENT_URI, Interval.asContentValues(interval));
-    }
-
-
-    public void deleteInterval(Long id){
-        ContentResolver resolver = mContext.getContentResolver();
-        resolver.delete(ContentDescriptor.Interval.CONTENT_URI, ContentDescriptor.Interval.Cols.ID + "=" + String.valueOf(id), null);
+    public void addInterval(Interval interval, Uri intervalUri) {
+        ContentResolver resolver = mApp.getContentResolver();
+        resolver.insert(intervalUri, Interval.asContentValues(interval));
     }
 
     public void addPlan(Plan plan) {
-        ContentResolver resolver = mContext.getContentResolver();
+        ContentResolver resolver = mApp.getContentResolver();
         resolver.insert(ContentDescriptor.Plan.CONTENT_URI, Plan.asContentValues(plan));
     }
 
     public void deletePlan(Long id){
-        ContentResolver resolver = mContext.getContentResolver();
+        ContentResolver resolver = mApp.getContentResolver();
         resolver.delete(ContentDescriptor.Plan.CONTENT_URI, ContentDescriptor.Plan.Cols.ID + "=" + String.valueOf(id), null);
     }
 
@@ -127,31 +130,33 @@ public class Database extends SQLiteOpenHelper {
         if (user.getFriendRequests() == null){
             user.setFriendRequests("");
         }
-        ContentResolver resolver = mContext.getContentResolver();
+        ContentResolver resolver = mApp.getContentResolver();
         resolver.insert(ContentDescriptor.User.CONTENT_URI, User.asContentValues(user));
     }
 
 
     public int countRuns(){
-        String[] proj = {ContentDescriptor.Running.Cols.ID};
-        Cursor c = mContext.getContentResolver().query(ContentDescriptor.Running.CONTENT_URI, proj, null, null, null);
+        String[] proj = {ContentDescriptor.RunningCols.ID};
+        Cursor c = mApp.getContentResolver().query(ContentDescriptor.Running.CONTENT_URI, proj, null, null, null);
         int toRet = c.getCount();
         c.close();
         c=null;
         return toRet;
     }
 
-    public List<Running> fetchRunsFromDb() {
+    public List<Running> fetchRunsFromDb(Uri runUri, Uri intervalUri) {
 
+       
         String[] FROM = {
                 // ! beware. I mark the position of the fields
-                ContentDescriptor.Running.Cols.DESCRIPTION,
-                ContentDescriptor.Running.Cols.DATE,
-                ContentDescriptor.Running.Cols.ID,
-                ContentDescriptor.Running.Cols.TIME,
-                ContentDescriptor.Running.Cols.AVGPACETEXT,
-                ContentDescriptor.Running.Cols.DISTANCE,
-                ContentDescriptor.Running.Cols.IS_SHARED
+                ContentDescriptor.RunningCols.DESCRIPTION,
+                ContentDescriptor.RunningCols.DATE,
+                ContentDescriptor.RunningCols.ID,
+                ContentDescriptor.RunningCols.TIME,
+                ContentDescriptor.RunningCols.AVGPACETEXT,
+                ContentDescriptor.RunningCols.DISTANCE,
+                ContentDescriptor.RunningCols.IS_SHARED,
+                ContentDescriptor.RunningCols.USERNAME
 
         };
         int sDescPosition = 0;
@@ -161,9 +166,11 @@ public class Database extends SQLiteOpenHelper {
         int sPacePosition = 4;
         int sDistPosition = 5;
         int sIsSharedPosition = 6;
+        int sUsernamePosition = 7;
 
 
-        Cursor c = mContext.getContentResolver().query(ContentDescriptor.Running.CONTENT_URI, FROM,
+
+        Cursor c = mApp.getContentResolver().query(runUri, FROM,
                 null,
                 null, null);
 
@@ -179,7 +186,8 @@ public class Database extends SQLiteOpenHelper {
                         c.getLong(sTimePosition),
                         c.getString(sDatePosition),
                         c.getFloat(sDistPosition),
-                        c.getInt(sIsSharedPosition)==1
+                        c.getInt(sIsSharedPosition)==1,
+                        c.getString(sUsernamePosition)
                 );
 
                 newRun.setAvgPaceText(c.getString(sPacePosition));
@@ -191,20 +199,26 @@ public class Database extends SQLiteOpenHelper {
         c.close();
         c = null;
 
+
+
+        for (Running run : St){
+            run.setIntervals(fetchIntervalsForRun(run.getRunning_id(), intervalUri));
+        }
+
         return St;
 
     }
 
-    public List<Interval> fetchIntervalsForRun(long id) {
+    public List<Interval> fetchIntervalsForRun(long id, Uri tableUri) {
 
         String[] FROM = {
                 // ! beware. I mark the position of the fields
-                ContentDescriptor.Interval.Cols.ID,
-                ContentDescriptor.Interval.Cols.LATLONLIST,
-                ContentDescriptor.Interval.Cols.MILLISECONDS,
-                ContentDescriptor.Interval.Cols.DISTANCE,
-                ContentDescriptor.Interval.Cols.PACETEXT,
-                ContentDescriptor.Interval.Cols.FASTEST
+                ContentDescriptor.IntervalCols.ID,
+                ContentDescriptor.IntervalCols.LATLONLIST,
+                ContentDescriptor.IntervalCols.MILLISECONDS,
+                ContentDescriptor.IntervalCols.DISTANCE,
+                ContentDescriptor.IntervalCols.PACETEXT,
+                ContentDescriptor.IntervalCols.FASTEST
         };
 
         int sIdPosition = 0;
@@ -214,8 +228,8 @@ public class Database extends SQLiteOpenHelper {
         int sPacePosition = 4;
         int sFastestPosition = 5;
 
-        Cursor c = mContext.getContentResolver().query(ContentDescriptor.Interval.CONTENT_URI, FROM,
-                ContentDescriptor.Interval.Cols.RUNNING_ID+" = "+String.valueOf(id),
+        Cursor c = mApp.getContentResolver().query(tableUri, FROM,
+                ContentDescriptor.IntervalCols.RUNNING_ID+" = "+String.valueOf(id),
                 null, null);
 
         List<Interval> St = new ArrayList<Interval>();
@@ -257,7 +271,7 @@ public class Database extends SQLiteOpenHelper {
         int sRoundsPosition = 4;
         int sStartRestPosition = 5;
 
-        Cursor c = mContext.getContentResolver().query(ContentDescriptor.Plan.CONTENT_URI, FROM,
+        Cursor c = mApp.getContentResolver().query(ContentDescriptor.Plan.CONTENT_URI, FROM,
                 null,
                 null, null);
 
@@ -286,15 +300,22 @@ public class Database extends SQLiteOpenHelper {
     }
 
     public void setSharedFlagTrue(Long runningId){
-        ContentResolver resolver = mContext.getContentResolver();
+        ContentResolver resolver = mApp.getContentResolver();
         ContentValues values = new ContentValues();
-        values.put(ContentDescriptor.Running.Cols.IS_SHARED, 1);
-        resolver.update(ContentDescriptor.Running.CONTENT_URI, values, ContentDescriptor.Running.Cols.ID + " = '"+runningId+"'", null);
+        values.put(ContentDescriptor.RunningCols.IS_SHARED, 1);
+        resolver.update(ContentDescriptor.Running.CONTENT_URI, values, ContentDescriptor.RunningCols.ID + " = '"+runningId+"'", null);
+
+    }
+
+    public void updateUserRuns(String mongoId, int newruns){
+        ContentResolver resolver = mApp.getContentResolver();
+        ContentValues values = new ContentValues();
+        values.put(ContentDescriptor.User.Cols.SHARED_RUNS_NUM, newruns);
+        resolver.update(ContentDescriptor.User.CONTENT_URI, values, ContentDescriptor.User.Cols.MONGO_ID + " = '"+mongoId+"'", null);
 
     }
 
     public List<User> fetchUsersFromDb() {
-
 
         int sIdPosition = 0;
         int sMongoIdPosition = 1;
@@ -303,14 +324,13 @@ public class Database extends SQLiteOpenHelper {
         int sFriendsPosition = 4;
         int sFriendRequestsPosition = 5;
         int sSharedRunsNumPosition = 6;
-
         int sTotalDistancePosition = 7;
         int sTotalIntervalsPosition = 8;
         int sTotalRunsPosition = 9;
         int sTotalTimePosition = 10;
 
 
-        Cursor c = mContext.getContentResolver().query(ContentDescriptor.User.CONTENT_URI, USERS_FROM,
+        Cursor c = mApp.getContentResolver().query(ContentDescriptor.User.CONTENT_URI, USERS_FROM,
                 null,
                 null, null);
 
@@ -324,20 +344,15 @@ public class Database extends SQLiteOpenHelper {
                 User newUser = new User(c.getLong(sIdPosition),
                         c.getString(sMongoIdPosition),
                         c.getString(sUsernamePosition),
-
                         c.getString(sEmailPosition),
                         c.getString(sFriendsPosition),
                         c.getString(sFriendRequestsPosition),
-
                         c.getInt(sSharedRunsNumPosition),
-
                         c.getFloat(sTotalDistancePosition),
                         c.getInt(sTotalIntervalsPosition),
                         c.getInt(sTotalRunsPosition),
                         c.getLong(sTotalTimePosition)
                 );
-
-
 
                 St.add(newUser);
             }
@@ -350,7 +365,6 @@ public class Database extends SQLiteOpenHelper {
     }
 
     public User fetchUser(String username) {
-
 
         int sIdPosition = 0;
         int sMongoIdPosition = 1;
@@ -365,7 +379,7 @@ public class Database extends SQLiteOpenHelper {
         int sTotalRunsPosition = 9;
         int sTotalTimePosition = 10;
 
-        Cursor c = mContext.getContentResolver().query(ContentDescriptor.User.CONTENT_URI, USERS_FROM,
+        Cursor c = mApp.getContentResolver().query(ContentDescriptor.User.CONTENT_URI, USERS_FROM,
                 ContentDescriptor.User.Cols.USERNAME + " = '" + username + "' ",
                 null, null);
 
@@ -399,6 +413,20 @@ public class Database extends SQLiteOpenHelper {
 
         }
         return user;
+    }
+
+
+    public void deleteAllFriends(){
+        ContentResolver resolver = mApp.getContentResolver();
+        resolver.delete(ContentDescriptor.User.CONTENT_URI, null, null);
+    }
+
+    public void deleteAllFriendRuns(){
+        ContentResolver resolver = mApp.getContentResolver();
+        resolver.delete(ContentDescriptor.RunningFriend.CONTENT_URI, null, null);
+        resolver.delete(ContentDescriptor.IntervalFriend.CONTENT_URI, null, null);
+
+
     }
 
 
