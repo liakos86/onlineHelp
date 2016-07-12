@@ -136,8 +136,11 @@ public class SyncHelper {
                 return 0; //no user found
             }
 
+
             user2.setMongoId(user2.get_id().get$oid());//it comes with object, I unpack to store in db
-            dbHelper.addUser(user2);
+
+            application.setMe(user2);
+//            dbHelper.addUser(user2);
 
             SharedPreferences.Editor editor = app_preferences.edit();
             editor.putString("mongoId", user2.get_id().get$oid());
@@ -241,10 +244,10 @@ public class SyncHelper {
             }
 
 
-            if (dbHelper.fetchUser(user2.getUsername()).getMongoId() == null) {
+//            if (dbHelper.fetchUser(user2.getUsername()).getMongoId() == null) {
                 user2.setMongoId(user2.get_id().get$oid());//it comes with object, I unpack to store in db
-                dbHelper.addUser(user2);
-            }
+                application.setMe(user2);
+//            }
 
 
                SharedPreferences.Editor editor = app_preferences.edit();
@@ -316,6 +319,10 @@ public class SyncHelper {
             workout.put("description", runToShare.getDescription());
             workout.put("sharedId", me.getSharedRunsNum()+1);
 
+            Log.v("SHAREDID", (me.getSharedRunsNum() + 1) + "");
+
+
+
 
                     StringEntity se = new StringEntity(workout.toString());
             setDefaultPostHeaders(httpPost);
@@ -365,7 +372,9 @@ public class SyncHelper {
             }
 
             me.setSharedRunsNum(me.getSharedRunsNum() + 1);
-            dbHelper.updateUserRuns(me.getMongoId(), me.getSharedRunsNum());
+            app_preferences.edit().putInt(User.SHARED_RUNS_NUM, me.getSharedRunsNum()).apply();
+
+            updateMySharedRunsNum();
 
             for (Interval interval : runToShare.getIntervals()){
                 interval.setRunning_mongo_id(run.get_id().get$oid());
@@ -772,6 +781,64 @@ public class SyncHelper {
 
     }
 
+    public void updateMySharedRunsNum(){
+
+        String query = "{'username': '"+application.getMe().getUsername()+"'}";
+
+        Uri uri = new Uri.Builder()
+                .scheme("https")
+                .authority(authUrl)
+                .path(runner_collection)
+                .appendQueryParameter("q", query)
+                .appendQueryParameter("apiKey", apiKey)
+                .build();
+
+
+        DefaultHttpClient client = application.getHttpClient();
+        client.setParams(getMyParams());
+
+
+        try {
+            JSONObject obj = new JSONObject();
+            obj.put(User.SHARED_RUNS_NUM , application.getMe().getSharedRunsNum());
+            JSONObject lastObj = new JSONObject();
+            lastObj.put("$set", obj);
+
+            StringEntity se = new StringEntity(lastObj.toString());
+            HttpPut httpRequest = new HttpPut(uri.toString());
+            httpRequest.setEntity(se);
+            setDefaultPutHeaders(httpRequest);
+            HttpResponse response = client.execute(httpRequest);
+            HttpEntity entity = response.getEntity();
+            StatusLine statusLine = response.getStatusLine();
+
+            if (statusLine.getStatusCode() >= 300) {
+                Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
+                return;
+            }
+
+            String resultString = null;
+
+            if (entity != null) {
+                InputStream instream = entity.getContent();
+                Header contentEncoding = response.getFirstHeader("Content-Encoding");
+                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+                    instream = new GZIPInputStream(instream);
+                }
+                resultString = Utils.convertStreamToString(instream);
+                instream.close();
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "Exception updating sharedRunsNum", e);
+            return;
+        }
+
+        Log.v(TAG, String.format("updated sharedRunsNum - done"));
+        return;
+
+    }
+
     public User acceptOrRejectFriend(String username, int type) {// 1 send request, 0 accept, 2 reject, else just get user
 
         Log.v(TAG, "Fetching user");
@@ -1088,7 +1155,6 @@ public class SyncHelper {
         return users;
     }
 
-
     public List<Running> getNewRunsForUsers(List<User> users) {
 
         List<Running> newRuns = new ArrayList<Running>();
@@ -1101,26 +1167,32 @@ public class SyncHelper {
         }
 
 
+   //     {$or:[    {$and:[{'username':'user1','sharedId':1}]} , {$and:[{'username':'user2','sharedId':1}]}   ]}
 
-        String query = "{";
+        int size = users.size();
 
-
-        for (User user : users) {
-
-            query += "{ $or: [";
-
-
-            query += "{ $and: [";
-            query += "{ 'username': '" + user.getUsername() + "' ,";
-            query += " 'sharedId': " + user.getSharedRunsNum() + "}";
-            query += "] }";
-
-
-            query += "] }";
-
+        if(size == 0){
+            return newRuns;
         }
 
-        query+= "}";
+        String query = "{$or:[";
+
+        Log.v("SIZE", size+"");
+        Log.v("SIZE", users.toString());
+
+
+
+
+        for (int i=0; i<size-1; i++) {
+
+            query += "{ $and:[{ 'username': '" + users.get(i).getUsername() + "' ,";
+            query += " 'sharedId': " + users.get(i).getSharedRunsNum() + "}]} ,";
+
+        }
+        query += "{ $and:[{ 'username': '" + users.get(size-1).getUsername() + "' ,";
+        query += " 'sharedId': " + users.get(size-1).getSharedRunsNum() + "}]} ";
+
+        query+= "]}";
 
         Uri uri = new Uri.Builder()
                 .scheme("https")
@@ -1192,88 +1264,6 @@ public class SyncHelper {
 
 
         return newRuns;
-    }
-
-    private List<Running> getRunForUser(String username, int sharedRunId){
-
-        List<Running> newRuns = new ArrayList<Running>();
-
-        String queryAnd = "{ $and: [";
-        queryAnd += "{ 'username': '" + username + "' ,";
-        queryAnd += " 'sharedId': " + sharedRunId + "}";
-        queryAnd += "] }";
-
-        Uri uri = new Uri.Builder()
-                .scheme("https")
-                .authority(authUrl)
-                .path(running_collection)
-                .appendQueryParameter("apiKey", apiKey)
-                .appendQueryParameter("q", queryAnd)
-                .build();
-
-
-
-
-//        HashMap  params = new HashMap();
-        DefaultHttpClient client = application.getHttpClient();
-        client.setParams(getMyParams());
-
-
-        try {
-
-            HttpResponse response;
-
-            HttpGet httpRequest = new HttpGet(uri.toString());
-
-            setDefaultGetHeaders(httpRequest);
-            Log.v(TAG, "fetching existing user");
-            response = client.execute(httpRequest);
-
-            Log.v(TAG, "user acquisition- response received");
-
-            HttpEntity entity = response.getEntity();
-
-            StatusLine statusLine = response.getStatusLine();
-
-            if (statusLine.getStatusCode() >= 300) {
-//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
-                Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
-            }
-
-            String resultString = null;
-
-            if (entity != null) {
-                InputStream instream = entity.getContent();
-                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-                    instream = new GZIPInputStream(instream);
-                }
-                resultString = Utils.convertStreamToString(instream);
-
-                instream.close();
-            }
-
-            Gson gson = new Gson();
-            newRuns = (List<Running>) gson.fromJson(resultString,
-                    new TypeToken<List<Running>>() {
-                    }.getType());
-
-            if (newRuns !=null){
-
-                for (Running run : newRuns){
-                   run.setIntervals(fetchIntervalsForRun(run));
-                }
-
-            }
-
-
-            return newRuns;
-        } catch (Exception e) {
-            e.printStackTrace();
-
-        }
-        return newRuns;
-
     }
 
     public List<Interval> fetchIntervalsForRun(Running run){//0 leaderboard
@@ -1355,275 +1345,6 @@ public class SyncHelper {
 
         return intervals;
     }
-
-
-//
-//    public void replyToChallenge(String opponentName, boolean won, float distance) {
-//
-//        updateTimeAndDistance(app_preferences.getString("username",""));
-//
-//        Log.v(TAG, "replying to challenge");
-//
-////        Toast.makeText(getApplication(), opponentName+"  "+won, Toast.LENGTH_LONG).show();
-//
-//
-//        String query = "{ $and: [";
-//        query = "{ 'user_name': '" + opponentName + "' ,";
-//        query += " 'opponent_name': '" + app_preferences.getString("username","") + "'}";
-////        query += "] }";
-//
-//
-//        Uri uri = new Uri.Builder()
-//                .scheme("https")
-//                .authority(authUrl)
-//                .path(running_collection)
-//                .appendQueryParameter("q", query)
-//                .appendQueryParameter("apiKey", apiKey)
-//                .build();
-//
-////        HashMap  params = new HashMap();
-//        DefaultHttpClient client = application.getHttpClient();
-//        client.setParams(getMyParams());
-//        HttpPut httpPut = new HttpPut(uri.toString());
-//
-//
-//        try {
-//
-//            JSONObject obj = new JSONObject();
-//            obj.put("winner" , won?app_preferences.getString("username",""):opponentName);
-//            obj.put("status" , 1);
-//            JSONObject lastObj = new JSONObject();
-//            lastObj.put("$set", obj);
-//
-//            StringEntity se = new StringEntity(lastObj.toString());
-//
-//
-//            setDefaultPutHeaders(httpPut);
-//            httpPut.setEntity(se);
-//
-//            Log.v(TAG, "Fetching runs - requesting");
-//            HttpResponse response = client.execute(httpPut);
-//            Log.v(TAG, "Fetching runs - responce received");
-//
-//            HttpEntity entity = response.getEntity();
-//
-//            StatusLine statusLine = response.getStatusLine();
-//
-//            Log.v(TAG, String.format("Fetching stores - status [%s]", statusLine));
-//
-//            if (statusLine.getStatusCode() >= 300) {
-////                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
-//                Log.e(TAG,statusLine.getStatusCode()+" - "+statusLine.getReasonPhrase());
-//            }
-//
-//            String resultString = null;
-//
-//            if (entity != null) {
-//                InputStream instream = entity.getContent();
-//                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-//                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-//                    instream = new GZIPInputStream(instream);
-//                }
-//                resultString = Utils.convertStreamToString(instream);
-//
-//
-//                fixScoreAndChallenges(app_preferences.getString("username",""), won, distance);
-//                fixScoreAndChallenges(opponentName, !won, distance);
-//
-//
-//
-//
-//
-//                instream.close();
-//            }
-//
-////            Toast.makeText(getApplication(), "Challenged updated", Toast.LENGTH_LONG).show();
-//
-//
-//        } catch (Exception e) {
-//            Log.e(TAG, "Exception replying to challenge", e);
-//        }
-//
-//        Log.v(TAG, String.format("Fetching stores - done"));
-//
-//
-//    }
-//
-//    private void fixScoreAndChallenges(String username, boolean won, float distance){
-//
-//        User user = getMongoUserByUsernameForFriend(username, -1);
-//
-//
-//        if (user!=null) {
-//
-//            user.setTotalChallenges(user.getTotalChallenges() + 1);
-//            if (won) {
-//                user.setWonChallenges(user.getwonChallenges() + 1);
-//                user.setTotalScore(user.getTotalScore() + (int)Math.ceil(distance));
-//            } else {
-////                if (user.getTotalScore() - 500 > 0)
-////                    user.setTotalScore(user.getTotalScore() - 500);
-////                else
-////                    user.setTotalScore(0);
-//
-//            }
-//
-//            setScoreAndChallenges(user);
-//
-//        }
-//
-//    }
-//
-//    private void setScoreAndChallenges(User user){
-//
-//        Log.v(TAG, "Saving new score");
-//
-//        String query = "{'username': '"+user.getUsername()+"'}";
-//
-//
-//        Uri uri = new Uri.Builder()
-//                .scheme("https")
-//                .authority(authUrl)
-//                .path(runner_collection)
-//                .appendQueryParameter("q", query)
-//                .appendQueryParameter("apiKey", apiKey)
-//                .build();
-//
-//
-//        DefaultHttpClient client = application.getHttpClient();
-//        client.setParams(getMyParams());
-//
-//
-//        try {
-//            JSONObject obj = new JSONObject();
-//
-//
-//            obj.put("totalScore" , user.getTotalScore());
-//
-//            obj.put("totalChallenges" , user.getTotalChallenges());
-//
-//            obj.put("wonChallenges" , user.getWonChallenges());
-//
-//            JSONObject lastObj = new JSONObject();
-//            lastObj.put("$set", obj);
-//
-//            StringEntity se = new StringEntity(lastObj.toString());
-//
-//
-//
-//            HttpPut httpRequest = new HttpPut(uri.toString());
-//
-//            httpRequest.setEntity(se);
-//
-//
-//            setDefaultPutHeaders(httpRequest);
-//
-//            Log.v(TAG, "setting user stats - requesting");
-//            HttpResponse response = client.execute(httpRequest);
-//            Log.v(TAG, "setting finished - responce received");
-//
-//            HttpEntity entity = response.getEntity();
-//
-//            StatusLine statusLine = response.getStatusLine();
-//
-//            Log.v(TAG, String.format("Fetching stores - status [%s]", statusLine));
-//
-//            if (statusLine.getStatusCode() >= 300) {
-////                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
-//                Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
-//                return;
-//            }
-//
-//            String resultString = null;
-//
-//            if (entity != null) {
-//                InputStream instream = entity.getContent();
-//                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-//                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-//                    instream = new GZIPInputStream(instream);
-//                }
-//                resultString = Utils.convertStreamToString(instream);
-//
-//                instream.close();
-//            }
-//
-//            Log.v(TAG, String.format("Deserialising [%s]", resultString));
-//
-//
-//
-////            dbHelper.deleteAllStores();
-//
-//            Log.v(TAG, String.format("Uploaded user score and challenges"));
-//
-//        } catch (Exception e) {
-//            Log.e(TAG, "Exception uploading user stats", e);
-//        }
-//
-//    }
-//
-//    public void deleteChallenge(String id){
-//
-//
-////
-////       String query =  "{_'id': '{ '$oid': '"+id+"'}";
-////         query =  "{'description' : 'xaxa'}";
-//
-//        Uri uri = new Uri.Builder()
-//                .scheme("https")
-//                .authority(authUrl)
-//                .path(running_collection+"/"+id)
-//                .appendQueryParameter("apiKey", apiKey)
-//                .build();
-//
-//
-//        DefaultHttpClient client = application.getHttpClient();
-//        client.setParams(getMyParams());
-//
-//        try{
-//            HttpDelete httpDelete = new HttpDelete(uri.toString());
-//            HttpResponse response;
-//
-//
-//            setDefaultDeleteHeaders(httpDelete);
-//            Log.v(TAG, "deleting run - requesting");
-//            response = client.execute(httpDelete);
-//
-//
-//
-//            Log.v(TAG, "deleting run - responce received");
-//
-//            HttpEntity entity = response.getEntity();
-//
-//            StatusLine statusLine = response.getStatusLine();
-//
-//            Log.v(TAG, String.format("deleting run [%s]", statusLine));
-//
-//            if (statusLine.getStatusCode() >= 300) {
-////                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
-//                Log.e(TAG,statusLine.getStatusCode()+" - "+statusLine.getReasonPhrase());
-//            }
-//
-//            String resultString = null;
-//
-//            if (entity != null) {
-//                InputStream instream = entity.getContent();
-//                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-//                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-//                    instream = new GZIPInputStream(instream);
-//                }
-//                resultString = Utils.convertStreamToString(instream);
-//
-//                instream.close();
-//            }
-//
-//            Log.v(TAG, String.format("Deserialising [%s]", resultString));
-//        }catch (Exception e) {
-//            Log.e(TAG, "Exception deleting run", e);
-//
-//        }
-//
-//
-//    }
 
     private void setDefaultDeleteHeaders(HttpDelete httpRequest) throws UnsupportedEncodingException {
         httpRequest.setHeader("Accept", "application/json");

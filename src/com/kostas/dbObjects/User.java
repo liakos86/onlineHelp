@@ -19,6 +19,8 @@ public class User {
 
     private static final String TAG = Thread.currentThread().getStackTrace()[2].getClassName();
 
+    public static final String SHARED_RUNS_NUM = "sharedRunsNum";
+
 
     private String username;
     private ObjectId _id;
@@ -72,7 +74,7 @@ public class User {
         this.email = sp.getString("email", null);
         this.friends = sp.getString("friends", null);
         this.friendRequests = sp.getString("friendRequests", null);
-        this.sharedRunsNum = sp.getInt("sharedRunsNum", 0);
+        this.sharedRunsNum = sp.getInt(SHARED_RUNS_NUM, 0);
         this.totalDistance = sp.getFloat("totalDistance", 0);
         this.totalIntervals = sp.getInt("totalIntervals", 0);
         this.totalRuns = sp.getInt("totalRuns", 0);

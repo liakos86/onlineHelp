@@ -187,14 +187,13 @@ public class MongoUpdateService extends IntentService {
 
     private void checkForChanges() {
 
-        if (friendsFromMongo.size() > friendsFromDb.size()) {
-            //todo: ???
-        }
+
 
         for (User friendFromMongo : friendsFromMongo) {
 
             if (friendFromMongo.get_id().get$oid().equals(meFromDb.getMongoId())) {
                 meFromMongo = friendFromMongo;
+
                 checkMyFriendsAndRequests();
 
             }
@@ -209,7 +208,11 @@ public class MongoUpdateService extends IntentService {
 
         }
 
+        friendsFromMongo.remove(meFromMongo);
         getNewFriendRuns();
+
+
+
 
 
     }
@@ -221,6 +224,9 @@ public class MongoUpdateService extends IntentService {
 
         if ( dbFriends.length() < mongoFriends.length()) {
             createForegroundNotification("You have a new friend!!!");
+
+            app_preferences.edit().putString("friends", mongoFriends).apply();
+            application.getMe().setFriends(mongoFriends);
 
             Intent intent = new Intent(NOTIFICATION);
             intent.putExtra(NEW_FRIEND, "");
@@ -255,8 +261,25 @@ public class MongoUpdateService extends IntentService {
             db.updateUserRuns(friend.get_id().get$oid(), friend.getSharedRunsNum());
         }
 
-        if (friendsWithNewRuns.size() > 0)
+        if (friendsWithNewRuns.size() > 0) {
             new PerformAsyncTask(CallTypes.FETCH_FRIEND_RUNS).execute();
+        }
+        else{
+            if (friendsFromMongo.size() > friendsFromDb.size()) {
+                //todo: ???
+                db.deleteAllFriends();
+                friendsFromDb.clear();
+                for (User fr : friendsFromMongo){
+
+                    fr.setMongoId(fr.get_id().get$oid());
+                    db.addUser(fr);
+                    friendsFromDb.add(fr);
+                }
+
+
+
+            }
+        }
 
 
 
@@ -290,8 +313,7 @@ public class MongoUpdateService extends IntentService {
         public void run() {
 
             if (meFromDb == null && app_preferences.getString("username", null) != null) {
-                meFromDb = db.fetchUser(app_preferences.getString("username", ""));
-                application.setMe(meFromDb);
+                meFromDb = application.getMe();
             }
 
 
@@ -353,6 +375,18 @@ public class MongoUpdateService extends IntentService {
                         db.addRunning(run, ContentDescriptor.RunningFriend.CONTENT_URI, ContentDescriptor.IntervalFriend.CONTENT_URI);
                     }
                     createForegroundNotification("A friend added a run");
+                }
+
+                if (friendsFromMongo.size() > friendsFromDb.size()) {
+                    //todo: ???
+                    db.deleteAllFriends();
+                    friendsFromDb.clear();
+                    for (User fr : friendsFromMongo){
+
+                        fr.setMongoId(fr.get_id().get$oid());
+                        db.addUser(fr);
+                        friendsFromDb.add(fr);
+                    }
                 }
 
             }

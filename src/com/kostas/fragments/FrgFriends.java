@@ -102,11 +102,12 @@ public class FrgFriends extends Fragment {
         SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
 
         String friends = app_preferences.getString("friendRequests", "");
+        Toast.makeText(getActivity(), friends, Toast.LENGTH_SHORT).show();
         friends = friends.replace("null ", "");
         String[]friendsArray  = new String[]{};
-        if (friends.length() > 3) {
+       // if (friends.length() > 3) {
             friendsArray = friends.split(" ");
-        }
+        //}
 
         for (String friend : friendsArray){
             friendRequests.add(friend);
@@ -204,7 +205,7 @@ public class FrgFriends extends Fragment {
     private void fetchFriend() {
 
 
-        if (friendName.getText().length() > 3) {
+        if (friendName.getText().length() > 0) {
             if (!alreadyFriend(friendName.getText().toString())) {
                 InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(
                         Context.INPUT_METHOD_SERVICE);
