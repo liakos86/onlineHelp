@@ -92,6 +92,7 @@ public class Database extends SQLiteOpenHelper {
 
         for (Interval interval : running.getIntervals())
         {
+            interval.setInterval_id(-1);
             interval.setRunning_id(runId);
             addInterval(interval, intervalUri);
         }

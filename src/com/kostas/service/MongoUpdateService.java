@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.widget.Toast;
 import com.kostas.dbObjects.Running;
 import com.kostas.dbObjects.User;
 import com.kostas.model.ContentDescriptor;
@@ -159,7 +160,7 @@ public class MongoUpdateService extends IntentService {
             Notification notification = mBuilder.build();
             notification.ledARGB = getResources().getColor(R.color.interval_green);
             notification.flags |= Notification.FLAG_SHOW_LIGHTS;
-            // notification.flags |= Notification.FLAG_ONGOING_EVENT;
+            notification.flags |= Notification.FLAG_AUTO_CANCEL;
             notification.ledOffMS = 1000;
             notification.ledOnMS = 1500;
 
@@ -176,7 +177,7 @@ public class MongoUpdateService extends IntentService {
             Notification notice = new Notification(R.drawable.ic_notification_icon, message, System.currentTimeMillis());
 //This method is deprecated. Use Notification.Builder instead.
             notice.setLatestEventInfo(this, "Click for info", "Running", pendIntent);
-            //notice.flags |= Notification.FLAG_NO_CLEAR;
+            notice.flags |= Notification.FLAG_AUTO_CANCEL;
 
 
             notificationManager.notify(123, notice);
@@ -208,6 +209,13 @@ public class MongoUpdateService extends IntentService {
 
         }
 
+        /**
+         * todo
+         * what if i uninstalled and then reinstalled? i have lost my sharednum
+         *
+         */
+        app_preferences.edit().putInt("sharedRunsNum", meFromMongo.getSharedRunsNum()).apply();
+        application.getMe().setSharedRunsNum(meFromMongo.getSharedRunsNum());
         friendsFromMongo.remove(meFromMongo);
         getNewFriendRuns();
 
@@ -265,20 +273,10 @@ public class MongoUpdateService extends IntentService {
             new PerformAsyncTask(CallTypes.FETCH_FRIEND_RUNS).execute();
         }
         else{
-            if (friendsFromMongo.size() > friendsFromDb.size()) {
-                //todo: ???
-                db.deleteAllFriends();
-                friendsFromDb.clear();
-                for (User fr : friendsFromMongo){
 
-                    fr.setMongoId(fr.get_id().get$oid());
-                    db.addUser(fr);
-                    friendsFromDb.add(fr);
-                }
+            refreshFriends();
 
 
-
-            }
         }
 
 
@@ -300,6 +298,23 @@ public class MongoUpdateService extends IntentService {
             super.onDestroy();
         }
 
+    }
+
+    private void refreshFriends(){
+        if (friendsFromMongo.size() > friendsFromDb.size()) {
+            //todo: ???
+            db.deleteAllFriends();
+            friendsFromDb.clear();
+            for (User fr : friendsFromMongo){
+
+                fr.setMongoId(fr.get_id().get$oid());
+                db.addUser(fr);
+                friendsFromDb.add(fr);
+            }
+
+
+
+        }
     }
 
     @Override
@@ -370,24 +385,20 @@ public class MongoUpdateService extends IntentService {
 
                 List<Running> newRuns = sh.getNewRunsForUsers(friendsWithNewRuns);
 
+
                 for (Running run : newRuns){
+
+
                     if (run.get_id()!=null) {
+                        run.setRunning_id(-1);
                         db.addRunning(run, ContentDescriptor.RunningFriend.CONTENT_URI, ContentDescriptor.IntervalFriend.CONTENT_URI);
                     }
                     createForegroundNotification("A friend added a run");
                 }
 
-                if (friendsFromMongo.size() > friendsFromDb.size()) {
-                    //todo: ???
-                    db.deleteAllFriends();
-                    friendsFromDb.clear();
-                    for (User fr : friendsFromMongo){
+                friendsWithNewRuns.clear();
 
-                        fr.setMongoId(fr.get_id().get$oid());
-                        db.addUser(fr);
-                        friendsFromDb.add(fr);
-                    }
-                }
+               refreshFriends();
 
             }
 

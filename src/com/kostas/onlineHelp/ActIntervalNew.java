@@ -117,6 +117,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
                     else if (bundle.getBoolean(CONNECTION_FAILED)) {
                         Toast.makeText(getApplication(), "Google services api is not correctly configured!", Toast.LENGTH_LONG).show();
                         stopRunningService();
+
                         clearAndReturnToMain();
                     }
                     else if (bundle.getFloat(INTERVAL_DISTANCE) != 0) {
@@ -351,9 +352,9 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         ((ExtApplication) getApplication()).setInRunningMode(false);
         ((ExtApplication) getApplication()).setInRunningAct(false);
 
-        intervalDistance = 0;
-        intervalTime = 0;
-        intervalStartRest = 0 ;
+        intervalDistance = 100;
+        intervalTime = 10;
+        intervalStartRest = 10 ;
         hideFrame();
         Intent intent = new Intent(this, ActMain.class);
         startActivity(intent);
@@ -530,6 +531,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         }
         resetAppPrefs();
 
+        Toast.makeText(getApplication(), "doStop", Toast.LENGTH_SHORT).show();
         clearAndReturnToMain();
 
         finish();

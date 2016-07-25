@@ -99,7 +99,9 @@
 
                 />
 
-        <LinearLayout  android:id="@+id/add_friend_linear"
+        <LinearLayout
+                android:gravity="bottom"
+                android:id="@+id/add_friend_linear"
                       android:padding="2dp" android:layout_margin="6dp"
                       android:layout_width="match_parent"
                       android:layout_height="200dp"

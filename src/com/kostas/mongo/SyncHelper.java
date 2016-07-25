@@ -1,12 +1,9 @@
-
 package com.kostas.mongo;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Log;
-import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.kostas.dbObjects.Interval;
@@ -50,7 +47,6 @@ public class SyncHelper {
     private SharedPreferences app_preferences;
 
     public SyncHelper(ExtApplication application) {
-
         this.application = application;
         running_collection = application.getResources().getString(R.string.running_collection_mongo_path);
         interval_collection = application.getResources().getString(R.string.interval_collection_mongo_path);
@@ -60,18 +56,12 @@ public class SyncHelper {
         app_preferences = application.getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
         dbHelper = new Database(application);
         client = application.getHttpClient();
-
     }
 
     public int insertMongoUser(String email, String username, String password){
-
         Log.v(TAG, "Inserting user");
-
         int returnCode = -2;//server error default ?
-        Uri uri=null;
-
-
-            uri = new Uri.Builder()
+        Uri uri = new Uri.Builder()
                     .scheme("https")
                     .authority(authUrl)
                     .path(runner_collection)
@@ -81,12 +71,8 @@ public class SyncHelper {
         DefaultHttpClient client = application.getHttpClient();
         client.setParams(getMyParams());
 
-
         try{
-
             HttpResponse response;
-
-           // if (username.length()>0&&email.length()>0) {//insert new
                 JSONObject runner = new JSONObject();
                 runner.put("username", username);
                 runner.put("password", password);
@@ -99,21 +85,15 @@ public class SyncHelper {
                 Log.v(TAG, "inserting new user");
                 response = client.execute(httpPost);
 
-          //  }
-
             Log.v(TAG, "user acquisition- response received");
-
             HttpEntity entity = response.getEntity();
-
             StatusLine statusLine = response.getStatusLine();
 
             if (statusLine.getStatusCode() >= 300) {
-//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
                 Log.e(TAG,statusLine.getStatusCode()+" - "+statusLine.getReasonPhrase());
             }
 
             String resultString = null;
-
             if (entity != null) {
                 InputStream instream = entity.getContent();
                 Header contentEncoding = response.getFirstHeader("Content-Encoding");
@@ -121,10 +101,8 @@ public class SyncHelper {
                     instream = new GZIPInputStream(instream);
                 }
                 resultString = Utils.convertStreamToString(instream);
-
                 instream.close();
             }
-
             Log.v(TAG, String.format("Deserialising [%s]", resultString));
 
             Gson gson = new Gson();
@@ -136,11 +114,8 @@ public class SyncHelper {
                 return 0; //no user found
             }
 
-
             user2.setMongoId(user2.get_id().get$oid());//it comes with object, I unpack to store in db
-
             application.setMe(user2);
-//            dbHelper.addUser(user2);
 
             SharedPreferences.Editor editor = app_preferences.edit();
             editor.putString("mongoId", user2.get_id().get$oid());
@@ -151,26 +126,19 @@ public class SyncHelper {
             editor.putString("friendRequests", user2.getFriendRequests());
             editor.apply();
             returnCode = 3;
-
-
         }catch (Exception e){
             Log.e(TAG, "Exception inserting user", e);
             return -2;
         }
-
         Log.v(TAG, "Successfully inserted user");
-
 
         return returnCode;
     }
 
     public int getMongoUser(String email, String username, String password) {
-
         Log.v(TAG, "Fetching user");
-
         int returnCode = -2;//server error default ?
         Uri uri=null;
-
 
          if (username.length()>0 || email.length()>0){//try get existing user by email or username
 
@@ -187,15 +155,10 @@ public class SyncHelper {
                     .appendQueryParameter("apiKey", apiKey)
                      .appendQueryParameter("fo", "true")
                     .build();
-
-
-//             url =  runnerCollection+ "?q= { 'email':'"+email+"' , 'password' :'"+password+"' }&apiKey=" +apiKey;
         }
 
             DefaultHttpClient client = application.getHttpClient();
             client.setParams(getMyParams());
-
-
 
         try {
 
@@ -205,15 +168,11 @@ public class SyncHelper {
                 setDefaultGetHeaders(httpRequest);
                 Log.v(TAG, "fetching existing user");
                 response = client.execute(httpRequest);
-
             Log.v(TAG, "user acquisition- response received");
 
             HttpEntity entity = response.getEntity();
-
             StatusLine statusLine = response.getStatusLine();
-
             if (statusLine.getStatusCode() >= 300) {
-//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
                 Log.e(TAG,statusLine.getStatusCode()+" - "+statusLine.getReasonPhrase());
             }
 
@@ -226,10 +185,8 @@ public class SyncHelper {
                     instream = new GZIPInputStream(instream);
                 }
                 resultString = Utils.convertStreamToString(instream);
-
                 instream.close();
             }
-
             Log.v(TAG, String.format("Deserialising [%s]", resultString));
 
             Gson gson = new Gson();
@@ -237,18 +194,12 @@ public class SyncHelper {
                     new TypeToken<User>() {
                     }.getType());
 
-
-
             if (user2==null){
                 return -1; //no user found
             }
 
-
-//            if (dbHelper.fetchUser(user2.getUsername()).getMongoId() == null) {
                 user2.setMongoId(user2.get_id().get$oid());//it comes with object, I unpack to store in db
                 application.setMe(user2);
-//            }
-
 
                SharedPreferences.Editor editor = app_preferences.edit();
                editor.putString("mongoId", user2.get_id().get$oid());
@@ -259,24 +210,6 @@ public class SyncHelper {
                 editor.putString("friendRequests", user2.getFriendRequests());
                 editor.apply();
                returnCode = 2;
-
-            //else if (email==null&&user2!=null){
-//                SharedPreferences.Editor editor = app_preferences.edit();
-//                editor.putInt("totalScore", user2.getTotalScore());
-//                editor.putString("username", user2.getUsername());
-//                editor.putInt("totalChallenges", user2.getTotalChallenges());
-//                editor.putLong("totalTime", user2.getTotalTime());
-//                editor.putFloat("totalDistance", user2.getTotalDistance());
-//                editor.putInt("wonChallenges", user2.getwonChallenges());
-//                editor.putString("friends", user2.getFriends());
-//                editor.putString("friendRequests", user2.getFriendRequests());
-//                editor.commit();
-//
-//
-//
-//                returnCode = 0;
-//            }
-
 
         } catch (Exception e) {
             Log.e(TAG, "Exception fetching user", e);
@@ -305,7 +238,6 @@ public class SyncHelper {
         client.setParams(getMyParams());
         HttpPost httpPost = new HttpPost(uri.toString());
 
-
         try {
 
             User me  = application.getMe();
@@ -321,25 +253,16 @@ public class SyncHelper {
 
             Log.v("SHAREDID", (me.getSharedRunsNum() + 1) + "");
 
-
-
-
                     StringEntity se = new StringEntity(workout.toString());
             setDefaultPostHeaders(httpPost);
             httpPost.setEntity(se);
-
             Log.v(TAG, "uploading run - requesting");
             HttpResponse response = client.execute(httpPost);
             Log.v(TAG, "uploading run - response received");
-
             HttpEntity entity = response.getEntity();
-
             StatusLine statusLine = response.getStatusLine();
-
             Log.v(TAG, String.format(" status [%s]", statusLine));
-
             if (statusLine.getStatusCode() >= 300) {
-//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
                 Log.e(TAG,statusLine.getStatusCode()+" - "+statusLine.getReasonPhrase());
             }
 
@@ -353,9 +276,6 @@ public class SyncHelper {
                 }
                 resultString = Utils.convertStreamToString(instream);
 
-
-
-
                 instream.close();
             }
 
@@ -365,6 +285,7 @@ public class SyncHelper {
             Running run = (Running) gson.fromJson(resultString,
                     new TypeToken<Running>() {
                     }.getType());
+
 
 
             if (run == null || run.get_id() == null){
@@ -391,8 +312,6 @@ public class SyncHelper {
 
         Log.v(TAG, String.format("uploaded run - done"));
         return 1;
-
-
     }
 
     public int shareIntervalForRunMongo(Interval intervalToShare) {
@@ -422,24 +341,16 @@ public class SyncHelper {
             intervalSession.put("latLonList", intervalToShare.getLatLonList());
             intervalSession.put("running_mongo_id", intervalToShare.getRunning_mongo_id());
 
-
-
             StringEntity se = new StringEntity( intervalSession.toString());
             setDefaultPostHeaders(httpPost);
             httpPost.setEntity(se);
-
             Log.v(TAG, "uploading run - requesting");
             HttpResponse response = client.execute(httpPost);
             Log.v(TAG, "uploading run - response received");
-
             HttpEntity entity = response.getEntity();
-
             StatusLine statusLine = response.getStatusLine();
-
             Log.v(TAG, String.format(" status [%s]", statusLine));
-
             if (statusLine.getStatusCode() >= 300) {
-//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
                 Log.e(TAG,statusLine.getStatusCode()+" - "+statusLine.getReasonPhrase());
             }
 
@@ -453,24 +364,18 @@ public class SyncHelper {
                 }
                 resultString = Utils.convertStreamToString(instream);
 
-
-
-
                 instream.close();
             }
 
             Gson gson = new Gson();
 
-
             Interval intervalSaved = (Interval) gson.fromJson(resultString,
                     new TypeToken<Interval>() {
                     }.getType());
 
-
             if (intervalSaved == null ){
                 return 0;
             }
-
 
         } catch (Exception e) {
             Log.e(TAG, "Exception uploading interval", e);
@@ -479,35 +384,18 @@ public class SyncHelper {
 
         Log.v(TAG, String.format("uploaded interval - done"));
         return 1;
-
-
     }
 
     public List<User> sentFriendRequest(String friend){
-
         List<User> users = new ArrayList<User>();
-
-
             Log.v(TAG, "Fetching user "+friend);
-
             String query;
 
             if (friend == null || friend.equals("")) {
                 return users;
             } else {
-
-
-
                     query = "{ 'username' : '"+friend+"'}";
-
-
-
             }
-
-//        https://api.mongolab.com/api/1/databases/auction/collections/runner?
-//        q={ $or: [ { "email": "liak@liak.gr" }, { "email": "liak2@liak.gr" } ] }
-//        &apiKey=fft3Q2J8bB2l-meOoBHZK_z3E_b5cuBz
-
 
             Uri uri = new Uri.Builder()
                     .scheme("https")
@@ -518,16 +406,11 @@ public class SyncHelper {
                     .appendQueryParameter("apiKey", apiKey)
                     .build();
 
-
             DefaultHttpClient client = application.getHttpClient();
             client.setParams(getMyParams());
 
-
             try {
-
                 HttpGet httpRequest = new HttpGet(uri.toString());
-
-
                 setDefaultGetHeaders(httpRequest);
 
                 Log.v(TAG, "Fetching runs - requesting");
@@ -541,7 +424,6 @@ public class SyncHelper {
                 Log.v(TAG, String.format("Fetching stores - status [%s]", statusLine));
 
                 if (statusLine.getStatusCode() >= 300) {
-//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
                     Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
                 }
 
@@ -561,27 +443,15 @@ public class SyncHelper {
                 Log.v(TAG, String.format("Deserialising [%s]", resultString));
 
                 Gson gson = new Gson();
-
-
                 users = (List<User>) gson.fromJson(resultString,
                         new TypeToken<List<User>>() {
                         }.getType());
 
-
                 //add a new friend request to the other user
                 if (users.size() == 1) {
-
-                    getMongoUserByUsernameForFriend(users.get(0).getUsername());
-
+                    getMongoUserByUsernameForFriend(users.get(0));
                 }
-//            dbHelper.deleteAllStores();
-
                 Log.v(TAG, String.format("Fetching parts - retrieved [%d] users", users.size()));
-
-//            for (int i = 0; i < StoreList.size(); i++) {
-//                dbHelper.addSite(StoreList.get(i));
-//                ll_rows++;
-//            }
 
            } catch (Exception e) {
                 Log.e(TAG, "Exception fetching leaderboard or friend", e);
@@ -593,110 +463,23 @@ public class SyncHelper {
             return users;
     }
 
-    public User getMongoUserByUsernameForFriend(String username) {// 1 send request, 0 accept, 2 reject, else just get user
-
-        Log.v(TAG, "Fetching user");
+    public User getMongoUserByUsernameForFriend(User user) {// 1 send request, 0 accept, 2 reject, else just get user
 
         String myUsername = app_preferences.getString("username", "");
-
-        User user = null;
-
-        Uri uri = new Uri.Builder()
-                    .scheme("https")
-                    .authority(authUrl)
-                    .path(runner_collection)
-                    .appendQueryParameter("q", "{ 'username':'"+username+"' }")
-                    .appendQueryParameter("fo", "true")
-                    .appendQueryParameter("apiKey", apiKey)
-                    .build();
-
-        DefaultHttpClient client = application.getHttpClient();
-        client.setParams(getMyParams());
-
-
-
-        try {
-
-            HttpResponse response;
-
-
-                HttpGet httpRequest = new HttpGet(uri.toString());
-                setDefaultGetHeaders(httpRequest);
-                Log.v(TAG, "Fetching user - requesting");
-                response = client.execute(httpRequest);
-
-
-
-            Log.v(TAG, "Fetching user - responce received");
-
-            HttpEntity entity = response.getEntity();
-
-            StatusLine statusLine = response.getStatusLine();
-
-            Log.v(TAG, String.format("Fetching user - status [%s]", statusLine));
-
-            if (statusLine.getStatusCode() >= 300) {
-//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
-                Log.e(TAG,statusLine.getStatusCode()+" - "+statusLine.getReasonPhrase());
-            }
-
-            String resultString = null;
-
-            if (entity != null) {
-                InputStream instream = entity.getContent();
-                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-                    instream = new GZIPInputStream(instream);
-                }
-                resultString = Utils.convertStreamToString(instream);
-
-                instream.close();
-            }
-
-            Log.v(TAG, String.format("Deserialising [%s]", resultString));
-
-            Gson gson = new Gson();
-             user = (User) gson.fromJson(resultString,
-                    new TypeToken<User>() {
-                    }.getType());
-
-            // refresh other users requests
-
             String currentRequests = user.getFriendRequests() != null ? user.getFriendRequests()+" " : "";
                 uploadNewFriendOrRequest(currentRequests  + myUsername, user.getUsername());
                 SharedPreferences.Editor editor = app_preferences.edit();
                 editor.putString("sentRequests",  app_preferences.getString("sentRequests","")+user.getUsername());
-                editor.commit();
-                //refresh other users friends
-
-
-//            Log.v(TAG, String.format("Fetching parts - ready to insert 1 user", 1));
-
-        } catch (Exception e) {
-            Log.e(TAG, "Exception fetching user", e);
-            return user;
-        }
+                editor.apply();
 
         Log.v(TAG, String.format("Fetching user - done"));
-
-
-
         return user;
-
     }
 
     public boolean uploadNewFriendOrRequest(String friends,String username){
 
-
         Log.v(TAG, "Uploading new friend");
-
         String query = "{'username': '"+username+"'}";
-
-
-//        https://api.mongolab.com/api/1/databases/auction/collections/runner?
-//        q={ $or: [ { "email": "liak@liak.gr" }, { "email": "liak2@liak.gr" } ] }
-//        &apiKey=fft3Q2J8bB2l-meOoBHZK_z3E_b5cuBz
-
 
         Uri uri = new Uri.Builder()
                 .scheme("https")
@@ -706,10 +489,8 @@ public class SyncHelper {
                 .appendQueryParameter("apiKey", apiKey)
                 .build();
 
-
         DefaultHttpClient client = application.getHttpClient();
         client.setParams(getMyParams());
-
 
         try {
             JSONObject obj = new JSONObject();
@@ -760,17 +541,7 @@ public class SyncHelper {
 
             Log.v(TAG, String.format("Deserialising [%s]", resultString));
 
-
-
-//            dbHelper.deleteAllStores();
-
             Log.v(TAG, String.format("Fetching parts - new friend added"));
-
-//            for (int i = 0; i < StoreList.size(); i++) {
-//                dbHelper.addSite(StoreList.get(i));
-//                ll_rows++;
-//            }
-
         } catch (Exception e) {
             Log.e(TAG, "Exception inserting friend", e);
             return false;
@@ -847,9 +618,7 @@ public class SyncHelper {
 
         User user = null;
 
-        Uri uri=null;
-
-        uri = new Uri.Builder()
+        Uri uri = new Uri.Builder()
                 .scheme("https")
                 .authority(authUrl)
                 .path(runner_collection)
@@ -858,14 +627,8 @@ public class SyncHelper {
                 .appendQueryParameter("apiKey", apiKey)
                 .build();
 
-
-
-
-
         DefaultHttpClient client = application.getHttpClient();
         client.setParams(getMyParams());
-
-
 
         try {
 
@@ -914,10 +677,7 @@ public class SyncHelper {
 
             // refresh other users requests
            if (type==0|| type==2) {
-
                 //add friend to both users list
-
-
                 if ((type==0)&&((user.getFriends()==null || !user.getFriends().contains(myUsername) )&& !app_preferences.getString("friends", "").contains(user.getUsername()))){
                     fixFriendsListForUser(user.getFriends() + " " + myUsername, user.getUsername(), type);
                     fixFriendsListForUser(app_preferences.getString("friends", "") + " " + user.getUsername(), myUsername, type);
@@ -936,15 +696,9 @@ public class SyncHelper {
                 if (type==0) {
                     editor.putString("friends", app_preferences.getString("friends", "") + " " + user.getUsername());
                 }
-                editor.commit();
-
-//                Toast.makeText(getApplication(), "Friend added!", Toast.LENGTH_LONG).show();
-
-
+                editor.apply();
 
             }
-
-//            Log.v(TAG, String.format("Fetching parts - ready to insert 1 user", 1));
 
         } catch (Exception e) {
             Log.e(TAG, "Exception fetching user", e);
@@ -952,9 +706,6 @@ public class SyncHelper {
         }
 
         Log.v(TAG, String.format("Fetching user - done"));
-
-
-
         return user;
 
     }
@@ -965,18 +716,6 @@ public class SyncHelper {
         Log.v(TAG, "Uploading new friend");
 
         String query = "{'username': '"+username+"'}";
-
-
-
-
-
-
-
-//        https://api.mongolab.com/api/1/databases/auction/collections/runner?
-//        q={ $or: [ { "email": "liak@liak.gr" }, { "email": "liak2@liak.gr" } ] }
-//        &apiKey=fft3Q2J8bB2l-meOoBHZK_z3E_b5cuBz
-
-
         Uri uri = new Uri.Builder()
                 .scheme("https")
                 .authority(authUrl)
@@ -1002,14 +741,8 @@ public class SyncHelper {
             lastObj.put("$set", obj);
 
             StringEntity se = new StringEntity(lastObj.toString());
-
-
-
             HttpPut httpRequest = new HttpPut(uri.toString());
-
             httpRequest.setEntity(se);
-
-
             setDefaultPutHeaders(httpRequest);
 
             Log.v(TAG, "new friend - requesting");
@@ -1043,17 +776,7 @@ public class SyncHelper {
 
             Log.v(TAG, String.format("Deserialising [%s]", resultString));
 
-
-
-//            dbHelper.deleteAllStores();
-
             Log.v(TAG, String.format("Fetching parts - new friend added"));
-
-//            for (int i = 0; i < StoreList.size(); i++) {
-//                dbHelper.addSite(StoreList.get(i));
-//                ll_rows++;
-//            }
-
         } catch (Exception e) {
             Log.e(TAG, "Exception inserting friend", e);
             return false;
@@ -1160,10 +883,9 @@ public class SyncHelper {
         List<Running> newRuns = new ArrayList<Running>();
 
         for (User user : users){
-            if (user.getMongoId() == null){
+            if (user.get_id() == null){
                 users.remove(user);
             }
-            //newRuns.addAll(getRunForUser(user.getUsername(), user.getSharedRunsNum()));
         }
 
 
@@ -1180,9 +902,6 @@ public class SyncHelper {
         Log.v("SIZE", size+"");
         Log.v("SIZE", users.toString());
 
-
-
-
         for (int i=0; i<size-1; i++) {
 
             query += "{ $and:[{ 'username': '" + users.get(i).getUsername() + "' ,";
@@ -1197,7 +916,7 @@ public class SyncHelper {
         Uri uri = new Uri.Builder()
                 .scheme("https")
                 .authority(authUrl)
-                .path(interval_collection)
+                .path(running_collection)
                 .appendQueryParameter("q", query)
                 .appendQueryParameter("apiKey", apiKey)
                 .build();
@@ -1249,20 +968,16 @@ public class SyncHelper {
                     new TypeToken<List<Running>>() {
                     }.getType());
 
+            for (Running run : newRuns){
+                run.setIntervals(fetchIntervalsForRun(run));
+            }
+
 
 
         } catch (Exception e) {
             Log.e(TAG, "Exception fetching leaderboard or friend", e);
             return newRuns;
         }
-
-
-
-
-
-
-
-
         return newRuns;
     }
 
@@ -1274,7 +989,7 @@ public class SyncHelper {
 
 
         query = "{ $or: [";
-            query += "{ 'running_mongo_id': '" + run.get_id().get$oid() + "'},";
+            query += "{ 'running_mongo_id': '" + run.get_id().get$oid() + "'}";
 
         query += "] }";
 
@@ -1333,6 +1048,11 @@ public class SyncHelper {
                     new TypeToken<List<Interval>>() {
                     }.getType());
 
+            for (Interval interval : intervals){
+                interval.setInterval_id(-1);
+            }
+
+
 
 
         } catch (Exception e) {
@@ -1372,9 +1092,4 @@ public class SyncHelper {
         HttpConnectionParams.setSoTimeout(httpParams, 5 * 60 * 1000);
         return httpParams;
     }
-
-    public ExtApplication getApplication() {
-        return application;
-    }
-
 }

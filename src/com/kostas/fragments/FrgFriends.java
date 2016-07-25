@@ -51,9 +51,6 @@ public class FrgFriends extends Fragment {
 
     ListView friendRunsList;
 
-
-    SyncHelper sh;
-
     ViewFlipper friendsFlipper;
 
     Button addFriend;
@@ -81,7 +78,6 @@ public class FrgFriends extends Fragment {
 
         setViewsAndListeners(v);
 
-        sh = new SyncHelper((ExtApplication)getActivity().getApplication());
 
 //        setTitleActionBar();
 
@@ -112,8 +108,7 @@ public class FrgFriends extends Fragment {
         for (String friend : friendsArray){
             friendRequests.add(friend);
         }
-
-
+        friendRequests.remove("");
         friendRequestsList = ((ListView) v.findViewById(R.id.listFriendRequests));
         friendRunsList = ((ListView) v.findViewById(R.id.listFriendRuns));
 
@@ -329,6 +324,8 @@ public class FrgFriends extends Fragment {
         @Override
         protected Integer doInBackground(Void... unused) {
 
+            SyncHelper sh = new SyncHelper(app);
+
 
             if (type == 1)
                 return sh.getMongoUser(email, username, password);
@@ -388,6 +385,8 @@ public class FrgFriends extends Fragment {
         @Override
         protected List<User> doInBackground(Void... unused) {
 
+            SyncHelper sh = new SyncHelper((ExtApplication)activity.getApplication());
+
 
             return sh.sentFriendRequest(friend);
 
@@ -435,6 +434,7 @@ public class FrgFriends extends Fragment {
         @Override
         protected User doInBackground(Void... unused) {
 
+            SyncHelper sh = new SyncHelper(((ExtApplication) activity.getApplication()));
 
             return sh.acceptOrRejectFriend(friend, type);
 
