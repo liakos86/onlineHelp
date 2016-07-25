@@ -225,6 +225,10 @@ public class MongoUpdateService extends IntentService {
 
     }
 
+    /**
+     * Check if my friends have changed in mongoDb which means someone has accepted my request
+     * Check if i have a new friend request in mongo
+     */
     private void checkMyFriendsAndRequests() {
 
         String mongoFriends = meFromMongo.getFriends() != null ? meFromMongo.getFriends().trim() : "";
@@ -252,6 +256,12 @@ public class MongoUpdateService extends IntentService {
 
     }
 
+    /**
+     * For every user I have in db i check his runs against the ones i got from mongo
+     * If the number is larger his means he has shared a new run
+     * @param userDb
+     * @param userMongo
+     */
     private void checkRunsForUser(User userDb, User userMongo) {
 
         if (userMongo.getSharedRunsNum() > userDb.getSharedRunsNum()) {
@@ -263,6 +273,9 @@ public class MongoUpdateService extends IntentService {
 
     }
 
+    /**
+     * create an async call for every user in the list of the friends with new runs
+     */
     private void getNewFriendRuns(){//todo turn friendsWithNewRuns to HashMap in order to get the new N runs. Now i get only the last
 
         for (User friend : friendsWithNewRuns){
@@ -271,15 +284,9 @@ public class MongoUpdateService extends IntentService {
 
         if (friendsWithNewRuns.size() > 0) {
             new PerformAsyncTask(CallTypes.FETCH_FRIEND_RUNS).execute();
-        }
-        else{
-
+        } else{
             refreshFriends();
-
-
         }
-
-
 
     }
 
@@ -300,6 +307,10 @@ public class MongoUpdateService extends IntentService {
 
     }
 
+    /**
+     *
+     * TODO maybe a more clever way
+     */
     private void refreshFriends(){
         if (friendsFromMongo.size() > friendsFromDb.size()) {
             //todo: ???

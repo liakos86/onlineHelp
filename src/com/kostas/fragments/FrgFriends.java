@@ -24,6 +24,7 @@ import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 import com.kostas.mongo.SyncHelper;
 import com.kostas.onlineHelp.ActMain;
+import com.kostas.onlineHelp.ActViewIntervals;
 import com.kostas.onlineHelp.ExtApplication;
 import com.kostas.onlineHelp.R;
 import com.kostas.service.MongoUpdateService;
@@ -592,7 +593,7 @@ public class FrgFriends extends Fragment {
                 holder = (ViewHolderRow) convertView.getTag();
             }
 
-            Running run = data.get(position);
+            final Running run = data.get(position);
 
             holder.bottomText.setText(run.getUsername()+": "+(int) run.getDistance() + " meters with " + ((int) (run.getTime() / 1000)) + " secs rest");
             holder.bottom2Text.setText( run.getDescription().length()>0? run.getDescription() : "No description" );
@@ -602,6 +603,18 @@ public class FrgFriends extends Fragment {
             holder.rightText.setText(String.valueOf(run.getIntervals().size()) + " sessions");
 
 
+            final Activity act = getActivity();
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent goToIntervals = new Intent(act, ActViewIntervals.class);
+
+                    goToIntervals.putExtra("run", run.getRunning_id());
+                    goToIntervals.putExtra("myRun", false);
+
+                    startActivity(goToIntervals);
+                }
+            });
 
             return convertView;
 

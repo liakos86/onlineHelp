@@ -42,95 +42,95 @@
 
         </RelativeLayout>
 
-        <RelativeLayout  android:layout_width="fill_parent" android:layout_height="fill_parent">
+        <!--<RelativeLayout  android:layout_width="fill_parent" android:layout_height="fill_parent">-->
 
 
-        <ListView
-                android:id="@+id/listIntervals"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_above="@+id/buttonShareFriends"
+        <!--<ListView-->
+                <!--android:id="@+id/listIntervals"-->
+                <!--android:layout_width="fill_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_alignParentTop="true"-->
+                <!--android:layout_above="@+id/buttonShareFriends"-->
 
-                />
+                <!--/>-->
 
-            <Button style="@style/buttonStyle"
-                    android:layout_margin="@dimen/ten_device_pixels"
-                    android:layout_above="@+id/buttonShowMap"
-                    android:text="Share with Friends"
-                    android:background="@drawable/share_button_selector"
-                    android:id="@+id/buttonShareFriends"
-                    android:layout_alignParentTop="true"
+            <!--<Button style="@style/buttonStyle"-->
+                    <!--android:layout_margin="@dimen/ten_device_pixels"-->
+                    <!--android:layout_above="@+id/buttonShowMap"-->
+                    <!--android:text="Share with Friends"-->
+                    <!--android:background="@drawable/share_button_selector"-->
+                    <!--android:id="@+id/buttonShareFriends"-->
+                    <!--android:layout_alignParentTop="true"-->
 
-                    />
-
-
+                    <!--/>-->
 
 
-            <View android:id="@+id/strut"
-                  android:layout_width="0dp"
-                  android:layout_height="0dp"
-                  android:layout_alignParentBottom="true"
-                  android:layout_centerHorizontal="true"/>
-            <Button android:text="@string/close"
-                    android:textSize="@dimen/xmedium_text"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginLeft="@dimen/ten_device_pixels"
-                    android:layout_alignRight="@id/strut"
-                    android:layout_alignParentLeft="true"
-                    android:layout_marginRight="@dimen/four_dp"
-                    android:textColor="@color/white_back" android:textStyle="bold"
-                    android:id="@+id/buttonCloseIntervals" android:background="@drawable/close_button_selector"
-                    android:layout_width="@dimen/zero"
-                    android:layout_height="@dimen/standard_view_height"/>
-            <Button android:text="@string/map"
-                    android:textSize="@dimen/xmedium_text"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignLeft="@id/strut"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginRight="@dimen/ten_device_pixels"
-                    android:textColor="@color/white_back" android:textStyle="bold"
-                    android:id="@+id/buttonShowMap"
-                    android:background="@drawable/plus_minus_selector"
-                    android:layout_width="@dimen/zero"
-                    android:layout_height="@dimen/standard_view_height"/>
 
 
-        </RelativeLayout>
+            <!--<View android:id="@+id/strut"-->
+                  <!--android:layout_width="0dp"-->
+                  <!--android:layout_height="0dp"-->
+                  <!--android:layout_alignParentBottom="true"-->
+                  <!--android:layout_centerHorizontal="true"/>-->
+            <!--<Button android:text="@string/close"-->
+                    <!--android:textSize="@dimen/xmedium_text"-->
+                    <!--android:layout_alignParentBottom="true"-->
+                    <!--android:layout_marginLeft="@dimen/ten_device_pixels"-->
+                    <!--android:layout_alignRight="@id/strut"-->
+                    <!--android:layout_alignParentLeft="true"-->
+                    <!--android:layout_marginRight="@dimen/four_dp"-->
+                    <!--android:textColor="@color/white_back" android:textStyle="bold"-->
+                    <!--android:id="@+id/buttonCloseIntervals" android:background="@drawable/close_button_selector"-->
+                    <!--android:layout_width="@dimen/zero"-->
+                    <!--android:layout_height="@dimen/standard_view_height"/>-->
+            <!--<Button android:text="@string/map"-->
+                    <!--android:textSize="@dimen/xmedium_text"-->
+                    <!--android:layout_alignParentBottom="true"-->
+                    <!--android:layout_alignLeft="@id/strut"-->
+                    <!--android:layout_alignParentRight="true"-->
+                    <!--android:layout_marginRight="@dimen/ten_device_pixels"-->
+                    <!--android:textColor="@color/white_back" android:textStyle="bold"-->
+                    <!--android:id="@+id/buttonShowMap"-->
+                    <!--android:background="@drawable/plus_minus_selector"-->
+                    <!--android:layout_width="@dimen/zero"-->
+                    <!--android:layout_height="@dimen/standard_view_height"/>-->
 
 
-        <com.kostas.custom.MapWrapperLayout
-            android:id="@+id/mapWrapperRuns"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-        <FrameLayout
-                 android:layout_width="match_parent"
-                 android:layout_height="match_parent"
+        <!--</RelativeLayout>-->
 
 
-            >
-    <fragment
-            android:id="@+id/mapListKostas"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+        <!--<com.kostas.custom.MapWrapperLayout-->
+            <!--android:id="@+id/mapWrapperRuns"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent">-->
 
-            />
+        <!--<FrameLayout-->
+                 <!--android:layout_width="match_parent"-->
+                 <!--android:layout_height="match_parent"-->
 
-            <ImageButton
-                    android:layout_margin="15dp"
-                    android:layout_width="70dp"
-                    android:layout_height="70dp"
-                    android:src="@drawable/close"
-                    android:background="@drawable/circle_red"
-                    android:focusable="false"
-                    android:id="@+id/buttonCloseMap"
-                    android:layout_gravity="left|bottom" />
 
-        </FrameLayout>
+            <!-->-->
+    <!--<fragment-->
+            <!--android:id="@+id/mapListKostas"-->
+            <!--android:name="com.google.android.gms.maps.SupportMapFragment"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
 
-    </com.kostas.custom.MapWrapperLayout>
+            <!--/>-->
+
+            <!--<ImageButton-->
+                    <!--android:layout_margin="15dp"-->
+                    <!--android:layout_width="70dp"-->
+                    <!--android:layout_height="70dp"-->
+                    <!--android:src="@drawable/close"-->
+                    <!--android:background="@drawable/circle_red"-->
+                    <!--android:focusable="false"-->
+                    <!--android:id="@+id/buttonCloseMap"-->
+                    <!--android:layout_gravity="left|bottom" />-->
+
+        <!--</FrameLayout>-->
+
+    <!--</com.kostas.custom.MapWrapperLayout>-->
 
 
         <TextView android:id="@+id/noRunsText"

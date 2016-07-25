@@ -8,13 +8,14 @@ import android.net.Uri;
 import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 
+import java.io.Serializable;
 import java.util.List;
 
 
 /**
  * Created by liakos on 11/4/2015.
  */
-public class Running {
+public class Running implements Serializable{
 
     private static final String TAG = Thread.currentThread().getStackTrace()[2].getClassName();
 
@@ -139,13 +140,13 @@ public class Running {
         this.intervals = intervals;
     }
 
-    public static Running getFromId(Context context, long id) {
+    public static Running getFromId(Context context, long id, Uri uri) {
         //Log.v(TAG, String.format("Requesting item [%d]", id));
         synchronized (context) {
             Cursor cursor = null;
             try {
                 cursor = context.getContentResolver()
-                        .query(Uri.withAppendedPath(ContentDescriptor.Running.CONTENT_URI,
+                        .query(Uri.withAppendedPath(uri,
                                 String.valueOf(id)), null, null, null, null);
                 cursor.moveToFirst();
                 return createFromCursor(cursor);
@@ -190,7 +191,6 @@ public class Running {
             toRet.distance = cursor.getFloat(cursor.getColumnIndex(ContentDescriptor.RunningCols.DISTANCE));
             toRet.username = cursor.getString(cursor.getColumnIndex(ContentDescriptor.RunningCols.USERNAME));
             toRet.isShared = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.RunningCols.IS_SHARED)) == 1;
-
 
             return toRet;
         }
