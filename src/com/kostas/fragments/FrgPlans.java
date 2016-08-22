@@ -208,7 +208,7 @@ public class FrgPlans extends Fragment {
 
             final Plan plan = plans.get(position);
             holder.topText.setText(plan.getDescription());
-            holder.bottomText.setText( plan.getMeters()+"m with "+plan.getSeconds()+"secs rest"+ (plan.getRounds()>0 ? " x"+plan.getRounds()+" rounds" : "" ));
+            holder.bottomText.setText( plan.getDistanceUnits()+"m with "+plan.getSeconds()+"secs rest"+ (plan.getRounds()>0 ? " x"+plan.getRounds()+" rounds" : "" ));
 
             convertView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
@@ -265,10 +265,10 @@ public class FrgPlans extends Fragment {
 
         Plan newPlan = new Plan();
         newPlan.setId(-1);
-        newPlan.setMeters(planIntervalDistancePicker.getValue());
-        newPlan.setSeconds(planIntervalTimePicker.getValue());
-        newPlan.setRounds(planIntervalRoundsPicker.getValue());
-        newPlan.setStartRest(planIntervalStartRestPicker.getValue());
+        newPlan.setDistanceUnits(planIntervalDistancePicker.getValue());
+        newPlan.setSeconds((int)planIntervalTimePicker.getValue());
+        newPlan.setRounds((int)planIntervalRoundsPicker.getValue());
+        newPlan.setStartRest((int)planIntervalStartRestPicker.getValue());
         newPlan.setDescription(description);
 
         Database db = new Database(getActivity());

@@ -81,9 +81,11 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
         SharedPreferences.Editor editor = app_preferences.edit();
         boolean hasNoSound = app_preferences.getBoolean(NO_SOUND, false);
         boolean hasNoVibration = app_preferences.getBoolean(NO_VIBRATION, false);
+        boolean metricMiles = app_preferences.getBoolean(METRIC_MILES, false);
         editor.clear().apply();
         editor.putBoolean(NO_SOUND, hasNoSound);
         editor.putBoolean(NO_VIBRATION, hasNoVibration);
+        editor.putBoolean(METRIC_MILES, metricMiles);
         editor.apply();
     }
 

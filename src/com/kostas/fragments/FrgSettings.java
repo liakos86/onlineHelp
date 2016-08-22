@@ -1,6 +1,8 @@
 package com.kostas.fragments;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,9 +12,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.kostas.onlineHelp.ActMain;
 import com.kostas.onlineHelp.R;
+import com.kostas.service.RunningService;
 import org.w3c.dom.Text;
 
 /**
@@ -74,6 +79,28 @@ public class FrgSettings extends Fragment {
                 }catch (Exception e){
                     e.printStackTrace();
                 }
+
+            }
+        });
+
+        final SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
+
+        final CheckBox metric =(CheckBox) v.findViewById(R.id.checkbox_metric);
+
+        boolean isMiles = app_preferences.getBoolean(RunningService.METRIC_MILES, false);
+
+        metric.setChecked(!isMiles);
+
+        metric.setText(isMiles ? getResources().getString(R.string.distance_miles) : getResources().getString(R.string.distance_meters) );
+
+
+        metric.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                app_preferences.edit().putBoolean("metricMiles", !metric.isChecked()).apply();
+                metric.setText(metric.isChecked() ? getResources().getString(R.string.distance_meters) : getResources().getString(R.string.distance_miles) );
+
+
 
             }
         });

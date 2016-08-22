@@ -38,6 +38,7 @@ public class RunningService extends IntentService
     public static final String INTERVAL_IN_PROGRESS = "intervalInProgress";
     public static final String NO_SOUND = "noSound";
     public static final String NO_VIBRATION = "noVibration";
+    public static final String METRIC_MILES = "metricMiles";
     public static final String INTERVAL_DISTANCE = "intervalDistance";
     public static final String INTERVAL_TIME = "intervalTime";
     public static final String INTERVAL_START_REST = "intervalStartRest";
@@ -106,6 +107,11 @@ public class RunningService extends IntentService
      */
     private long fastest_millis;
 
+    /**
+     * Has the user selected miles as unit?
+     */
+    private boolean isMetricMiles;
+
 
     @Override
     protected void onHandleIntent(Intent intent) {
@@ -124,6 +130,9 @@ public class RunningService extends IntentService
         locationList = new ArrayList<Location>();
         buildGoogleApiClient();
         ttsManager = application.getTtsManager();
+
+        isMetricMiles = app_preferences.getBoolean(METRIC_MILES, false);
+
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -192,6 +201,11 @@ public class RunningService extends IntentService
         startCountDownForNextInterval(intervalStartRest);
         intervals = new ArrayList<Interval>();
         intervalDistance = intent.getFloatExtra(INTERVAL_DISTANCE, 0);
+
+        if (isMetricMiles){
+            intervalDistance *= 1609.34;//miles to meters
+        }
+
         intervalRounds = intent.getIntExtra(INTERVAL_ROUNDS, 0);
         new PerformAsyncTask(0).execute();
     }
@@ -556,6 +570,7 @@ public class RunningService extends IntentService
                 if (((PowerManager) getSystemService(Context.POWER_SERVICE)).isScreenOn()) {
                     Intent intent = new Intent(NOTIFICATION);
                     intent.putExtra(INTERVAL_DISTANCE, currentDistance);
+
                     intent.putExtra(INTERVAL_TIME, totalTime);
                     sendBroadcast(intent);
                 }

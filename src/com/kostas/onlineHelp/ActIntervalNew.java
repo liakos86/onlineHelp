@@ -180,6 +180,28 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         intervalStartRestPicker = (NumberPickerKostas) findViewById(R.id.intervalStartRestPicker);
         intervalStartRestPicker.setValue(10);
         progressWheel = (ProgressWheel) findViewById(R.id.timerProgressWheel);
+
+
+        boolean isMiles = app_preferences.getBoolean(METRIC_MILES, false);
+        String distString = isMiles ? getResources().getString(R.string.distance_miles): getResources().getString(R.string.distance_meters);
+        intervalDistancePicker.setDescriptionText(distString+" to run");
+
+
+        TextView distanceTextTitle = ((TextView) findViewById(R.id.distance));
+
+        if (isMiles){
+            intervalDistancePicker.setMinValue(0.1f);
+            intervalDistancePicker.setValue(0.1f);
+            intervalDistancePicker.setMaxValue(3);
+            intervalDistancePicker.setStep(0.1f);
+            distanceTextTitle.setText("Miles covered");
+        }else{
+
+            distanceTextTitle.setText("Meters covered");
+
+
+        }
+
     }
 
     /**
@@ -279,7 +301,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
             return;
         }
 
-        setRoundsText(intervalRoundsPicker.getValue());
+        setRoundsText((int)intervalRoundsPicker.getValue());
         progressWheel.setVisibility(View.VISIBLE);
         progressWheel.setProgress(360);
         final int step = (int) (360000 / intervalTime);
@@ -333,9 +355,11 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         SharedPreferences.Editor editor = app_preferences.edit();
         boolean hasNoSound = app_preferences.getBoolean(NO_SOUND, false);
         boolean hasNoVibration = app_preferences.getBoolean(NO_VIBRATION, false);
+        boolean metricMiles = app_preferences.getBoolean(METRIC_MILES, false);
         editor.clear().apply();
         editor.putBoolean(NO_SOUND, hasNoSound);
         editor.putBoolean(NO_VIBRATION, hasNoVibration);
+        editor.putBoolean(METRIC_MILES, metricMiles);
         editor.apply();
     }
 
@@ -433,8 +457,8 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      **/
     private void obtainUserInput() {
             intervalDistance = ((float) intervalDistancePicker.getValue());
-            intervalTime = intervalTimePicker.getValue() * 1000;
-            intervalStartRest = intervalStartRestPicker.getValue() * 1000;
+            intervalTime = (int)intervalTimePicker.getValue() * 1000;
+            intervalStartRest = (int)intervalStartRestPicker.getValue() * 1000;
     }
 
 
@@ -474,7 +498,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      */
     private void showFrame() {
         flipper.setDisplayedChild(1);
-        setRoundsText(intervalRoundsPicker.getValue());
+        setRoundsText((int)intervalRoundsPicker.getValue());
         distanceText.setText("0 / "+(int)intervalDistance);
     }
 
@@ -589,7 +613,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
     private void loadPlan(int position) {
         Plan plan = plans.get(position);
         intervalTimePicker.setValue(plan.getSeconds());
-        intervalDistancePicker.setValue(plan.getMeters());
+        intervalDistancePicker.setValue(plan.getDistanceUnits());
         intervalRoundsPicker.setValue(plan.getRounds());
         intervalStartRestPicker.setValue(plan.getStartRest());
         intervalRoundsPicker.disableButtonColor(plan.getRounds() == 0);
