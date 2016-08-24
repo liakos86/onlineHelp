@@ -10,6 +10,7 @@
             app:minValue="100"
             app:maxValue="5000"
             app:step="50"
+            app:textName="@string/distance"
             android:layout_gravity="center_horizontal"
             android:id="@+id/intervalDistancePicker"
             android:orientation="horizontal"

@@ -51,13 +51,13 @@ import com.kostas.onlineHelp.R;
  */
 public class NumberPickerKostas extends LinearLayout {
 
-    private float minValue;
-    private float maxValue;
-    private float step;
+    private int minValue;
+    private int maxValue;
+    private int step;
 	
 	private final int TEXT_SIZE = 14;
 	
-	public Float value;
+	public Integer value;
 
     Button decrement;
     Button increment;
@@ -181,13 +181,9 @@ public class NumberPickerKostas extends LinearLayout {
         descriptionText.setText( text );
     }
 
-    public void setDescriptionText(String text){
-        descriptionText.setText( text );
-    }
-
 	private void initValueEditText( Context context){
 		
-		value = new Float( minValue );
+		value = new Integer( minValue );
 		
 		valueText = new EditText( context );
 		valueText.setTextSize( TEXT_SIZE );
@@ -210,9 +206,9 @@ public class NumberPickerKostas extends LinearLayout {
 		// number
 		valueText.setOnKeyListener(new OnKeyListener() {
             public boolean onKey(View v, int arg1, KeyEvent event) {
-                float backupValue = value;
+                int backupValue = value;
                 try {
-                    value = Float.parseFloat(((EditText) v).getText().toString());
+                    value = Integer.parseInt(((EditText) v).getText().toString());
                 } catch (NumberFormatException nfe) {
                     value = backupValue;
                 }
@@ -308,11 +304,11 @@ public class NumberPickerKostas extends LinearLayout {
 		}
 	}
 	
-	public float getValue(){
+	public int getValue(){
 		return value;
 	}
 	
-	public void setValue( float value ){
+	public void setValue( int value ){
 		if( value > maxValue ) value = maxValue;
 		if( value >= minValue ){
 			this.value = value;
@@ -323,27 +319,27 @@ public class NumberPickerKostas extends LinearLayout {
 	}
 
 
-    public float getMinValue() {
+    public int getMinValue() {
         return minValue;
     }
 
-    public void setMinValue(float minValue) {
+    public void setMinValue(int minValue) {
         this.minValue = minValue;
     }
 
-    public float getMaxValue() {
+    public int getMaxValue() {
         return maxValue;
     }
 
-    public void setMaxValue(float maxValue) {
+    public void setMaxValue(int maxValue) {
         this.maxValue = maxValue;
     }
 
-    public float getStep() {
+    public int getStep() {
         return step;
     }
 
-    public void setStep(float step) {
+    public void setStep(int step) {
         this.step = step;
     }
 

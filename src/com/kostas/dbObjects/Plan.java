@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 
@@ -18,7 +19,7 @@ public class Plan {
 
     private long id;
     private String description;
-    private float distanceUnits;
+    private int meters;
     private int seconds;
     private int rounds;
     private int startRest;
@@ -29,10 +30,10 @@ public class Plan {
         this.description = description;
     }
 
-    public Plan(long id, String description, int distanceUnits, int seconds, int rounds, int startRest){
+    public Plan(long id, String description, int meters, int seconds, int rounds, int startRest){
         this.id = id;
         this.description = description;
-        this.distanceUnits = distanceUnits;
+        this.meters = meters;
         this.seconds = seconds;
         this.rounds = rounds;
         this.startRest = startRest;
@@ -55,12 +56,12 @@ public class Plan {
         this.description = description;
     }
 
-    public float getDistanceUnits() {
-        return distanceUnits;
+    public int getMeters() {
+        return meters;
     }
 
-    public void setDistanceUnits(float distanceUnits) {
-        this.distanceUnits = distanceUnits;
+    public void setMeters(int meters) {
+        this.meters = meters;
     }
 
     public int getSeconds() {
@@ -112,7 +113,7 @@ public class Plan {
 
             toRet.put(ContentDescriptor.Plan.Cols.ID, item.id);
             toRet.put(ContentDescriptor.Plan.Cols.DESCRIPTION, item.description);
-            toRet.put(ContentDescriptor.Plan.Cols.METERS, item.distanceUnits);
+            toRet.put(ContentDescriptor.Plan.Cols.METERS, item.meters);
             toRet.put(ContentDescriptor.Plan.Cols.SECONDS, item.seconds);
             toRet.put(ContentDescriptor.Plan.Cols.ROUNDS, item.rounds);
             toRet.put(ContentDescriptor.Plan.Cols.START_REST, item.startRest);
@@ -130,7 +131,7 @@ public class Plan {
             Plan toRet = new Plan();
             toRet.id = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.Plan.Cols.ID));
             toRet.description = cursor.getString(cursor.getColumnIndex(ContentDescriptor.Plan.Cols.DESCRIPTION));
-            toRet.distanceUnits = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Plan.Cols.METERS));
+            toRet.meters = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Plan.Cols.METERS));
             toRet.seconds = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Plan.Cols.SECONDS));
             toRet.rounds = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Plan.Cols.ROUNDS));
             return toRet;
