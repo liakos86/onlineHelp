@@ -107,6 +107,8 @@ public class RunningService extends IntentService
      */
     private long fastest_millis;
 
+    public static final double METERS_TO_MILES_CONST = 1609.34;
+
     /**
      * Has the user selected miles as unit?
      */
@@ -203,7 +205,7 @@ public class RunningService extends IntentService
         intervalDistance = intent.getFloatExtra(INTERVAL_DISTANCE, 0);
 
         if (isMetricMiles){
-            intervalDistance *= 1609.34;//miles to meters
+            intervalDistance *= METERS_TO_MILES_CONST;//meters to miles
         }
 
         intervalRounds = intent.getIntExtra(INTERVAL_ROUNDS, 0);

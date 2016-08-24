@@ -67,6 +67,11 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
     AdRequest adRequest;
     private BroadcastReceiver receiver;
 
+    /**
+     * the metric the user has selected
+     */
+    private boolean isMiles;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,6 +126,11 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
                     }
                     else if (bundle.getFloat(INTERVAL_DISTANCE) != 0) {
                         coveredDist = bundle.getFloat(INTERVAL_DISTANCE);
+
+                        if (isMiles){
+                            coveredDist /= RunningService.METERS_TO_MILES_CONST;
+                        }
+
                         setDistanceProgress(coveredDist);
                     } else {//todo add another message to identify ending
                         prepareForNextInterval(bundle.getBoolean(INTERVAL_COMPLETED, false));
@@ -182,7 +192,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         progressWheel = (ProgressWheel) findViewById(R.id.timerProgressWheel);
 
 
-        boolean isMiles = app_preferences.getBoolean(METRIC_MILES, false);
+        isMiles = app_preferences.getBoolean(METRIC_MILES, false);
         String distString = isMiles ? getResources().getString(R.string.distance_miles): getResources().getString(R.string.distance_meters);
         intervalDistancePicker.setDescriptionText(distString+" to run");
 
@@ -241,7 +251,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         }
         else if (!isRunning && !isCompleted) {//from resume OR first time
 
-            distanceText.setText("0 / " + (int) intervalDistance);
+            distanceText.setText("0 / " +  intervalDistance);
             timeText.setText(getResources().getString(R.string.zero_time));
 
             final int step = (int) (360000 / millisecondsToCount);
@@ -290,7 +300,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         coveredDist = 0;
         mHandler.removeCallbacks(mUpdateTimeTask);
         timeText.setText(getResources().getString(R.string.zero_time));
-        distanceText.setText(0 + " / " + (int) intervalDistance);
+        distanceText.setText(0 + " / " +  intervalDistance);
 
         if (countDownTimer !=null) {
             countDownTimer.cancel();
@@ -319,8 +329,8 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      * Actions performed when the countdown finishes and the interval will start.
      */
     private void onFinishUpdate() {
-        progressWheel.setText(0 + " / " + (int) intervalDistance);
-        distanceText.setText(0 + " / " + (int) intervalDistance);
+        progressWheel.setText(0.0 + " / " + String.format("%.2f", intervalDistance));
+        distanceText.setText(0.0 + " / " +  intervalDistance);
         startTimeMillis = SystemClock.uptimeMillis();
         mHandler.post(mUpdateTimeTask);
         setProgressAndVisibilityTimerAndDistance(View.VISIBLE);
@@ -344,8 +354,8 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      */
     private void setDistanceProgress(float progress) {
         progressWheel.setProgress(((int) ((progress / intervalDistance) * 360)));
-        progressWheel.setText((int) progress + " / " + (int) intervalDistance);
-        distanceText.setText((int) progress + " / " + (int) intervalDistance);
+        progressWheel.setText( String.format("%.2f", progress) + " / " +  intervalDistance);
+        distanceText.setText( String.format("%.2f", progress) + " / " +  intervalDistance);
     }
 
     /**
@@ -499,7 +509,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
     private void showFrame() {
         flipper.setDisplayedChild(1);
         setRoundsText((int)intervalRoundsPicker.getValue());
-        distanceText.setText("0 / "+(int)intervalDistance);
+        distanceText.setText("0 / "+intervalDistance);
     }
 
     private void hideFrame() {
