@@ -72,6 +72,11 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      */
     private boolean isMiles;
 
+    /**
+     * The format to use when printing distance, depends on metric selected
+     */
+    private String formatForProgressWheel;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -200,18 +205,16 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         TextView distanceTextTitle = ((TextView) findViewById(R.id.distance));
 
         if (isMiles){
+            formatForProgressWheel = "%.2f";
             intervalDistancePicker.setMinValue(0.1f);
             intervalDistancePicker.setValue(0.1f);
             intervalDistancePicker.setMaxValue(3);
             intervalDistancePicker.setStep(0.1f);
             distanceTextTitle.setText("Miles covered");
         }else{
-
+            formatForProgressWheel = "%.0f";
             distanceTextTitle.setText("Meters covered");
-
-
         }
-
     }
 
     /**
@@ -251,8 +254,8 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         }
         else if (!isRunning && !isCompleted) {//from resume OR first time
 
-            distanceText.setText("0 / " +  intervalDistance);
-            timeText.setText(getResources().getString(R.string.zero_time));
+            distanceText.setText(String.format(formatForProgressWheel, 0.0)+" / " +  String.format(formatForProgressWheel, intervalDistance));
+                    timeText.setText(getResources().getString(R.string.zero_time));
 
             final int step = (int) (360000 / millisecondsToCount);
             progressWheel.setVisibility(View.VISIBLE);
@@ -300,7 +303,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         coveredDist = 0;
         mHandler.removeCallbacks(mUpdateTimeTask);
         timeText.setText(getResources().getString(R.string.zero_time));
-        distanceText.setText(0 + " / " +  intervalDistance);
+        distanceText.setText(String.format(formatForProgressWheel, 0.0) + " / " +  String.format(formatForProgressWheel, intervalDistance));
 
         if (countDownTimer !=null) {
             countDownTimer.cancel();
@@ -329,8 +332,8 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      * Actions performed when the countdown finishes and the interval will start.
      */
     private void onFinishUpdate() {
-        progressWheel.setText(0.0 + " / " + String.format("%.2f", intervalDistance));
-        distanceText.setText(0.0 + " / " +  intervalDistance);
+        progressWheel.setText(String.format(formatForProgressWheel,0.0) + " / " + String.format(formatForProgressWheel, intervalDistance));
+        distanceText.setText(String.format(formatForProgressWheel,0.0) + " / " +  String.format(formatForProgressWheel, intervalDistance));
         startTimeMillis = SystemClock.uptimeMillis();
         mHandler.post(mUpdateTimeTask);
         setProgressAndVisibilityTimerAndDistance(View.VISIBLE);
@@ -354,8 +357,8 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      */
     private void setDistanceProgress(float progress) {
         progressWheel.setProgress(((int) ((progress / intervalDistance) * 360)));
-        progressWheel.setText( String.format("%.2f", progress) + " / " +  intervalDistance);
-        distanceText.setText( String.format("%.2f", progress) + " / " +  intervalDistance);
+        progressWheel.setText( String.format(formatForProgressWheel, progress) + " / " +  String.format(formatForProgressWheel,intervalDistance));
+        distanceText.setText( String.format(formatForProgressWheel, progress) + " / " + String.format(formatForProgressWheel, intervalDistance));
 
     }
 
@@ -510,7 +513,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
     private void showFrame() {
         flipper.setDisplayedChild(1);
         setRoundsText((int)intervalRoundsPicker.getValue());
-        distanceText.setText("0 / "+intervalDistance);
+        distanceText.setText(String.format(formatForProgressWheel,0.0) +" / "+String.format(formatForProgressWheel, intervalDistance));
     }
 
     private void hideFrame() {
