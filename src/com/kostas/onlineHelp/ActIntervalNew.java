@@ -356,6 +356,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         progressWheel.setProgress(((int) ((progress / intervalDistance) * 360)));
         progressWheel.setText( String.format("%.2f", progress) + " / " +  intervalDistance);
         distanceText.setText( String.format("%.2f", progress) + " / " +  intervalDistance);
+
     }
 
     /**
