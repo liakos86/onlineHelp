@@ -3,6 +3,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
@@ -22,6 +23,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.kostas.onlineHelp.*;
 import com.kostas.custom.MapWrapperLayout;
+import com.kostas.service.RunningService;
 
 import java.util.*;
 
@@ -178,8 +180,9 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
          runsExpListView.setIndicatorBoundsRelative(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
         }
 
+        SharedPreferences preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
         adapterInterval = new IntervalAdapterItem(getActivity(), getActivity().getApplicationContext(),
-                R.layout.list_interval_row, intervals);
+                R.layout.list_interval_row, intervals, preferences.getBoolean(RunningService.METRIC_MILES, false));
         intervalListView.setAdapter(adapterInterval);
 
         closeIntervalsButton.setOnClickListener(new View.OnClickListener() {

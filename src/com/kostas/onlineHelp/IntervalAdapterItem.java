@@ -16,15 +16,17 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
     int layoutResourceId;
     List<Interval> data;
     Activity activity;
+    boolean isMetricMiles;
 
     public IntervalAdapterItem(Activity activity, Context mContext, int layoutResourceId,
-                               List<Interval> data) {
+                               List<Interval> data, boolean isMetricMiles) {
 
         super(mContext, layoutResourceId, data);
         this.layoutResourceId = layoutResourceId;
         this.mContext = mContext;
         this.data = data;
         this.activity = activity;
+        this.isMetricMiles = isMetricMiles;
     }
 
     @Override
@@ -74,9 +76,16 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
         holder.distance.setText((int)current.getDistance()+"m completed  in  "+timeText);
 
 
-        holder.time.setText(
-                "Speed: "+  String.format("%1$,.2f", ((double) ((current.getDistance()/intervalTime)  *3600)))+"km/h " +
-                "  Pace: "+current.getPaceText());
+        if (isMetricMiles){
+            holder.time.setText(
+                    "Speed: "+  String.format("%1$,.2f", ((double) ((current.getDistance()*0.621371192/intervalTime)  *3600)))+"mi/h " +
+                            "  Pace: "+current.getPaceText());
+        }else{
+            holder.time.setText(
+                    "Speed: "+  String.format("%1$,.2f", ((double) ((current.getDistance()/intervalTime)  *3600)))+"km/h " +
+                            "  Pace: "+current.getPaceText());
+        }
+
 
         return convertView;
 

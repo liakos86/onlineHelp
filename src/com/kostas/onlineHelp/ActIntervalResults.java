@@ -14,6 +14,7 @@ import com.google.gson.reflect.TypeToken;
 import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Running;
 import com.kostas.model.Database;
+import com.kostas.service.RunningService;
 
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
@@ -163,9 +164,14 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
             long millis = SystemClock.uptimeMillis() - app_preferences.getLong(MSTART_TIME, 0);
             intervalsList.add(new Interval(-1, sb.toString(), millis, coveredDist));
         }
-        totalPace = computeTotalPace();
+
+        boolean metricMiles = app_preferences.getBoolean(RunningService.METRIC_MILES, false);
+        totalPace = computeTotalPace(metricMiles);
+
+
+
         adapterInterval = new IntervalAdapterItem(this, this.getApplicationContext(),
-                R.layout.list_interval_row, intervalsList);
+                R.layout.list_interval_row, intervalsList, metricMiles);
         completedIntervalsListView.setAdapter(adapterInterval);
     }
 
@@ -195,7 +201,7 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
         clear();
     }
 
-    String computeTotalPace(){
+    String computeTotalPace(boolean isMetricMiles){
 
 
         long totalTime = 0;
@@ -208,7 +214,7 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
 
             // object item based on the position
             long intervalTime = interval.getMilliseconds();
-            float pace = intervalTime / interval.getDistance();
+            float pace =(float) (intervalTime / (interval.getDistance()*0.621371192));
 
             int paceMinutes = (int) (pace / 60);
             int paceSeconds = (int) (pace - (paceMinutes * 60));
