@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,10 +17,13 @@ import com.kostas.custom.NumberPickerKostas;
 import com.kostas.custom.ViewHolderRow;
 import com.kostas.dbObjects.Plan;
 import com.kostas.model.Database;
+import com.kostas.onlineHelp.ActMain;
 import com.kostas.onlineHelp.R;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.kostas.service.RunningService.METRIC_MILES;
 
 /**
  * Created by liakos on 10/10/2015.
@@ -114,6 +118,12 @@ public class FrgPlans extends Fragment {
                 }
             }
         });
+
+        SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
+
+        Boolean isMiles = app_preferences.getBoolean(METRIC_MILES, false);
+        String distString = isMiles ? getResources().getString(R.string.distance_miles): getResources().getString(R.string.distance_meters);
+        planIntervalDistancePicker.setDescriptionText(distString+" to run");
 
     }
 
