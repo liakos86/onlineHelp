@@ -75,15 +75,16 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
         String timeText = String.format("%02d",hours)+":" + String.format("%02d",mins)+":"+String.format("%02d",secs);
         holder.distance.setText((int)current.getDistance()+"m completed  in  "+timeText);
 
+        String[]paces = current.getPaceText().split("-");
 
         if (isMetricMiles){
             holder.time.setText(
                     "Speed: "+  String.format("%1$,.2f", ((double) ((current.getDistance()*0.621371192/intervalTime)  *3600)))+"mi/h " +
-                            "  Pace: "+current.getPaceText());
+                            "  Pace: "+paces[1]);
         }else{
             holder.time.setText(
                     "Speed: "+  String.format("%1$,.2f", ((double) ((current.getDistance()/intervalTime)  *3600)))+"km/h " +
-                            "  Pace: "+current.getPaceText());
+                            "  Pace: "+paces[0]);
         }
 
 

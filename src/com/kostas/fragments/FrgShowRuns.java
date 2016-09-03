@@ -91,6 +91,8 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
     TextView metersCount;
     TextView durationCount ;
 
+    boolean isMetricMiles;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -181,8 +183,9 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         }
 
         SharedPreferences preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
+        isMetricMiles = preferences.getBoolean(RunningService.METRIC_MILES, false);
         adapterInterval = new IntervalAdapterItem(getActivity(), getActivity().getApplicationContext(),
-                R.layout.list_interval_row, intervals, preferences.getBoolean(RunningService.METRIC_MILES, false));
+                R.layout.list_interval_row, intervals, isMetricMiles);
         intervalListView.setAdapter(adapterInterval);
 
         closeIntervalsButton.setOnClickListener(new View.OnClickListener() {
@@ -466,12 +469,22 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
             }
 
             Running run = child.get(childPosition);
+            String[] paces = run.getAvgPaceText().split("-");
+            if (isMetricMiles){
 
-            holder.bottomText.setText((int) run.getDistance() + " meters with " + ((int) (run.getTime() / 1000)) + " secs rest");
+                holder.bottomText.setText(String.format("%1$,.2f", ((double)  run.getDistance() *0.621371192)) + " miles with " + ((int) (run.getTime() / 1000)) + " secs rest");
+                holder.topRightText.setText("Avg Pace: "+paces[1]);
+
+
+            }else{
+                holder.bottomText.setText((int) run.getDistance() + " meters with " + ((int) (run.getTime() / 1000)) + " secs rest");
+                holder.topRightText.setText("Avg Pace: "+paces[0]);
+            }
+
             holder.bottom2Text.setText( run.getDescription().length()>0? run.getDescription() : "No description" );
 
             holder.topText.setText(run.getDate());
-            holder.topRightText.setText("Avg Pace: "+run.getAvgPaceText());
+
             holder.rightText.setText(String.valueOf(run.getIntervals().size()) + " sessions");
 
                 convertView.setOnLongClickListener(new View.OnLongClickListener() {

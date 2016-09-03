@@ -214,22 +214,34 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
 
             // object item based on the position
             long intervalTime = interval.getMilliseconds();
-            float pace =(float) (intervalTime / (interval.getDistance()*0.621371192));
+            float paceMi =(float) (intervalTime / (interval.getDistance()*0.621371192));
+            float paceKm = (intervalTime / interval.getDistance());
+            int paceMinutesKm = (int) (paceKm / 60);
+            int paceSecondsKm = (int) (paceKm - (paceMinutesKm * 60));
+            int paceMinutesMi = (int) (paceMi / 60);
+            int paceSecondsMi = (int) (paceMi - (paceMinutesMi * 60));
 
-            int paceMinutes = (int) (pace / 60);
-            int paceSeconds = (int) (pace - (paceMinutes * 60));
-
-            String paceText = paceMinutes<60 ?   String.format("%02d", paceMinutes)+"m "+String.format("%02d", paceSeconds)+"s" : "over 1 hour";
+            String paceTextKm = paceMinutesKm<60 ?   String.format("%02d", paceMinutesKm)+"m "+String.format("%02d", paceSecondsKm)+"s" : "over 1 hour";
+            String paceTextMi = paceMinutesMi<60 ?   String.format("%02d", paceMinutesMi)+"m "+String.format("%02d", paceSecondsMi)+"s" : "over 1 hour";
 
 
-            interval.setPaceText(paceText);
+            interval.setPaceText(paceTextKm+"-"+paceTextMi);
         }
 
-        float totalPace = totalTime / totalDistance;
-        int paceMinutes = (int) (totalPace / 60);
-        int paceSeconds = (int) (totalPace - (paceMinutes * 60));
+        float totalPaceKm = totalTime / totalDistance;
+        float totalPaceMi = (float)(totalTime / (totalDistance*0.621371192));
+        int paceMinutesKm = (int) (totalPaceKm / 60);
+        int paceSecondsKm = (int) (totalPaceKm - (paceMinutesKm * 60));
 
-        return paceMinutes<60 ?   String.format("%02d", paceMinutes)+"m "+String.format("%02d", paceSeconds)+"s" : "over 1 hour";
+        int paceMinutesMi = (int) (totalPaceMi / 60);
+        int paceSecondsMi = (int) (totalPaceMi - (paceMinutesMi * 60));
+
+
+        String totalPaceTextKm = paceMinutesKm<60 ?   String.format("%02d", paceMinutesKm)+"m "+String.format("%02d", paceSecondsKm)+"s" : "over 1 hour";
+        String totalPaceTextMi = paceMinutesMi<60 ?   String.format("%02d", paceMinutesMi)+"m "+String.format("%02d", paceSecondsMi)+"s" : "over 1 hour";
+
+
+        return totalPaceTextKm+"-"+totalPaceTextMi;
 
     }
 
