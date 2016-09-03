@@ -17,10 +17,13 @@ import java.util.List;
 public class Database extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "interval_runner.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     // this is also considered as invalid id by the server
     public static final long INVALID_ID = -1;
     private Context mContext;
+
+    private static final String DATABASE_ALTER_RUNNING_1 = "Update running set avgpacetext = avgpacetext || '-n/a';";
+    private static final String DATABASE_ALTER_INTERVAL_1 = "Update interval set pacetext = pacetext || '-n/a';";
 
     public Database(Context ctx) {
         super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -39,13 +42,12 @@ public class Database extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-//        Log.w("Database", "Upgrading database from version " + oldVersion + " to " + newVersion
-//                + ", which will destroy all old data");
-            db.execSQL("drop table if exists " + ContentDescriptor.Running.TABLE_NAME);
-        db.execSQL("drop table if exists " + ContentDescriptor.Interval.TABLE_NAME);
-        db.execSQL("drop table if exists " + ContentDescriptor.Plan.TABLE_NAME);
 
-            onCreate(db); // run onCreate to get new database
+        if (oldVersion < 2) {
+            db.execSQL(DATABASE_ALTER_RUNNING_1);
+            db.execSQL(DATABASE_ALTER_INTERVAL_1);
+        }
+
     }
     
     
