@@ -5,11 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.widget.LinearLayout;
 import com.kostas.custom.NonSwipeableViewPager;
 import com.kostas.fragments.FrgShowRuns;
 import com.kostas.service.RunningService;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 import java.util.Map;
 
 /**
@@ -66,7 +70,27 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
                 ((ExtApplication) getApplication()).setPosition(position);
                 mPager.setCurrentItem(position);
                 setSelectedBottomButton(bottomButtons, position);
+
+                Fragment fragment = getActiveFragment(getSupportFragmentManager(),position);
+                if(fragment instanceof FrgShowRuns){
+                    ((FrgShowRuns)fragment).refreshPaceTextsIfNeeded();
+                }
+
                 invalidateOptionsMenu();
+            }
+
+            public Fragment getActiveFragment(FragmentManager fragmentManager, int position) {
+                final String name = makeFragmentName(mPager.getId(), position);
+                final Fragment fragmentByTag = fragmentManager.findFragmentByTag(name);
+                if (fragmentByTag == null) {
+                    final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    fragmentManager.dump("", null, new PrintWriter(outputStream, true), null);
+                }
+                return fragmentByTag;
+            }
+
+            private String makeFragmentName(int viewId, int index) {
+                return "android:switcher:" + viewId + ":" + index;
             }
 
             @Override

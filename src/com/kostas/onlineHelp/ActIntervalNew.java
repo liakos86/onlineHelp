@@ -133,7 +133,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
                         coveredDist = bundle.getFloat(INTERVAL_DISTANCE);
 
                         if (isMiles){
-                            coveredDist /= RunningService.METERS_TO_MILES_CONST;
+                            coveredDist /= RunningService.MILE_TO_METERS_CONST;
                         }
 
                         setDistanceProgress(coveredDist);

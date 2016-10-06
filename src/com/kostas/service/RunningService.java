@@ -10,7 +10,6 @@ import android.location.Location;
 import android.os.*;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.util.Log;
 import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -107,7 +106,7 @@ public class RunningService extends IntentService
      */
     private long fastest_millis;
 
-    public static final double METERS_TO_MILES_CONST = 1609.34;
+    public static final double MILE_TO_METERS_CONST = 1609.344;
 
     /**
      * Has the user selected miles as unit?
@@ -205,7 +204,7 @@ public class RunningService extends IntentService
         intervalDistance = intent.getFloatExtra(INTERVAL_DISTANCE, 0);
 
         if (isMetricMiles){
-            intervalDistance *= METERS_TO_MILES_CONST;//meters to miles
+            intervalDistance *= MILE_TO_METERS_CONST;//meters to miles
         }
 
         intervalRounds = intent.getIntExtra(INTERVAL_ROUNDS, 0);

@@ -153,7 +153,13 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         runs = ((ExtApplication)getActivity().getApplication()).getRuns();
         computeParentAndChildRuns();
         computeInfoTexts();
+        SharedPreferences preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
+        isMetricMiles = preferences.getBoolean(RunningService.METRIC_MILES, false);
+        createExpandableList();
+        setButtonListeners();
+    }
 
+    public void createExpandableList(){
         runsExpListView.setDividerHeight(2);
         adapterExp = new MyExpandableAdapter(parentItems, childItems, getActivity());
         runsExpListView.setAdapter(adapterExp);
@@ -179,15 +185,16 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
             runsExpListView.setIndicatorBounds(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
         } else {
-         runsExpListView.setIndicatorBoundsRelative(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
+            runsExpListView.setIndicatorBoundsRelative(right - getResources().getDrawable(R.drawable.arrow_down).getIntrinsicWidth(), right);
         }
 
-        SharedPreferences preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
-        isMetricMiles = preferences.getBoolean(RunningService.METRIC_MILES, false);
+
         adapterInterval = new IntervalAdapterItem(getActivity(), getActivity().getApplicationContext(),
                 R.layout.list_interval_row, intervals, isMetricMiles);
         intervalListView.setAdapter(adapterInterval);
+    }
 
+    public void setButtonListeners(){
         closeIntervalsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -272,7 +279,11 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
         runsCount.setText("RUNS\r\n"+runsNum);
         intervalsCount.setText("INTERVALS\r\n"+intervalsNum);
-        metersCount.setText("KM\r\n"+String.format("%1$,.1f",metersNum/1000));
+        if (isMetricMiles){
+            metersCount.setText("MI\r\n" + String.format("%1$,.1f", metersNum / RunningService.MILE_TO_METERS_CONST));
+        }else {
+            metersCount.setText("KM\r\n" + String.format("%1$,.1f", metersNum / 1000));
+        }
         durationCount.setText(("HRS\r\n"+(int)(millisecsNum/3600000)));
     }
 
@@ -598,6 +609,17 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
            viewFlipper.setDisplayedChild(3);
         }else{
             viewFlipper.setDisplayedChild(0);
+        }
+    }
+
+
+    public void refreshPaceTextsIfNeeded(){
+        SharedPreferences preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
+        boolean newIsMetricMiles = preferences.getBoolean(RunningService.METRIC_MILES, false);
+        if (newIsMetricMiles != isMetricMiles){
+            isMetricMiles = newIsMetricMiles;
+            createExpandableList();
+            computeInfoTexts();
         }
     }
 
