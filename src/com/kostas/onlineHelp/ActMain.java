@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.widget.LinearLayout;
 import com.kostas.custom.NonSwipeableViewPager;
+import com.kostas.fragments.FrgPlans;
 import com.kostas.fragments.FrgShowRuns;
 import com.kostas.service.RunningService;
 
@@ -74,6 +75,8 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
                 Fragment fragment = getActiveFragment(getSupportFragmentManager(),position);
                 if(fragment instanceof FrgShowRuns){
                     ((FrgShowRuns)fragment).refreshPaceTextsIfNeeded();
+                }else if(fragment instanceof FrgPlans){
+                    ((FrgPlans)fragment).changeNewPlanTextsIfNeeded();
                 }
 
                 invalidateOptionsMenu();

@@ -92,7 +92,7 @@ public class FrgSettings extends Fragment {
         metric.setChecked(!isMiles);
 
 
-        metric.setText(isMiles ? getResources().getString(R.string.distance_miles) : getResources().getString(R.string.distance_meters) );
+        metric.setText(isMiles ? getResources().getString(R.string.distance_miles) : getResources().getString(R.string.distance_kilometers) );
 
 
         metric.setOnClickListener(new View.OnClickListener() {

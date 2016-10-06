@@ -290,6 +290,7 @@ public class NumberPickerKostas extends LinearLayout {
                 disableButtonColor(false);
             }
 
+            //TODO change also text
 			value += step;
 			valueText.setText( value.toString() );
 
@@ -316,7 +317,13 @@ public class NumberPickerKostas extends LinearLayout {
 		if( value > maxValue ) value = maxValue;
 		if( value >= minValue ){
 			this.value = value;
-			valueText.setText(this.value.toString());
+
+            if (!descriptionText.getText().toString().contains("to run")) {
+                String value2 = this.value.toString();
+                valueText.setText(value2.substring(0, value2.indexOf(".")));
+            }else {
+                valueText.setText(this.value.toString());
+            }
 		}
 
 

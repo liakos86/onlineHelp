@@ -36,7 +36,7 @@ public class FrgPlans extends Fragment {
     ViewFlipper plansFlipper;
     Button buttonNewPlan, buttonNewPlan2, buttonSavePlan, buttonClosePlan;
     EditText planDescription;
-
+    boolean isMiles;
     /**
      * Pickers for selecting distance, time between planIntervals, rest start and rounds of planInterval
      */
@@ -120,11 +120,27 @@ public class FrgPlans extends Fragment {
         });
 
         SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
+        isMiles = app_preferences.getBoolean(METRIC_MILES, false);
+        setDistancePicketText();
+    }
 
-        Boolean isMiles = app_preferences.getBoolean(METRIC_MILES, false);
+    private void setDistancePicketText(){
+
         String distString = isMiles ? getResources().getString(R.string.distance_miles): getResources().getString(R.string.distance_meters);
         planIntervalDistancePicker.setDescriptionText(distString+" to run");
 
+        if (isMiles){
+            planIntervalDistancePicker.setMinValue(0.1f);
+            planIntervalDistancePicker.setMaxValue(3);
+            planIntervalDistancePicker.setStep(0.1f);
+            planIntervalDistancePicker.setValue(0.1f);
+
+        }else{
+            planIntervalDistancePicker.setMinValue(100f);
+            planIntervalDistancePicker.setMaxValue(5000);
+            planIntervalDistancePicker.setValue(100f);
+            planIntervalDistancePicker.setStep(50f);
+        }
     }
 
     private void clearViews(){
@@ -296,6 +312,17 @@ public class FrgPlans extends Fragment {
         db.deletePlan(trId);
         plans.remove(position);
         adapterPlans.notifyDataSetChanged();
+    }
+
+    public void changeNewPlanTextsIfNeeded(){
+
+        SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
+        boolean newIsMiles = app_preferences.getBoolean(METRIC_MILES, false);
+        if (newIsMiles != isMiles){
+            isMiles = newIsMiles;
+            setDistancePicketText();
+        }
+
     }
 
     private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {

@@ -152,9 +152,9 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         intervalListView.setDivider(null);
         runs = ((ExtApplication)getActivity().getApplication()).getRuns();
         computeParentAndChildRuns();
-        computeInfoTexts();
         SharedPreferences preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
         isMetricMiles = preferences.getBoolean(RunningService.METRIC_MILES, false);
+        computeInfoTexts();
         createExpandableList();
         setButtonListeners();
     }
