@@ -91,18 +91,10 @@ public class FrgSettings extends Fragment {
 
         metric.setChecked(!isMiles);
 
-
-        metric.setText(isMiles ? getResources().getString(R.string.distance_miles) : getResources().getString(R.string.distance_kilometers) );
-
-
         metric.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 app_preferences.edit().putBoolean("metricMiles", !metric.isChecked()).apply();
-                metric.setText(metric.isChecked() ? getResources().getString(R.string.distance_meters) : getResources().getString(R.string.distance_miles) );
-
-
-
             }
         });
 

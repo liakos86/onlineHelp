@@ -24,7 +24,6 @@
     <string name="rounds">Rounds</string>
     <string name="start_rest_secs">Start rest</string>
     <string name="distance_meters">Meters</string>
-    <string name="distance_kilometers">Kilometers</string>
     <string name="distance_miles">Miles</string>
     <string name="delete">Delete</string>
     <string name="save">Save</string>

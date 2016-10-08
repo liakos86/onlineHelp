@@ -5,18 +5,16 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <ImageView  android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:src="@drawable/interval_100"
-            android:layout_centerInParent="true"/>
-
 
     <CheckBox
-           android:layout_alignParentTop="true"
-            android:gravity="center" android:paddingLeft="@dimen/ten_device_pixels" android:paddingRight="@dimen/zero"
-               android:layout_marginRight="@dimen/eight"
-              android:background="@drawable/checkbox_selector" android:button="@drawable/checkbox_sound_design"
-              android:textColor="@color/white_back" android:id="@+id/checkbox_metric" android:layout_width="fill_parent"
-              android:layout_height="@dimen/standard_view_height" />
+           android:layout_above="@+id/icons8text"
+            android:layout_centerHorizontal="true"
+             android:layout_marginBottom="@dimen/standard_view_height"
+              android:button="@drawable/checkbox_metric_selector"
+              android:textColor="@color/white_back"
+           android:id="@+id/checkbox_metric"
+           android:layout_width="wrap_content"
+              android:layout_height="wrap_content" />
 
     <TextView android:layout_above="@+id/loginButton"
               android:layout_centerHorizontal="true"
