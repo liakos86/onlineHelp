@@ -484,7 +484,11 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
             if (isMetricMiles){
 
                 holder.bottomText.setText(String.format("%1$,.2f", ((double) (run.getDistance() *0.000621371192))) + " miles with " + ((int) (run.getTime() / 1000)) + " secs rest");
-                holder.topRightText.setText("Avg Pace: "+paces[1]);
+               if (paces.length > 1) {
+                   holder.topRightText.setText("Avg Pace: "+paces[1]);
+               }else{
+                   holder.topRightText.setText("n/a");
+               }
 
 
             }else{
