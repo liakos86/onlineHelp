@@ -64,6 +64,8 @@ public class NumberPickerKostas extends LinearLayout {
 
 	public EditText valueText;
     public TextView descriptionText;
+
+    private String formatForValueText;
 	
 	private Handler repeatUpdateHandler = new Handler();
 	
@@ -166,9 +168,17 @@ public class NumberPickerKostas extends LinearLayout {
 		});
 	}
 
-
+    /*
+      Initialises the description text.
+      if it is not distance picker i don't need the floating points
+     */
     private void initDescriptionText( Context context, String text){
 
+        if (text == null ){
+            formatForValueText = "%.1f";
+        }else{
+            formatForValueText = "%.0f";
+        }
 
         descriptionText = new TextView( context );
         descriptionText.setTextSize(TEXT_SIZE);
@@ -292,7 +302,9 @@ public class NumberPickerKostas extends LinearLayout {
 
             //TODO change also text
 			value += step;
-			valueText.setText( value.toString() );
+
+            valueText.setText(String.format(formatForValueText, this.value));
+			//valueText.setText( value.toString() );
 
 		}
 	}
@@ -303,7 +315,8 @@ public class NumberPickerKostas extends LinearLayout {
 
 
 
-                valueText.setText(value==0? "NO" : value.toString());
+            valueText.setText(value==0? "NO" : String.format(formatForValueText, this.value));
+               // valueText.setText(value==0? "NO" : value.toString());
                 if (value==0) disableButtonColor(true);
 
 		}
@@ -314,16 +327,17 @@ public class NumberPickerKostas extends LinearLayout {
 	}
 	
 	public void setValue( float value ){
+
+//        if (formatForValueText.equals("%.1f") && value > 10){
+//            formatForValueText = "%.0f";
+//        }
+
 		if( value > maxValue ) value = maxValue;
 		if( value >= minValue ){
 			this.value = value;
 
-            if (!descriptionText.getText().toString().contains("to run")) {
-                String value2 = this.value.toString();
-                valueText.setText(value2.substring(0, value2.indexOf(".")));
-            }else {
-                valueText.setText(this.value.toString());
-            }
+
+            valueText.setText(String.format(formatForValueText, this.value));
 		}
 
 
