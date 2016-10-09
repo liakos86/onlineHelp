@@ -234,7 +234,13 @@ public class FrgPlans extends Fragment {
 
             final Plan plan = plans.get(position);
             holder.topText.setText(plan.getDescription());
-            holder.bottomText.setText( plan.getDistanceUnits()+"m with "+plan.getSeconds()+"secs rest"+ (plan.getRounds()>0 ? " x"+plan.getRounds()+" rounds" : "" ));
+
+            String metricWord = " meters";
+            if (plan.isMetricMiles()){
+                metricWord = " miles";
+            }
+
+            holder.bottomText.setText(plan.getDistanceUnits() + metricWord+ " with " + plan.getSeconds() + "secs rest" + (plan.getRounds() > 0 ? " x " + plan.getRounds() + " rounds" : ""));
 
             convertView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
@@ -296,6 +302,7 @@ public class FrgPlans extends Fragment {
         newPlan.setRounds((int)planIntervalRoundsPicker.getValue());
         newPlan.setStartRest((int)planIntervalStartRestPicker.getValue());
         newPlan.setDescription(description);
+        newPlan.setMetricMiles(isMiles);
 
         Database db = new Database(getActivity());
         db.addPlan(newPlan);

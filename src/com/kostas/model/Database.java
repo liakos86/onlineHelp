@@ -22,8 +22,11 @@ public class Database extends SQLiteOpenHelper {
     public static final long INVALID_ID = -1;
     private Context mContext;
 
-    private static final String DATABASE_ALTER_RUNNING_1 = "Update running set avgpacetext = avgpacetext || '-n/a';";
-    private static final String DATABASE_ALTER_INTERVAL_1 = "Update interval set pacetext = pacetext || '-n/a';";
+    private static final String DATABASE_ALTER_RUNNING_1 = "Update "+ContentDescriptor.Running.TABLE_NAME+" set avgpacetext = avgpacetext || '-n/a';";
+    private static final String DATABASE_ALTER_INTERVAL_1 = "Update "+ContentDescriptor.Interval.TABLE_NAME+" set pacetext = pacetext || '-n/a';";
+
+    private static final String DATABASE_ALTER_PLAN_SCHEMA_1 = "ALTER TABLE "+ContentDescriptor.Plan.TABLE_NAME+" ADD COLUMN "+ContentDescriptor.Plan.Cols.IS_METRIC_MILES+" INTEGER DEFAULT 0;";
+
 
     public Database(Context ctx) {
         super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -46,6 +49,7 @@ public class Database extends SQLiteOpenHelper {
         if (oldVersion < 2) {
             db.execSQL(DATABASE_ALTER_RUNNING_1);
             db.execSQL(DATABASE_ALTER_INTERVAL_1);
+            db.execSQL(DATABASE_ALTER_PLAN_SCHEMA_1);
         }
 
     }
@@ -208,7 +212,8 @@ public class Database extends SQLiteOpenHelper {
                 ContentDescriptor.Plan.Cols.METERS,
                 ContentDescriptor.Plan.Cols.SECONDS,
                 ContentDescriptor.Plan.Cols.ROUNDS,
-                ContentDescriptor.Plan.Cols.START_REST
+                ContentDescriptor.Plan.Cols.START_REST,
+                ContentDescriptor.Plan.Cols.IS_METRIC_MILES
 
         };
 
@@ -218,6 +223,7 @@ public class Database extends SQLiteOpenHelper {
         int sSecondsPosition = 3;
         int sRoundsPosition = 4;
         int sStartRestPosition = 5;
+        int sIsMetricMilesPosition =6;
 
         Cursor c = mContext.getContentResolver().query(ContentDescriptor.Plan.CONTENT_URI, FROM,
                 null,
@@ -233,10 +239,11 @@ public class Database extends SQLiteOpenHelper {
 
                 St.add(new Plan(c.getLong(sIdPosition),
                         c.getString(sDescPosition),
-                        c.getInt(sMetersPosition),
+                        c.getFloat(sMetersPosition),
                         c.getInt(sSecondsPosition),
                         c.getInt(sRoundsPosition),
-                        c.getInt(sStartRestPosition)
+                        c.getInt(sStartRestPosition),
+                        c.getInt(sIsMetricMilesPosition) == 1
                 ));
             }
         }

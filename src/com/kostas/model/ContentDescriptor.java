@@ -188,6 +188,8 @@ public class ContentDescriptor {
             public static final String SECONDS = "seconds";
             public static final String ROUNDS = "rounds";
             public static final String START_REST = "startRest";
+            public static final String IS_METRIC_MILES = "isMetricMiles";
+
 
 
 
@@ -210,6 +212,7 @@ public class ContentDescriptor {
                     + String.format(sFrmTextNotNull, Cols.SECONDS) + " , "
                     + String.format(sFrmTextNotNull, Cols.ROUNDS) + " , "
                     + String.format(sFrmTextNotNull, Cols.START_REST) + " , "
+                    + String.format(sFrmInt, Cols.IS_METRIC_MILES) + " , "
 
                     + String.format(sFrmPrimaryKey, Cols.ID) + ")";
         }

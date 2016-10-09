@@ -22,6 +22,7 @@ public class Plan {
     private int seconds;
     private int rounds;
     private int startRest;
+    private boolean isMetricMiles;
 
     public Plan(){}
 
@@ -29,15 +30,23 @@ public class Plan {
         this.description = description;
     }
 
-    public Plan(long id, String description, int distanceUnits, int seconds, int rounds, int startRest){
+    public Plan(long id, String description, float distanceUnits, int seconds, int rounds, int startRest, boolean isMetricMiles){
         this.id = id;
         this.description = description;
         this.distanceUnits = distanceUnits;
         this.seconds = seconds;
         this.rounds = rounds;
         this.startRest = startRest;
+        this.isMetricMiles = isMetricMiles;
     }
 
+    public boolean isMetricMiles() {
+        return isMetricMiles;
+    }
+
+    public void setMetricMiles(boolean isMetricMiles) {
+        this.isMetricMiles = isMetricMiles;
+    }
 
     public long getId() {
         return id;
@@ -116,6 +125,7 @@ public class Plan {
             toRet.put(ContentDescriptor.Plan.Cols.SECONDS, item.seconds);
             toRet.put(ContentDescriptor.Plan.Cols.ROUNDS, item.rounds);
             toRet.put(ContentDescriptor.Plan.Cols.START_REST, item.startRest);
+            toRet.put(ContentDescriptor.Plan.Cols.IS_METRIC_MILES, item.isMetricMiles ? 1 : 0);
 
             return toRet;
         }
@@ -133,6 +143,7 @@ public class Plan {
             toRet.distanceUnits = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Plan.Cols.METERS));
             toRet.seconds = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Plan.Cols.SECONDS));
             toRet.rounds = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Plan.Cols.ROUNDS));
+            toRet.isMetricMiles = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Plan.Cols.IS_METRIC_MILES)) == 1;
             return toRet;
         }
     }

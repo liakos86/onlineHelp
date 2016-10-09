@@ -28,6 +28,13 @@ import java.util.*;
 
 /**
  * Activity for performing a new interval session
+ *
+ * User selects desired distance, rest seconds and the rounds he wants.
+ * He can also select from a pre-saved plan from db.
+ * Then by pressing start the countdown begins.
+ * There is a RunningService instance on the background sending
+ * broadcasts about distance, time, etc.
+ *
  */
 public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
 
@@ -42,7 +49,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      */
     private long intervalTime, intervalStartRest, startTimeMillis;
     SharedPreferences app_preferences;
-    Button buttonSetIntervalValues;
+    Button buttonSetIntervalValuesAndStart;
     TextView roundsText, myAddress, timeText, distanceText;
     /**
      * The distance needed to be covered for every interval
@@ -186,7 +193,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         roundsText = (TextView) findViewById(R.id.roundsText);
         distanceText = ((TextView) findViewById(R.id.distanceText));
         timeText = (TextView) findViewById(R.id.timeText);
-        buttonSetIntervalValues = (Button) findViewById(R.id.buttonSetIntervalValues);
+        buttonSetIntervalValuesAndStart = (Button) findViewById(R.id.buttonSetIntervalValues);
         intervalTimePicker = (NumberPickerKostas) findViewById(R.id.intervalTimePicker);
         intervalTimePicker.setValue(10);
         intervalDistancePicker = (NumberPickerKostas) findViewById(R.id.intervalDistancePicker);
@@ -412,7 +419,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
             }
         });
 
-        buttonSetIntervalValues.setOnClickListener(new View.OnClickListener() {
+        buttonSetIntervalValuesAndStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -460,7 +467,9 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         List<Plan> newPlans = db.fetchPlansFromDb();
         plans.add(new Plan("Select a plan"));
         for (Plan plan : newPlans) {
-            plans.add(plan);
+            if (plan.isMetricMiles() == isMiles) {
+                plans.add(plan);
+            }
         }
         plansAdapter.notifyDataSetChanged();
         plansSpinner.setClickable(true);
