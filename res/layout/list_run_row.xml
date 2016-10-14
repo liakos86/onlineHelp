@@ -6,8 +6,9 @@
         >
 
     <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
-               android:layout_centerVertical="true" android:layout_alignParentLeft="true" android:layout_marginRight="@dimen/eight"
-               android:src="@drawable/interval_32" android:id="@+id/rowIcon"/>
+               android:layout_alignParentTop="true" android:layout_alignParentLeft="true"
+               android:layout_marginRight="@dimen/eight" android:layout_marginTop="@dimen/eight"
+               android:src="@drawable/time_46" android:id="@+id/rowIcon"/>
 
 
 
