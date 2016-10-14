@@ -145,7 +145,7 @@ public class Database extends SQLiteOpenHelper {
                         c.getString(sDescPosition),
                         c.getLong(sTimePosition),
                         c.getString(sDatePosition),
-                        c.getFloat(sDistPosition)
+                        c.getDouble(sDistPosition)
                 );
 
                 newRun.setAvgPaceText(c.getString(sPacePosition));
@@ -239,7 +239,7 @@ public class Database extends SQLiteOpenHelper {
 
                 St.add(new Plan(c.getLong(sIdPosition),
                         c.getString(sDescPosition),
-                        c.getFloat(sMetersPosition),
+                        c.getDouble(sMetersPosition),
                         c.getInt(sSecondsPosition),
                         c.getInt(sRoundsPosition),
                         c.getInt(sStartRestPosition),

@@ -24,7 +24,7 @@ public class Running {
 
     private long running_id;
     private String date;
-    private float distance;
+    private double distance;
     private long time;
     private String description;
     private String avgPaceText;
@@ -39,7 +39,7 @@ public class Running {
     public Running(){}
 
 
-    public Running(long running_id, String description, long time, String date, float distance, List<Interval>intervals){
+    public Running(long running_id, String description, long time, String date, double distance, List<Interval>intervals){
         this.running_id = running_id;
         this.time = time;
         this.date = date;
@@ -49,7 +49,7 @@ public class Running {
     }
 
 
-    public Running(long running_id, String description, long time, String date, float distance){
+    public Running(long running_id, String description, long time, String date, double distance){
         this.running_id = running_id;
         this.time = time;
         this.date = date;
@@ -59,10 +59,6 @@ public class Running {
 
     public String getDate() {
         return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
     }
 
     public long getRunning_id() {
@@ -77,10 +73,6 @@ public class Running {
         return time;
     }
 
-    public void setTime(long time) {
-        this.time = time;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -89,12 +81,8 @@ public class Running {
         this.description = description;
     }
 
-    public float getDistance() {
+    public double getDistance() {
         return distance;
-    }
-
-    public void setDistance(float distance) {
-        this.distance = distance;
     }
 
     public String getAvgPaceText() {

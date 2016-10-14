@@ -130,14 +130,14 @@ public class FrgPlans extends Fragment {
         planIntervalDistancePicker.setDescriptionText(distString+" to run");
 
         if (isMiles){
-            planIntervalDistancePicker.setMinValue(0.1f);
-            planIntervalDistancePicker.setMaxValue(3);
-            planIntervalDistancePicker.setStep(0.1f);
-            planIntervalDistancePicker.setValue(0.1f);
+            planIntervalDistancePicker.setMinValue(0.1d);
+            planIntervalDistancePicker.setMaxValue(3.0d);
+            planIntervalDistancePicker.setStep(0.1d);
+            planIntervalDistancePicker.setValue(0.1d);
 
         }else{
             planIntervalDistancePicker.setMinValue(100f);
-            planIntervalDistancePicker.setMaxValue(5000);
+            planIntervalDistancePicker.setMaxValue(5000.0f);
             planIntervalDistancePicker.setValue(100f);
             planIntervalDistancePicker.setStep(50f);
         }

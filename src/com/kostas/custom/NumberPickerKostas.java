@@ -51,13 +51,13 @@ import com.kostas.onlineHelp.R;
  */
 public class NumberPickerKostas extends LinearLayout {
 
-    private float minValue;
-    private float maxValue;
-    private float step;
+    private double minValue;
+    private double maxValue;
+    private double step;
 	
 	private final int TEXT_SIZE = 14;
 	
-	public Float value;
+	public Double value;
 
     Button decrement;
     Button increment;
@@ -197,7 +197,7 @@ public class NumberPickerKostas extends LinearLayout {
 
 	private void initValueEditText( Context context){
 		
-		value = new Float( minValue );
+		value = new Double( minValue );
 		
 		valueText = new EditText( context );
 		valueText.setTextSize( TEXT_SIZE );
@@ -220,9 +220,9 @@ public class NumberPickerKostas extends LinearLayout {
 		// number
 		valueText.setOnKeyListener(new OnKeyListener() {
             public boolean onKey(View v, int arg1, KeyEvent event) {
-                float backupValue = value;
+                double backupValue = value;
                 try {
-                    value = Float.parseFloat(((EditText) v).getText().toString());
+                    value = Double.parseDouble(((EditText) v).getText().toString());
                 } catch (NumberFormatException nfe) {
                     value = backupValue;
                 }
@@ -241,7 +241,7 @@ public class NumberPickerKostas extends LinearLayout {
 			}
 		});
 		valueText.setGravity( Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL );
-		valueText.setText( value==0? "NO" : value.toString() );
+		valueText.setText( value==0? "NO" : String.valueOf(value) );
         if (value==0) disableButtonColor(true);
 
 		valueText.setInputType( InputType.TYPE_CLASS_NUMBER );
@@ -293,78 +293,56 @@ public class NumberPickerKostas extends LinearLayout {
 	
 	public void increment(){
 		if( value < maxValue ){
-
-
-
             if (value<minValue+step){
                 disableButtonColor(false);
             }
-
-            //TODO change also text
 			value += step;
-
             valueText.setText(String.format(formatForValueText, this.value));
-			//valueText.setText( value.toString() );
-
 		}
 	}
 
 	public void decrement(){
 		if( value > minValue ){
 			value -= step;
-
-
-
             valueText.setText(value==0? "NO" : String.format(formatForValueText, this.value));
-               // valueText.setText(value==0? "NO" : value.toString());
-                if (value==0) disableButtonColor(true);
-
+            if (value==0) disableButtonColor(true);
 		}
 	}
 	
-	public float getValue(){
+	public double getValue(){
 		return value;
 	}
 	
-	public void setValue( float value ){
-
-//        if (formatForValueText.equals("%.1f") && value > 10){
-//            formatForValueText = "%.0f";
-//        }
-
+	public void setValue( double value ){
 		if( value > maxValue ) value = maxValue;
 		if( value >= minValue ){
 			this.value = value;
-
-
             valueText.setText(String.format(formatForValueText, this.value));
 		}
-
-
 	}
 
 
-    public float getMinValue() {
+    public double getMinValue() {
         return minValue;
     }
 
-    public void setMinValue(float minValue) {
+    public void setMinValue(double minValue) {
         this.minValue = minValue;
     }
 
-    public float getMaxValue() {
+    public double getMaxValue() {
         return maxValue;
     }
 
-    public void setMaxValue(float maxValue) {
+    public void setMaxValue(double maxValue) {
         this.maxValue = maxValue;
     }
 
-    public float getStep() {
+    public double getStep() {
         return step;
     }
 
-    public void setStep(float step) {
+    public void setStep(double step) {
         this.step = step;
     }
 

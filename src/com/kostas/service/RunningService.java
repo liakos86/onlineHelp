@@ -108,6 +108,8 @@ public class RunningService extends IntentService
 
     public static final double MILE_TO_METERS_CONST = 1609.344;
 
+    public static final double METERS_TO_MILES_CONST = 0.000621371192;
+
     /**
      * Has the user selected miles as unit?
      */

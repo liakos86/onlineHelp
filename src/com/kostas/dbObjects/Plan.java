@@ -18,7 +18,7 @@ public class Plan {
 
     private long id;
     private String description;
-    private float distanceUnits;
+    private double distanceUnits;
     private int seconds;
     private int rounds;
     private int startRest;
@@ -30,7 +30,7 @@ public class Plan {
         this.description = description;
     }
 
-    public Plan(long id, String description, float distanceUnits, int seconds, int rounds, int startRest, boolean isMetricMiles){
+    public Plan(long id, String description, double distanceUnits, int seconds, int rounds, int startRest, boolean isMetricMiles){
         this.id = id;
         this.description = description;
         this.distanceUnits = distanceUnits;
@@ -64,11 +64,11 @@ public class Plan {
         this.description = description;
     }
 
-    public float getDistanceUnits() {
+    public double getDistanceUnits() {
         return distanceUnits;
     }
 
-    public void setDistanceUnits(float distanceUnits) {
+    public void setDistanceUnits(double distanceUnits) {
         this.distanceUnits = distanceUnits;
     }
 

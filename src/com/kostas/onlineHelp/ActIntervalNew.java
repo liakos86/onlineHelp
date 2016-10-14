@@ -215,7 +215,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
             formatForProgressWheel = "%.2f";
             intervalDistancePicker.setMinValue(0.1f);
             intervalDistancePicker.setValue(0.1f);
-            intervalDistancePicker.setMaxValue(3);
+            intervalDistancePicker.setMaxValue(3.0f);
             intervalDistancePicker.setStep(0.1f);
             distanceTextTitle.setText("Miles covered");
         }else{

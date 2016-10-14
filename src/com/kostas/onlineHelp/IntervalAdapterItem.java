@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import com.kostas.dbObjects.Interval;
+import com.kostas.service.RunningService;
 
 import java.util.List;
 
@@ -79,9 +80,9 @@ public class IntervalAdapterItem extends ArrayAdapter<Interval> {
 
         if (isMetricMiles){
 
-            holder.distance.setText(String.format("%1$,.2f",((double)(current.getDistance()*0.000621371192)))+"mi completed  in  "+timeText);
+            holder.distance.setText(String.format("%1$,.2f",((double)(current.getDistance()* RunningService.METERS_TO_MILES_CONST)))+"mi completed  in  "+timeText);
             holder.time.setText(
-                    "Speed: "+  String.format("%1$,.2f", ((double) ((current.getDistance()*0.621371192/intervalTime)  *3600)))+"mi/h " +
+                    "Speed: "+  String.format("%1$,.2f", ((double) ((current.getDistance()*RunningService.METERS_TO_MILES_CONST*1000/intervalTime)  *3600)))+"mi/h " +
                             "  Pace: "+paces[1]);
         }else{
 
