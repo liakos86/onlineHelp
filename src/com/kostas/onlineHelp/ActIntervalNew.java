@@ -797,6 +797,10 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
             startTimeMillis = app_preferences.getLong(MSTART_TIME, SystemClock.uptimeMillis());
             //mHandler.post(mUpdateTimeTask);
             coveredDist = app_preferences.getFloat(TOTAL_DIST, 0);
+            if (isMiles){
+                coveredDist /= RunningService.MILE_TO_METERS_CONST;
+                intervalDistance /= MILE_TO_METERS_CONST;//meters to miles
+            }
             setRoundsText(app_preferences.getInt(INTERVAL_ROUNDS, 0));
             registerReceiver(receiver, new IntentFilter(NOTIFICATION));
             getInRunningMode(app_preferences.getBoolean(IS_RUNNING, false),
