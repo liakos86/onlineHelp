@@ -608,7 +608,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
             intent.putExtra(INTERVAL_DISTANCE, intervalDistance);
             intent.putExtra(INTERVAL_TIME, intervalTime);
             intent.putExtra(INTERVAL_START_REST, intervalStartRest);
-            intent.putExtra(INTERVAL_ROUNDS, intervalRoundsPicker.getValue());
+            intent.putExtra(INTERVAL_ROUNDS, (int)intervalRoundsPicker.getValue());
         }
         startService(intent);
     }
