@@ -130,6 +130,12 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
         return false;
     }
 
+    /**
+     * upon resuming i need to check three things.
+     * 1. if the service is running and there is a run in progress or the app is in running act i need to start the Interval act.
+     * 2. if the run has stopped and the app is in result, i go to results act.
+     * 3. if nothing of the above, but a new run is added, i need to refresh my runs.
+     */
     @Override
     protected void onResume() {
         super.onResume();
