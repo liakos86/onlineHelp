@@ -47,6 +47,8 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
         setListeners();
 
         ((ExtApplication) getApplication()).setInResultsAct(true);
+        ((ExtApplication) getApplication()).setNewIntervalInDb(true);
+
     }
 
     /**
@@ -168,8 +170,6 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
         boolean metricMiles = app_preferences.getBoolean(RunningService.METRIC_MILES, false);
         totalPace = computeTotalPace(metricMiles);
 
-
-
         adapterInterval = new IntervalAdapterItem(this, this.getApplicationContext(),
                 R.layout.list_interval_row, intervalsList, metricMiles);
         completedIntervalsListView.setAdapter(adapterInterval);
@@ -184,20 +184,14 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
         long intervalTime = app_preferences.getLong(INTERVAL_TIME, 0);
         float intervalDistance = app_preferences.getFloat(INTERVAL_DISTANCE, 0);
 
-
-
         Running running = new Running(-1, descText.getText().toString().trim(), intervalTime, new SimpleDateFormat("dd/MM/yyyy, HH:mm").format(new Date()), intervalDistance, intervalsList);
         running.setAvgPaceText(totalPace);
-
-
-
 
         Database db = new Database(getApplicationContext());
         int runId = db.addRunning(running);
         running.setRunning_id(runId);
         ((ExtApplication)getApplication()).getRuns().add(0, running);
 
-        ((ExtApplication) getApplication()).setNewIntervalInDb(true);
         clear();
     }
 

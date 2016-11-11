@@ -374,20 +374,11 @@ public class RunningService extends IntentService
         }
 
         editor.apply();
-
-
         startCountDownForNextInterval(intervalTime);
-
-        //todo Do i really need to care about my broadcast when no receivers?
-        if (((PowerManager) getSystemService(Context.POWER_SERVICE)).isScreenOn()) {
             Intent intent = new Intent(NOTIFICATION);
             intent.putExtra(INTERVAL_COMPLETED, completed);
             sendBroadcast(intent);
-        }
-
-
-
-        totalTime = 0;
+              totalTime = 0;
     }
 
     private void speak(final String textToSpeak) {
@@ -429,11 +420,6 @@ public class RunningService extends IntentService
     }
 
     private void refreshInterval() {
-        //DURATION = (100 * pace / 6) > 2000 ? ((100 * pace / 6) < 4000 ? (long) (100 * pace / 6) : 4000) : 2000;
-
-
-      //  Toast.makeText(getApplication(),"refresh",Toast.LENGTH_SHORT).show();
-
         new PerformAsyncTask(2).execute();
     }
 
@@ -448,14 +434,11 @@ public class RunningService extends IntentService
     public void onDestroy() {
         try {
             stopLocationUpdates();
-            if (wl.isHeld()) wl.release();
-
-//            if (ttsManager != null) {
-//                ttsManager.shutDown();
-//            }
+            if (wl.isHeld()) {
+                wl.release();
+            }
 
             mHandler.removeCallbacks(mStartRunnable);
-
 
         } catch (Exception e) {
             //Log.v("LATLNG", "Crash");
@@ -481,12 +464,6 @@ public class RunningService extends IntentService
 
             mStartTime = SystemClock.uptimeMillis();
 
-
-            /**
-             *
-             * TODO THIS WINDOW ALLOWS SMALL DISPLACEMENTS
-             */
-
             if (mLocationRequest.getSmallestDisplacement() < 10) {
 
                 mLocationRequest.setInterval(DURATION);
@@ -498,7 +475,6 @@ public class RunningService extends IntentService
                 }
 
             }
-
 
             startReceiving();
             intervalInProgress = true;
@@ -570,13 +546,13 @@ public class RunningService extends IntentService
                 editor.putLong(INTERVAL_TIME, intervalTime);
                 editor.putInt(INTERVAL_ROUNDS, intervalRounds);
             } else if (type == 2) {
-                if (((PowerManager) getSystemService(Context.POWER_SERVICE)).isScreenOn()) {
+               // if (((PowerManager) getSystemService(Context.POWER_SERVICE)).isScreenOn()) {
                     Intent intent = new Intent(NOTIFICATION);
                     intent.putExtra(INTERVAL_DISTANCE, currentDistance);
 
                     intent.putExtra(INTERVAL_TIME, totalTime);
                     sendBroadcast(intent);
-                }
+               // }
 
                 if (!app_preferences.getBoolean(HAS_RUN_METERS, false)){
                     editor.putBoolean(HAS_RUN_METERS, true);
