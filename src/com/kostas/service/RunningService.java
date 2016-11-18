@@ -423,6 +423,11 @@ public class RunningService extends IntentService
         new PerformAsyncTask(2).execute();
     }
 
+    /**
+     * Every time an interval s finished i restart the handler runnable
+     * and reset the countdown start time.
+     * @param millis
+     */
     private void startCountDownForNextInterval(long millis) {
         mHandler.postDelayed(mStartRunnable, millis);
         SharedPreferences.Editor editor = app_preferences.edit();
