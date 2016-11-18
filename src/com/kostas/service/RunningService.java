@@ -213,10 +213,8 @@ public class RunningService extends IntentService
         new PerformAsyncTask(0).execute();
     }
 
-
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-
         super.onTaskRemoved(rootIntent);
     }
 
@@ -226,7 +224,14 @@ public class RunningService extends IntentService
         return super.stopService(name);
     }
 
-
+    /**
+     * While interval is not in progress i send he last location all the time in order to be precise.
+     *
+     * As soon as i start the interval i check if the last location is null and if so,
+     * I set it equals to the incoming location and I put it in the list
+     *
+     * @param location
+     */
     @Override
     public void onLocationChanged(Location location) {
 
@@ -250,7 +255,7 @@ public class RunningService extends IntentService
             mLocationRequest.setFastestInterval(10000);
             mLocationRequest.setInterval(10000);
             //if i have a last & new loc and a right accuracy
-            if (lastLocation != null && (location.getTime() > lastLocation.getTime())) {
+            if (location.getTime() > lastLocation.getTime()) {
                 float newDistance = lastLocation.distanceTo(location);
                 currentDistance += newDistance;
                 locationList.add(location);
@@ -260,9 +265,7 @@ public class RunningService extends IntentService
                 } else if (currentDistance > 0) {
                     refreshInterval();
                 }
-            }
 
-            if (lastLocation == null || (location.getTime() > lastLocation.getTime())) {
                 lastLocation = location;
             }
 
@@ -338,7 +341,6 @@ public class RunningService extends IntentService
             intervals.get(fastest_position).setFastest(false);
             interval.setFastest(true);
             fastest_position = intervals.size()-1;
-
         }
 
         currentDistance = 0;
@@ -348,15 +350,14 @@ public class RunningService extends IntentService
         vibrate(3000);
 
         String toSpeak;
-        if (!completed) {
-            toSpeak = "STOPPED. ";
-        } else {
+        if (completed) {
             toSpeak = "COMPLETED " + intervalRounds + " intervals. ";
+        } else {
+            toSpeak = "STOPPED. ";
+            startCountDownForNextInterval(intervalTime);
         }
-        int hours = (int) (totalTime / 3600000);
-        int mins = (int) ((totalTime - (hours * 3600000)) / 60000);
-        int secs = (int) ((totalTime - (hours * 3600000) - (mins * 60000)) / 1000);
-        toSpeak += mins + " minutes and " + secs + " seconds";
+
+        toSpeak += computeRemainingSpeakText();
         speak(toSpeak);
         SharedPreferences.Editor editor = app_preferences.edit();
         editor.putBoolean(INTERVAL_COMPLETED, completed);
@@ -368,21 +369,28 @@ public class RunningService extends IntentService
         }.getType();
         String json = (new Gson()).toJson(intervals, listOfIntervals);
         editor.putString(INTERVALS, json);
-
         if (!app_preferences.getBoolean(HAS_RUN_METERS, false)){
             editor.putBoolean(HAS_RUN_METERS, true);
         }
-
         editor.apply();
-        startCountDownForNextInterval(intervalTime);
-            Intent intent = new Intent(NOTIFICATION);
-            intent.putExtra(INTERVAL_COMPLETED, completed);
-            sendBroadcast(intent);
-              totalTime = 0;
+        Intent intent = new Intent(NOTIFICATION);
+        intent.putExtra(INTERVAL_COMPLETED, completed);
+        sendBroadcast(intent);
+        totalTime = 0;
+    }
+
+    /**
+     * Compute what has to be spoken based on the total time
+     * @return
+     */
+    private String computeRemainingSpeakText(){
+        int hours = (int) (totalTime / 3600000);
+        int mins = (int) ((totalTime - (hours * 3600000)) / 60000);
+        int secs = (int) ((totalTime - (hours * 3600000) - (mins * 60000)) / 1000);
+        return mins + " minutes and " + secs + " seconds";
     }
 
     private void speak(final String textToSpeak) {
-
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -391,19 +399,15 @@ public class RunningService extends IntentService
                 }
             }
         }).start();
-
-
     }
 
     private void vibrate(final long millis){
-
         new Thread(new Runnable() {
             @Override
             public void run() {
                 if (hasVibration) {
                     v.vibrate(millis);
                 }
-
             }}).start();
     }
 
@@ -442,16 +446,12 @@ public class RunningService extends IntentService
             if (wl.isHeld()) {
                 wl.release();
             }
-
             mHandler.removeCallbacks(mStartRunnable);
-
         } catch (Exception e) {
             //Log.v("LATLNG", "Crash");
-
         } finally {
             super.onDestroy();
         }
-
     }
 
     @Override
@@ -463,56 +463,40 @@ public class RunningService extends IntentService
     private Runnable mStartRunnable = new Runnable() {
 
         public void run() {
-
             vibrate(2000);
             speak("STARTED");
-
             mStartTime = SystemClock.uptimeMillis();
-
             if (mLocationRequest.getSmallestDisplacement() < 10) {
-
                 mLocationRequest.setInterval(DURATION);
                 mLocationRequest.setFastestInterval(DURATION - 1000);
                 mLocationRequest.setSmallestDisplacement(10);
-
                 if ( lastLocation != null){
                     locationList.add(lastLocation);
                 }
-
             }
-
             startReceiving();
             intervalInProgress = true;
-//            connectAndReceive();
-
             SharedPreferences.Editor editor = app_preferences.edit();
-
             editor.putBoolean(IS_RUNNING, true);
             editor.putLong(MSTART_TIME, mStartTime);
             editor.apply();
-
         }
     };
 
     @Override
     public void onConnected(Bundle bundle) {
-
         createLocationRequest();
         startReceiving();
-
     }
 
     private void startReceiving() {
-
         if (mGoogleApiClient.isConnected()) {
-
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         } else
             Toast.makeText(application, "google client not connected", Toast.LENGTH_SHORT).show();
     }
 
     protected void stopLocationUpdates() {
-
         if (mGoogleApiClient.isConnected()) LocationServices.FusedLocationApi.removeLocationUpdates(
                 mGoogleApiClient, this);
     }
@@ -530,12 +514,9 @@ public class RunningService extends IntentService
     }
 
     private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
-
         int type;
-
         public PerformAsyncTask(int type) {
             this.type = type;
-
         }
 
         protected void onPreExecute() {
@@ -580,4 +561,5 @@ public class RunningService extends IntentService
         protected void onPostExecute(Void result) {
         }
     }
+
 }
