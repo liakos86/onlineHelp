@@ -108,6 +108,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         }
     }
 
+
     /**
      * A receiver that listens for broadcast messages
      * If the message contains an interval_distance entry I update the current interval info
