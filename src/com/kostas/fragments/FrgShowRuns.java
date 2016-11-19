@@ -38,7 +38,7 @@ public class FrgShowRuns extends Fragment {
 
     List <Running> runs = new ArrayList<Running>();
 
-
+    List<Interval> intervals = new ArrayList<Interval>();
 
     /**
      * The months grouped
