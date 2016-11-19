@@ -3,9 +3,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
@@ -23,7 +21,6 @@ import com.kostas.model.Database;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.kostas.mongo.SyncHelper;
 import com.kostas.onlineHelp.*;
 import com.kostas.custom.MapWrapperLayout;
 import com.kostas.service.RunningService;
@@ -34,10 +31,13 @@ import java.util.*;
 /**
  * Created by liakos on 11/4/2015.
  */
-public class FrgShowRuns extends Fragment {
+public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
     List <Running> runs = new ArrayList<Running>();
 
+    /**
+     * All the intervals together
+     */
     List<Interval> intervals = new ArrayList<Interval>();
 
     /**
@@ -57,7 +57,6 @@ public class FrgShowRuns extends Fragment {
     ListView intervalListView;
     IntervalAdapterItem adapterInterval;
 
-
     /**
      * Parent view containing every layout
      */
@@ -65,12 +64,27 @@ public class FrgShowRuns extends Fragment {
     GoogleMap googleMap;
     MapWrapperLayout mapWrapperLayout;
 
+    /**
+     * The bounds of the visible map area
+     */
+    LatLngBounds bounds;
 
+    /**
+     * Close the map with the lines and return to intervals of run
+     */
+    ImageButton closeMapButton;
 
+    /**
+     * Open the map for the interval, close the current interval and go to runs list
+     */
+    Button openMapButton, closeIntervalsButton;
 
     Button buttonNewRun;
 
-
+    /**
+     * If the map is drawn we dont need to redraw
+     */
+    boolean alreadyDrawn;
 
     TextView runsCount ;
     TextView intervalsCount;
@@ -90,6 +104,7 @@ public class FrgShowRuns extends Fragment {
         View v = inflater.inflate(R.layout.frg_show_runs, container, false);
         initializeViews(v);
         setList();
+        initializeMap();
         return  v;
     }
 
@@ -99,22 +114,24 @@ public class FrgShowRuns extends Fragment {
 
     private void initializeViews(View v){
 
-
-         runsCount = (TextView) v.findViewById(R.id.runsCount);
-         intervalsCount =(TextView) v.findViewById(R.id.intervalsCount);
-         metersCount =(TextView) v.findViewById(R.id.metersCount);
-         durationCount =(TextView) v.findViewById(R.id.durationCount);
+        runsCount = (TextView) v.findViewById(R.id.runsCount);
+        intervalsCount =(TextView) v.findViewById(R.id.intervalsCount);
+        metersCount =(TextView) v.findViewById(R.id.metersCount);
+        durationCount =(TextView) v.findViewById(R.id.durationCount);
         viewFlipper = (ViewFlipper) v.findViewById(R.id.viewFlipperRuns);
 
-
+        openMapButton = (Button) v.findViewById(R.id.buttonShowMap);
+        closeMapButton = (ImageButton) v.findViewById(R.id.buttonCloseMap);
+        closeIntervalsButton = (Button) v.findViewById(R.id.buttonCloseIntervals);
         runsExpListView = (ExpandableListView) v.findViewById(R.id.listExpRunning);
+        intervalListView = (ListView) v.findViewById(R.id.listIntervals);
         buttonNewRun = (Button) v.findViewById(R.id.buttonNewRun);
-
-
     }
 
+    public void initializeMap(){
+        ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapListKostas)).getMapAsync(this);
 
-
+    }
 
     private void showIntervalsForRun(Running running){
         intervals.clear();
@@ -131,8 +148,8 @@ public class FrgShowRuns extends Fragment {
         }
     }
 
-    
     private void setList(){
+        intervalListView.setDivider(null);
         runs = ((ExtApplication)getActivity().getApplication()).getRuns();
         computeParentAndChildRuns();
         SharedPreferences preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
@@ -239,7 +256,7 @@ public class FrgShowRuns extends Fragment {
                 runsExpListView.expandGroup(0);
             }
         }else{
-            viewFlipper.setDisplayedChild(1);
+            viewFlipper.setDisplayedChild(3);
         }
     }
 
@@ -268,6 +285,86 @@ public class FrgShowRuns extends Fragment {
             metersCount.setText("KM\r\n" + String.format("%1$,.1f", metersNum / 1000));
         }
         durationCount.setText(("HRS\r\n"+(int)(millisecsNum/3600000)));
+    }
+
+    public void drawMap(){
+        alreadyDrawn = true;
+        currentIntervals = currentRun.getIntervals();
+        markers.clear();
+        List<LatLng> locationList = new ArrayList<LatLng>();
+        double northPoint=-85.05115 , southPoint=85.05115 , eastPoint=-180, westPoint=180;
+        LatLng top = new LatLng(0,0), bottom=new LatLng(0,0), left=new LatLng(0,0), right=new LatLng(0,0);
+        int number = currentIntervals.size();
+        double latPoint, lonPoint;
+
+        for (int i=0; i<number; i++) {//for each interval
+            Interval current = currentIntervals.get(i);
+            int color = i % 2 == 0 ? getResources().getColor(R.color.interval_red) : getResources().getColor(R.color.interval_green);
+            locationList.clear();
+            String[] latStringList = current.getLatLonList().split(",");
+            int listLength = latStringList.length - 1;
+
+            if (latStringList[0].equals("null")) {
+                Toast.makeText(getActivity(),(i+1)+" : "+ current.getLatLonList(), Toast.LENGTH_SHORT).show();
+            } else {
+                for (int j = 0; j < listLength; j += 2) {
+                    latPoint = Double.valueOf(latStringList[j]);
+                    lonPoint = Double.parseDouble(latStringList[j + 1]);
+
+                    if (latPoint > northPoint) {
+                        northPoint = latPoint;
+                        top = new LatLng(latPoint, lonPoint);
+                    }
+                    if (latPoint < southPoint) {
+                        southPoint = latPoint;
+                        bottom = new LatLng(latPoint, lonPoint);
+                    }
+
+                    if (lonPoint > eastPoint) {
+                        eastPoint = lonPoint;
+                        right = new LatLng(latPoint, lonPoint);
+                    }
+                    if (lonPoint < westPoint) {
+                        westPoint = lonPoint;
+                        left = new LatLng(latPoint, lonPoint);
+                    }
+                    locationList.add(new LatLng(latPoint, lonPoint));
+                }
+                int currSize = locationList.size() - 1;
+                for (int k = 0; k < currSize; k++) {
+                    googleMap.addPolyline(new PolylineOptions().add(locationList.get(k), locationList.get(k + 1)).width(7).color(color));
+                }
+
+                if (currSize > 0) {
+                    markers.add(googleMap.addMarker(new MarkerOptions()
+                                            .position(locationList.get(0))
+                                            .title(String.valueOf(current.getInterval_id()))
+                                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_start2)
+
+                                            )
+                            )
+                    );
+
+                    googleMap.addMarker(new MarkerOptions()
+                                    .position(locationList.get(currSize))
+                                    .snippet("Speed: " + String.format("%1$,.2f", ((double) ((current.getDistance() / current.getMilliseconds()) * 3600))) + " km/h")
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_stop2))
+                    );
+                }
+            }
+
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            builder.include(top);
+            builder.include(bottom);
+            builder.include(left);
+            builder.include(right);
+            bounds = builder.build();
+            try {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 200));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void confirmDelete(final Long trId,final int groupPosition, final int position){
@@ -319,7 +416,27 @@ public class FrgShowRuns extends Fragment {
         computeInfoTexts();
     }
 
+    @Override
+    public void onMapReady(GoogleMap gMap) {
+        googleMap = gMap;
+        googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        googleMap.setIndoorEnabled(false);
+        googleMap.getUiSettings().setZoomControlsEnabled(true);
+        googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 200));
+            }
+        });
 
+        mapWrapperLayout = (MapWrapperLayout) getView().findViewById(R.id.mapWrapperRuns);
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                return true;
+            }
+        });
+    }
 
 
     public class MyExpandableAdapter extends BaseExpandableListAdapter {
@@ -367,11 +484,11 @@ public class FrgShowRuns extends Fragment {
             if (isMetricMiles){
 
                 holder.bottomText.setText(String.format("%1$,.2f", ((double) (run.getDistance() *0.000621371192))) + " miles with " + ((int) (run.getTime() / 1000)) + " secs rest");
-               if (paces.length > 1) {
-                   holder.topRightText.setText("Avg Pace: "+paces[1]);
-               }else{
-                   holder.topRightText.setText("n/a");
-               }
+                if (paces.length > 1) {
+                    holder.topRightText.setText("Avg Pace: "+paces[1]);
+                }else{
+                    holder.topRightText.setText("n/a");
+                }
 
 
             }else{
@@ -385,34 +502,21 @@ public class FrgShowRuns extends Fragment {
 
             holder.rightText.setText(String.valueOf(run.getIntervals().size()) + " sessions");
 
-                convertView.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View view) {
-                        confirmDelete(child.get(childPosition).getRunning_id(), groupPosition, childPosition);
-                        return false;
-                    }
-                });
+            convertView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    confirmDelete(child.get(childPosition).getRunning_id(), groupPosition, childPosition);
+                    return false;
+                }
+            });
 
-            final Activity act = getActivity();
-                convertView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                        Intent goToIntervals = new Intent(act, ActViewIntervals.class);
-
-                        goToIntervals.putExtra("run", child.get(childPosition).getRunning_id());
-                        goToIntervals.putExtra("myRun", true);
-                        startActivity(goToIntervals);
-
-
-//                        currentRun = child.get(childPosition);
-//                        showIntervalsForRun(child.get(childPosition));
-//                        if (currentRun.isShared()){
-//                            shareFriendsButton.setClickable(false);
-//                            shareFriendsButton.setText("Run already shared");
-//                        }
-                    }
-                });
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    currentRun = child.get(childPosition);
+                    showIntervalsForRun(child.get(childPosition));
+                }
+            });
             return convertView;
         }
 
@@ -431,7 +535,7 @@ public class FrgShowRuns extends Fragment {
 
             int month=1;
             try {
-                 month = Integer.valueOf(parentItems.get(groupPosition).split("/")[0]);
+                month = Integer.valueOf(parentItems.get(groupPosition).split("/")[0]);
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -506,7 +610,7 @@ public class FrgShowRuns extends Fragment {
         }
 
         if (empty){
-           viewFlipper.setDisplayedChild(1);
+            viewFlipper.setDisplayedChild(3);
         }else{
             viewFlipper.setDisplayedChild(0);
         }
@@ -523,9 +627,10 @@ public class FrgShowRuns extends Fragment {
         }
     }
 
-
-
-
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
 
     public static FrgShowRuns init(int val) {
         FrgShowRuns truitonList = new FrgShowRuns();
