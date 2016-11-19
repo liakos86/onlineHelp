@@ -188,7 +188,7 @@ public class ActViewIntervals extends BaseFrgActivityWithBottomButtons implement
 
 
         adapterInterval = new IntervalAdapterItem(this, getApplicationContext(),
-                R.layout.list_interval_row, intervals);
+                R.layout.list_interval_row, intervals, true);
         intervalListView.setAdapter(adapterInterval);
 
 
