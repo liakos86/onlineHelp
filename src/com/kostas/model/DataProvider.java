@@ -1,10 +1,7 @@
 
 package com.kostas.model;
 
-import android.content.ContentProvider;
-import android.content.ContentUris;
-import android.content.ContentValues;
-import android.content.Context;
+import android.content.*;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
@@ -63,7 +60,36 @@ public class DataProvider extends ContentProvider {
 
             case ContentDescriptor.Plan.PATH_FOR_ID_TOKEN:
                 return ContentDescriptor.Plan.CONTENT_ITEM_TYPE;
-                
+
+
+            case ContentDescriptor.User.PATH_TOKEN:
+            case ContentDescriptor.User.PATH_START_LETTERS_TOKEN:
+                return ContentDescriptor.User.CONTENT_TYPE_DIR;
+
+
+
+            case ContentDescriptor.User.PATH_FOR_ID_TOKEN:
+                return ContentDescriptor.User.CONTENT_ITEM_TYPE;
+
+
+            case ContentDescriptor.RunningFriend.PATH_TOKEN:
+            case ContentDescriptor.RunningFriend.PATH_START_LETTERS_TOKEN:
+                return ContentDescriptor.RunningFriend.CONTENT_TYPE_DIR;
+
+
+
+            case ContentDescriptor.RunningFriend.PATH_FOR_ID_TOKEN:
+                return ContentDescriptor.RunningFriend.CONTENT_ITEM_TYPE;
+
+
+            case ContentDescriptor.IntervalFriend.PATH_TOKEN:
+            case ContentDescriptor.IntervalFriend.PATH_START_LETTERS_TOKEN:
+                return ContentDescriptor.IntervalFriend.CONTENT_TYPE_DIR;
+
+
+
+            case ContentDescriptor.IntervalFriend.PATH_FOR_ID_TOKEN:
+                return ContentDescriptor.IntervalFriend.CONTENT_ITEM_TYPE;
 
           
             default:
@@ -96,8 +122,8 @@ public class DataProvider extends ContentProvider {
                 builder.setTables(ContentDescriptor.Running.TABLE_NAME);
 
                 if (!TextUtils.isEmpty(searchFor)) {
-                    String where = String.format(sWhereLike, ContentDescriptor.Running.Cols.DESCRIPTION, searchFor);
-                    where += " OR " + (String.format(sWhereLike, ContentDescriptor.Running.Cols.DESCRIPTION, searchFor));
+                    String where = String.format(sWhereLike, ContentDescriptor.RunningCols.DESCRIPTION, searchFor);
+                    where += " OR " + (String.format(sWhereLike, ContentDescriptor.RunningCols.DESCRIPTION, searchFor));
                     //Log.v(TAG, String.format("where [%s]", where));
                     builder.appendWhere(where);
                 }
@@ -120,7 +146,7 @@ public class DataProvider extends ContentProvider {
                 SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
                 builder.setTables(ContentDescriptor.Running.TABLE_NAME);
                 toRet = builder.query(db, projection,
-                        String.format(sWhere, ContentDescriptor.Running.Cols.ID), new String[]{
+                        String.format(sWhere, ContentDescriptor.RunningCols.ID), new String[]{
                         id
                 },
                         null, null, null, sortOrder);
@@ -136,8 +162,8 @@ public class DataProvider extends ContentProvider {
                 builder.setTables(ContentDescriptor.Interval.TABLE_NAME);
 
                 if (!TextUtils.isEmpty(searchFor)) {
-                    String where = String.format(sWhereLike, ContentDescriptor.Interval.Cols.MILLISECONDS, searchFor);
-                    where += " OR " + (String.format(sWhereLike, ContentDescriptor.Interval.Cols.MILLISECONDS, searchFor));
+                    String where = String.format(sWhereLike, ContentDescriptor.IntervalCols.MILLISECONDS, searchFor);
+                    where += " OR " + (String.format(sWhereLike, ContentDescriptor.IntervalCols.MILLISECONDS, searchFor));
                     //Log.v(TAG, String.format("where [%s]", where));
                     builder.appendWhere(where);
                 }
@@ -160,7 +186,7 @@ public class DataProvider extends ContentProvider {
                 SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
                 builder.setTables(ContentDescriptor.Interval.TABLE_NAME);
                 toRet = builder.query(db, projection,
-                        String.format(sWhere, ContentDescriptor.Interval.Cols.ID), new String[]{
+                        String.format(sWhere, ContentDescriptor.IntervalCols.ID), new String[]{
                                 id
                         },
                         null, null, null, sortOrder);
@@ -208,6 +234,125 @@ public class DataProvider extends ContentProvider {
             break;
             // END Plan
 
+            //START User
+            case ContentDescriptor.User.PATH_TOKEN: {
+                String searchFor = uri.getQueryParameter(ContentDescriptor.PARAM_SEARCH);
+                SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
+                builder.setTables(ContentDescriptor.User.TABLE_NAME);
+
+                if (!TextUtils.isEmpty(searchFor)) {
+                    String where = String.format(sWhereLike, ContentDescriptor.User.Cols.USERNAME, searchFor);
+                    where += " OR " + (String.format(sWhereLike, ContentDescriptor.User.Cols.USERNAME, searchFor));
+                    //Log.v(TAG, String.format("where [%s]", where));
+                    builder.appendWhere(where);
+                }
+
+                toRet = builder.query(db, projection, selection, selectionArgs, null, null,
+                        sortOrder);
+            }
+            break;
+            case ContentDescriptor.User.PATH_START_LETTERS_TOKEN: {
+                SQLiteDatabase rdb = database.getReadableDatabase();
+                toRet = rdb
+                        .rawQuery(
+                                "select distinct substr(username, 1, 1) from user order by 1 asc",
+                                null);
+            }
+            break;
+            case ContentDescriptor.User.PATH_FOR_ID_TOKEN: {
+                String id = uri.getLastPathSegment();
+                //Log.v(TAG, String.format("querying for [%s]", id));
+                SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
+                builder.setTables(ContentDescriptor.User.TABLE_NAME);
+                toRet = builder.query(db, projection,
+                        String.format(sWhere, ContentDescriptor.User.Cols.ID), new String[]{
+                                id
+                        },
+                        null, null, null, sortOrder);
+            }
+            break;
+            // END User
+
+
+            //START RunningFriend
+            case ContentDescriptor.RunningFriend.PATH_TOKEN: {
+                String searchFor = uri.getQueryParameter(ContentDescriptor.PARAM_SEARCH);
+                SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
+                builder.setTables(ContentDescriptor.RunningFriend.TABLE_NAME);
+
+                if (!TextUtils.isEmpty(searchFor)) {
+                    String where = String.format(sWhereLike, ContentDescriptor.RunningCols.USERNAME, searchFor);
+                    where += " OR " + (String.format(sWhereLike, ContentDescriptor.RunningCols.USERNAME, searchFor));
+                    //Log.v(TAG, String.format("where [%s]", where));
+                    builder.appendWhere(where);
+                }
+
+                toRet = builder.query(db, projection, selection, selectionArgs, null, null,
+                        sortOrder);
+            }
+            break;
+            case ContentDescriptor.RunningFriend.PATH_START_LETTERS_TOKEN: {
+                SQLiteDatabase rdb = database.getReadableDatabase();
+                toRet = rdb
+                        .rawQuery(
+                                "select distinct substr(username, 1, 1) from running_friend order by 1 asc",
+                                null);
+            }
+            break;
+            case ContentDescriptor.RunningFriend.PATH_FOR_ID_TOKEN: {
+                String id = uri.getLastPathSegment();
+                //Log.v(TAG, String.format("querying for [%s]", id));
+                SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
+                builder.setTables(ContentDescriptor.RunningFriend.TABLE_NAME);
+                toRet = builder.query(db, projection,
+                        String.format(sWhere, ContentDescriptor.RunningCols.ID), new String[]{
+                                id
+                        },
+                        null, null, null, sortOrder);
+            }
+            break;
+            // END RunningFriend
+
+            //START IntervalFriend
+            case ContentDescriptor.IntervalFriend.PATH_TOKEN: {
+                String searchFor = uri.getQueryParameter(ContentDescriptor.PARAM_SEARCH);
+                SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
+                builder.setTables(ContentDescriptor.IntervalFriend.TABLE_NAME);
+
+                if (!TextUtils.isEmpty(searchFor)) {
+                    String where = String.format(sWhereLike, ContentDescriptor.IntervalCols.PACETEXT, searchFor);
+                    where += " OR " + (String.format(sWhereLike, ContentDescriptor.IntervalCols.PACETEXT, searchFor));
+                    //Log.v(TAG, String.format("where [%s]", where));
+                    builder.appendWhere(where);
+                }
+
+                toRet = builder.query(db, projection, selection, selectionArgs, null, null,
+                        sortOrder);
+            }
+            break;
+            case ContentDescriptor.IntervalFriend.PATH_START_LETTERS_TOKEN: {
+                SQLiteDatabase rdb = database.getReadableDatabase();
+                toRet = rdb
+                        .rawQuery(
+                                "select distinct substr(pacetext, 1, 1) from interval_friend order by 1 asc",
+                                null);
+            }
+            break;
+            case ContentDescriptor.IntervalFriend.PATH_FOR_ID_TOKEN: {
+                String id = uri.getLastPathSegment();
+                //Log.v(TAG, String.format("querying for [%s]", id));
+                SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
+                builder.setTables(ContentDescriptor.IntervalFriend.TABLE_NAME);
+                toRet = builder.query(db, projection,
+                        String.format(sWhere, ContentDescriptor.IntervalCols.ID), new String[]{
+                                id
+                        },
+                        null, null, null, sortOrder);
+            }
+            break;
+            // END IntervalFriend
+
+
             default:
 //                Log.d(TAG, String.format("Could not handle matcher [%d]", match));
         }
@@ -227,7 +372,7 @@ public class DataProvider extends ContentProvider {
             //Running
             case ContentDescriptor.Running.PATH_TOKEN: {
                 id = db.insert(ContentDescriptor.Running.TABLE_NAME, null,
-                        adjustIdField(values, ContentDescriptor.Running.Cols.ID));
+                        adjustIdField(values, ContentDescriptor.RunningCols.ID));
             }
             break;
             //End Running
@@ -243,10 +388,34 @@ public class DataProvider extends ContentProvider {
             //Interval
             case ContentDescriptor.Interval.PATH_TOKEN: {
                 id = db.insert(ContentDescriptor.Interval.TABLE_NAME, null,
-                        adjustIdField(values, ContentDescriptor.Interval.Cols.ID));
+                        adjustIdField(values, ContentDescriptor.IntervalCols.ID));
             }
             break;
             //End Interval
+
+            //User
+            case ContentDescriptor.User.PATH_TOKEN: {
+                id = db.insert(ContentDescriptor.User.TABLE_NAME, null,
+                        adjustIdField(values, ContentDescriptor.User.Cols.ID));
+            }
+            break;
+            //End User
+
+            //RunningFriend
+            case ContentDescriptor.RunningFriend.PATH_TOKEN: {
+                id = db.insert(ContentDescriptor.RunningFriend.TABLE_NAME, null,
+                        adjustIdField(values, ContentDescriptor.RunningCols.ID));
+            }
+            break;
+            //End RunningFriend
+
+            //IntervalFriend
+            case ContentDescriptor.IntervalFriend.PATH_TOKEN: {
+                id = db.insert(ContentDescriptor.IntervalFriend.TABLE_NAME, null,
+                        adjustIdField(values, ContentDescriptor.IntervalCols.ID));
+            }
+            break;
+            //End IntervalFriend
 
 
             default: {
@@ -289,6 +458,30 @@ public class DataProvider extends ContentProvider {
             }
             break;
             //End Plan
+
+            //User
+            case ContentDescriptor.User.PATH_TOKEN: {
+                toRet = db.update(ContentDescriptor.User.TABLE_NAME, values, selection,
+                        selectionArgs);
+            }
+            break;
+            //End User
+
+            //RunningFriend
+            case ContentDescriptor.RunningFriend.PATH_TOKEN: {
+                toRet = db.update(ContentDescriptor.RunningFriend.TABLE_NAME, values, selection,
+                        selectionArgs);
+            }
+            break;
+            //End RunningFriend
+
+            //IntervalFriend
+            case ContentDescriptor.IntervalFriend.PATH_TOKEN: {
+                toRet = db.update(ContentDescriptor.IntervalFriend.TABLE_NAME, values, selection,
+                        selectionArgs);
+            }
+            break;
+            //End IntervalFriend
            
 
             default: {
@@ -326,6 +519,27 @@ public class DataProvider extends ContentProvider {
             }
             break;
             //Interval
+
+            //User
+            case ContentDescriptor.User.PATH_TOKEN: {
+                toRet = db.delete(ContentDescriptor.User.TABLE_NAME, selection, selectionArgs);
+            }
+            break;
+            //User
+
+            //RunningFriend
+            case ContentDescriptor.RunningFriend.PATH_TOKEN: {
+                toRet = db.delete(ContentDescriptor.RunningFriend.TABLE_NAME, selection, selectionArgs);
+            }
+            break;
+            //RunningFriend
+
+            //IntervalFriend
+            case ContentDescriptor.IntervalFriend.PATH_TOKEN: {
+                toRet = db.delete(ContentDescriptor.IntervalFriend.TABLE_NAME, selection, selectionArgs);
+            }
+            break;
+            //IntervalFriend
 
 
             default: {

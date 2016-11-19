@@ -13,6 +13,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Running;
+import com.kostas.dbObjects.User;
+import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 import com.kostas.service.RunningService;
 
@@ -85,10 +87,23 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
         boolean hasNoSound = app_preferences.getBoolean(NO_SOUND, false);
         boolean hasNoVibration = app_preferences.getBoolean(NO_VIBRATION, false);
         boolean metricMiles = app_preferences.getBoolean(METRIC_MILES, false);
+        String mongoId  = app_preferences.getString("mongoId", null);
+        String username  = app_preferences.getString("username", null);
+
+        String friends  = app_preferences.getString("friends", null);
+        String friendRequests  = app_preferences.getString("friendRequests", null);
+        int sharedRunsNum = app_preferences.getInt(User.SHARED_RUNS_NUM, 0);
+
+
         editor.clear().apply();
         editor.putBoolean(NO_SOUND, hasNoSound);
         editor.putBoolean(NO_VIBRATION, hasNoVibration);
         editor.putBoolean(METRIC_MILES, metricMiles);
+        editor.putString("mongoId", mongoId);
+        editor.putString("username", username);
+        editor.putString("friends", friends);
+        editor.putString("friendRequests", friendRequests);
+        editor.putInt(User.SHARED_RUNS_NUM, sharedRunsNum);
         editor.apply();
     }
 
@@ -186,9 +201,9 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
 
         Running running = new Running(-1, descText.getText().toString().trim(), intervalTime, new SimpleDateFormat("dd/MM/yyyy, HH:mm").format(new Date()), intervalDistance, intervalsList);
         running.setAvgPaceText(totalPace);
-
-        Database db = new Database(getApplicationContext());
-        int runId = db.addRunning(running);
+        
+        Database db = new Database((ExtApplication)getApplication());
+        int runId = db.addRunning(running, ContentDescriptor.Running.CONTENT_URI, ContentDescriptor.Interval.CONTENT_URI);
         running.setRunning_id(runId);
         ((ExtApplication)getApplication()).getRuns().add(0, running);
 

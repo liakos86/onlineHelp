@@ -1,16 +1,21 @@
 package com.kostas.onlineHelp;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import com.kostas.custom.NonSwipeableViewPager;
 import com.kostas.fragments.FrgPlans;
+import com.kostas.dbObjects.User;
 import com.kostas.fragments.FrgShowRuns;
+import com.kostas.mongo.SyncHelper;
 import com.kostas.service.RunningService;
 
 import java.io.ByteArrayOutputStream;
@@ -35,7 +40,7 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
     /**
      * The total size of the pager objects
      */
-    static final int PAGER_SIZE = 3;
+    static final int PAGER_SIZE = 4;
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -47,8 +52,18 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setupPager();
+
+
+//        SharedPreferences app_preferences = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+//
+//        if (app_preferences.getString("mongoId", null) != null) {
+//            new AsyncLoadFriends((ExtApplication)getApplication()).execute();
+//        }
+
 //        FacebookSdk.sdkInitialize(getApplicationContext());
     }
+
+
 
     /**
      * Initializes the pager, sets adapter and listener
@@ -56,7 +71,7 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
      */
     private void setupPager() {
         mPager = (NonSwipeableViewPager) findViewById(R.id.pager);
-        mPager.setOffscreenPageLimit(2);
+        mPager.setOffscreenPageLimit(3);
         mPager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(),  PAGER_SIZE));
         setBottomButtons(mPager);
         setSelectedBottomButton(bottomButtons, 0);
@@ -130,6 +145,41 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
         return false;
     }
 
+//    private class AsyncLoadFriends extends AsyncTask<Void, Void, Integer> {
+//        private ExtApplication application;
+//
+//        public AsyncLoadFriends(ExtApplication application) {
+//            this.application = application;
+//        }
+//
+//        protected void onPreExecute() {
+//
+//        }
+//
+//        @Override
+//        protected Integer doInBackground(Void... unused) {
+//
+//
+//            SyncHelper sh = new SyncHelper(application);
+//         return sh.getMyMongoUser();
+//
+//
+//
+//
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Integer result) {
+//
+//            if (result == -1){
+//                Toast.makeText(getApplication(), "User profile could not be loaded", Toast.LENGTH_SHORT).show();
+//            }
+//
+//        }
+//
+//
+//    }
+
     /**
      * upon resuming i need to check three things.
      * 1. if the service is running and there is a run in progress or the app is in running act i need to start the Interval act.
@@ -140,6 +190,10 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
     protected void onResume() {
         super.onResume();
         SharedPreferences app_preferences = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+
+//        SharedPreferences.Editor editor = app_preferences.edit();
+//        editor.remove("mongoId").apply();
+
         if ((isMyServiceRunning() && (app_preferences.getBoolean(RunningService.INTERVAL_IN_PROGRESS, false)))||(((ExtApplication) getApplication()).isInRunningAct())) {//service is on
             startIntervalAct();
         }else  if (((ExtApplication) getApplication()).isInResultsAct()) {

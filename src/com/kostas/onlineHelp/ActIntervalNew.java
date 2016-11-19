@@ -19,6 +19,7 @@ import com.google.gson.reflect.TypeToken;
 import com.kostas.custom.NumberPickerKostas;
 import com.kostas.custom.ProgressWheel;
 import com.kostas.dbObjects.Plan;
+import com.kostas.dbObjects.Running;
 import com.kostas.model.Database;
 import com.kostas.service.RunningService;
 
@@ -135,6 +136,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
                     else if (bundle.getBoolean(CONNECTION_FAILED)) {
                         Toast.makeText(getApplication(), "Google services api is not correctly configured!", Toast.LENGTH_LONG).show();
                         stopRunningService();
+
                         clearAndReturnToMain();
                     }
                     else if (bundle.getFloat(INTERVAL_DISTANCE) != 0) {
@@ -231,13 +233,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      * @return
      */
     private boolean isMyServiceRunning() {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (RunningService.class.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
+        return ((ExtApplication)getApplication()).isMyServiceRunning(RunningService.class);
     }
 
 
@@ -378,10 +374,14 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         boolean hasNoSound = app_preferences.getBoolean(NO_SOUND, false);
         boolean hasNoVibration = app_preferences.getBoolean(NO_VIBRATION, false);
         boolean metricMiles = app_preferences.getBoolean(METRIC_MILES, false);
+        String mongoId  = app_preferences.getString("mongoId", null);
+        String username  = app_preferences.getString("username", null);
         editor.clear().apply();
         editor.putBoolean(NO_SOUND, hasNoSound);
         editor.putBoolean(NO_VIBRATION, hasNoVibration);
         editor.putBoolean(METRIC_MILES, metricMiles);
+        editor.putString("mongoId", mongoId);
+        editor.putString("username", username);
         editor.apply();
     }
 
@@ -393,9 +393,9 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         ((ExtApplication) getApplication()).setInRunningMode(false);
         ((ExtApplication) getApplication()).setInRunningAct(false);
 
-        intervalDistance = 0;
-        intervalTime = 0;
-        intervalStartRest = 0 ;
+        intervalDistance = 100;
+        intervalTime = 10;
+        intervalStartRest = 10 ;
         hideFrame();
         Intent intent = new Intent(this, ActMain.class);
         startActivity(intent);
@@ -574,6 +574,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         }
         resetAppPrefs();
 
+        Toast.makeText(getApplication(), "doStop", Toast.LENGTH_SHORT).show();
         clearAndReturnToMain();
 
         finish();

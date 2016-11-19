@@ -5,23 +5,21 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
 import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.io.Serializable;
 import java.util.List;
 
 
 /**
  * Created by liakos on 11/4/2015.
  */
-public class Running {
+public class Running implements Serializable{
 
     private static final String TAG = Thread.currentThread().getStackTrace()[2].getClassName();
 
+    private ObjectId _id;
     private long running_id;
     private String date;
     private double distance;
@@ -29,12 +27,9 @@ public class Running {
     private String description;
     private String avgPaceText;
     private List<Interval> intervals;
-
-    //todo after solving zoom issue, add field
-    //int zoomLevel;
-
-
-
+    private boolean isShared;
+    private int sharedId;
+    private String username;
 
     public Running(){}
 
@@ -46,15 +41,47 @@ public class Running {
         this.description = description;
         this.distance = distance;
         this.intervals = intervals;
+
+
     }
 
 
-    public Running(long running_id, String description, long time, String date, double distance){
+    public Running(long running_id, String description, long time, String date, double distance, boolean isShared, String username){
         this.running_id = running_id;
         this.time = time;
         this.date = date;
         this.description = description;
         this.distance = distance;
+        this.isShared = isShared;
+        this.username = username;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public int getSharedId() {
+        return sharedId;
+    }
+
+    public void setSharedId(int sharedId) {
+        this.sharedId = sharedId;
+    }
+
+    public boolean isShared() {
+        return isShared;
+    }
+
+    public void setShared(boolean isShared) {
+        this.isShared = isShared;
+    }
+
+    public ObjectId get_id() {
+        return _id;
     }
 
     public String getDate() {
@@ -101,13 +128,13 @@ public class Running {
         this.intervals = intervals;
     }
 
-    public static Running getFromId(Context context, long id) {
+    public static Running getFromId(Context context, long id, Uri uri) {
         //Log.v(TAG, String.format("Requesting item [%d]", id));
         synchronized (context) {
             Cursor cursor = null;
             try {
                 cursor = context.getContentResolver()
-                        .query(Uri.withAppendedPath(ContentDescriptor.Running.CONTENT_URI,
+                        .query(Uri.withAppendedPath(uri,
                                 String.valueOf(id)), null, null, null, null);
                 cursor.moveToFirst();
                 return createFromCursor(cursor);
@@ -124,12 +151,14 @@ public class Running {
         synchronized (item) {
             ContentValues toRet = new ContentValues();
 
-            toRet.put(ContentDescriptor.Running.Cols.ID, item.running_id);
-            toRet.put(ContentDescriptor.Running.Cols.DATE, item.date);
-            toRet.put(ContentDescriptor.Running.Cols.DESCRIPTION, item.description);
-            toRet.put(ContentDescriptor.Running.Cols.TIME, item.time);
-            toRet.put(ContentDescriptor.Running.Cols.AVGPACETEXT, item.avgPaceText);
-            toRet.put(ContentDescriptor.Running.Cols.DISTANCE, item.distance);
+            toRet.put(ContentDescriptor.RunningCols.ID, item.running_id);
+            toRet.put(ContentDescriptor.RunningCols.DATE, item.date);
+            toRet.put(ContentDescriptor.RunningCols.DESCRIPTION, item.description);
+            toRet.put(ContentDescriptor.RunningCols.TIME, item.time);
+            toRet.put(ContentDescriptor.RunningCols.AVGPACETEXT, item.avgPaceText);
+            toRet.put(ContentDescriptor.RunningCols.DISTANCE, item.distance);
+            toRet.put(ContentDescriptor.RunningCols.IS_SHARED, item.isShared ? 1 : 0);
+            toRet.put(ContentDescriptor.RunningCols.USERNAME, item.username);
 
             return toRet;
         }
@@ -142,12 +171,14 @@ public class Running {
                 return null;
             }
             Running toRet = new Running();
-            toRet.running_id = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.Running.Cols.ID));
-            toRet.date = cursor.getString(cursor.getColumnIndex(ContentDescriptor.Running.Cols.DATE));
-            toRet.description = cursor.getString(cursor.getColumnIndex(ContentDescriptor.Running.Cols.DESCRIPTION));
-            toRet.time = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.Running.Cols.TIME));
-            toRet.avgPaceText = cursor.getString(cursor.getColumnIndex(ContentDescriptor.Running.Cols.AVGPACETEXT));
-            toRet.distance = cursor.getFloat(cursor.getColumnIndex(ContentDescriptor.Running.Cols.DISTANCE));
+            toRet.running_id = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.RunningCols.ID));
+            toRet.date = cursor.getString(cursor.getColumnIndex(ContentDescriptor.RunningCols.DATE));
+            toRet.description = cursor.getString(cursor.getColumnIndex(ContentDescriptor.RunningCols.DESCRIPTION));
+            toRet.time = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.RunningCols.TIME));
+            toRet.avgPaceText = cursor.getString(cursor.getColumnIndex(ContentDescriptor.RunningCols.AVGPACETEXT));
+            toRet.distance = cursor.getFloat(cursor.getColumnIndex(ContentDescriptor.RunningCols.DISTANCE));
+            toRet.username = cursor.getString(cursor.getColumnIndex(ContentDescriptor.RunningCols.USERNAME));
+            toRet.isShared = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.RunningCols.IS_SHARED)) == 1;
 
             return toRet;
         }
@@ -159,16 +190,16 @@ public class Running {
      * @param resolver
      * @param item
      */
-    public static void save(ContentResolver resolver, Running item) {
-        if (item.running_id == Database.INVALID_ID)
-            resolver.insert(ContentDescriptor.Running.CONTENT_URI, Running.asContentValues(item));
-        else
-            resolver.update(ContentDescriptor.Running.CONTENT_URI, Running.asContentValues(item),
-                    String.format("%s=?", ContentDescriptor.Running.Cols.ID),
-                    new String[]{
-                            String.valueOf(item.running_id)
-                    });
-    }
+//    public static void save(ContentResolver resolver, Running item) {
+//        if (item.running_id == Database.INVALID_ID)
+//            resolver.insert(ContentDescriptor.Running.CONTENT_URI, Running.asContentValues(item));
+//        else
+//            resolver.update(ContentDescriptor.Running.CONTENT_URI, Running.asContentValues(item),
+//                    String.format("%s=?", ContentDescriptor.RunningCols.ID),
+//                    new String[]{
+//                            String.valueOf(item.running_id)
+//                    });
+//    }
 
 
 

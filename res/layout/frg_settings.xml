@@ -16,7 +16,7 @@
            android:layout_width="wrap_content"
               android:layout_height="wrap_content" />
 
-    <TextView android:layout_above="@+id/loginButton"
+    <TextView android:layout_above="@+id/contactButton"
               android:layout_centerHorizontal="true"
               android:layout_marginBottom="@dimen/eight"
               android:textSize="@dimen/small_text"
@@ -24,17 +24,6 @@
               android:layout_width="wrap_content"
               android:clickable="true"
               android:layout_height="wrap_content"/>
-
-    <Button android:layout_above="@+id/contactButton"
-            android:id="@+id/loginButton"
-            android:drawableStart="@drawable/login_50"
-            android:drawableLeft="@drawable/login_50"
-            android:paddingLeft="@dimen/eight"
-            style="@style/buttonStyle"
-            android:background="@drawable/close_button_selector"
-            android:layout_alignParentBottom="false"
-            android:layout_marginBottom="@dimen/ten_device_pixels"
-            android:text="@string/login"/>
 
 
 

@@ -52,16 +52,6 @@ public class FrgSettings extends Fragment {
             }
         });
 
-        Button b2=(Button)v.findViewById(R.id.loginButton);
-
-
-        b2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getActivity(), getResources().getString(R.string.soon), Toast.LENGTH_SHORT).show();
-            }
-        });
-
 
         Button contact = (Button)v.findViewById(R.id.contactButton);
         contact.setOnClickListener(new View.OnClickListener() {

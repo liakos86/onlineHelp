@@ -1,7 +1,10 @@
 package com.kostas.onlineHelp;
 
+import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -9,13 +12,18 @@ import android.widget.Toast;
 //import com.kostas.custom.MyAcraSender;
 import com.kostas.custom.MyAcraSender;
 import com.kostas.dbObjects.Running;
+import com.kostas.dbObjects.User;
+import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
+import com.kostas.service.MongoUpdateService;
+import com.kostas.service.RunningService;
 import com.kostas.service.TTSManager;
 import org.acra.ACRA;
 import org.acra.ReportField;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 import org.acra.sender.HttpSender;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -64,6 +72,8 @@ public class ExtApplication extends Application {
 
     List<Running> runs = new ArrayList<Running>();
 
+    User me;
+
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
@@ -81,10 +91,12 @@ public class ExtApplication extends Application {
         super.onCreate();
         FontsOverride.setDefaultFont(this, "MONOSPACE",  "fonts/OpenSans-Semibold.ttf");
 
-
         new PerformAsyncTask(this).execute();
         ttsManager = new TTSManager();
         ttsManager.init(this);
+
+
+
 
     }
 
@@ -102,8 +114,18 @@ public class ExtApplication extends Application {
                     .isConnectedOrConnecting();
             return isWifi || is3g;
         }catch (Exception e){
-            return false;
+            return true;
         }
+    }
+
+    public boolean isMyServiceRunning(Class serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<Running> getRuns() {
@@ -119,6 +141,7 @@ public class ExtApplication extends Application {
     }
 
     /**
+     * TODO: ALWAYS REMOVE BEFORE COMMIT
      * For testing purposes returns an md5 hash of the device to add testing ads
      * @param s
      * @return
@@ -161,10 +184,8 @@ public class ExtApplication extends Application {
         @Override
         protected Void doInBackground(Void... unused) {
             Database db = new Database(application);
-            runs = db.fetchRunsFromDb();
-            for (Running run : runs){
-                run.setIntervals(db.fetchIntervalsForRun(run.getRunning_id()));
-            }
+            runs = db.fetchRunsFromDb(ContentDescriptor.Running.CONTENT_URI, ContentDescriptor.Interval.CONTENT_URI);
+
             Collections.reverse(runs);
             return null;
         }
@@ -175,6 +196,25 @@ public class ExtApplication extends Application {
             setRunsLoaded(true);
 
         }
+    }
+
+
+    /**
+     * Builds a new HttpClient with the same CookieStore than the previous one.
+     * This allows to follow the http session, without keeping in memory the
+     * full DefaultHttpClient.
+     */
+    public DefaultHttpClient getHttpClient() {
+        final DefaultHttpClient httpClient = new DefaultHttpClient();
+        return httpClient;
+    }
+
+    public User getMe() {
+        return me;
+    }
+
+    public void setMe(User me) {
+        this.me = me;
     }
 
     public boolean isRunsLoaded() {

@@ -35,7 +35,16 @@ android:background="@color/primary_grey"
                     android:text="@string/plans"
                     style="@style/BottomTabText"/>
         </LinearLayout>
-
+        <LinearLayout
+                android:id="@+id/btn_my_friends"
+                style="@style/BottomTab">
+            <ImageView
+                    android:src="@drawable/friends_50"
+                    style="@style/BottomTabImage"/>
+            <TextView
+                    android:text="@string/friends"
+                    style="@style/BottomTabText"/>
+        </LinearLayout>
         <LinearLayout
                 android:id="@+id/btn_settings"
                 style="@style/BottomTab">

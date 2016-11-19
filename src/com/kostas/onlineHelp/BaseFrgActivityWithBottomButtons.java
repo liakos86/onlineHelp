@@ -48,7 +48,8 @@ public class BaseFrgActivityWithBottomButtons extends FragmentActivity {
         bottomButtons = new HashMap<Integer, Integer>();
         bottomButtons.put(0, R.id.btn_my_runs);
         bottomButtons.put(1, R.id.btn_my_plans);
-        bottomButtons.put(2, R.id.btn_settings);
+        bottomButtons.put(2, R.id.btn_my_friends);
+        bottomButtons.put(3, R.id.btn_settings);
         for (int counter = 0; counter < ActMain.PAGER_SIZE; counter++) {
             setBottomButtonListener(mPager, bottomButtons.get(counter), counter);
         }

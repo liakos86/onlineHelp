@@ -24,6 +24,7 @@ public class Interval{
 
     private long interval_id;
     private long running_id;
+    private String running_mongo_id;
     private String latLonList;
     private long milliseconds;
     private float distance;
@@ -54,6 +55,13 @@ public class Interval{
 
     }
 
+    public String getRunning_mongo_id() {
+        return running_mongo_id;
+    }
+
+    public void setRunning_mongo_id(String running_mongo_id) {
+        this.running_mongo_id = running_mongo_id;
+    }
 
     public boolean isFastest() {
         return isFastest;
@@ -134,13 +142,13 @@ public class Interval{
         synchronized (item) {
             ContentValues toRet = new ContentValues();
 
-            toRet.put(ContentDescriptor.Interval.Cols.ID, item.interval_id);
-            toRet.put(ContentDescriptor.Interval.Cols.RUNNING_ID, item.running_id);
-            toRet.put(ContentDescriptor.Interval.Cols.MILLISECONDS, item.milliseconds);
-            toRet.put(ContentDescriptor.Interval.Cols.LATLONLIST, item.latLonList);
-            toRet.put(ContentDescriptor.Interval.Cols.DISTANCE, item.distance);
-            toRet.put(ContentDescriptor.Interval.Cols.PACETEXT, item.paceText);
-            toRet.put(ContentDescriptor.Interval.Cols.FASTEST, item.isFastest ? 1 : 0);
+            toRet.put(ContentDescriptor.IntervalCols.ID, item.interval_id);
+            toRet.put(ContentDescriptor.IntervalCols.RUNNING_ID, item.running_id);
+            toRet.put(ContentDescriptor.IntervalCols.MILLISECONDS, item.milliseconds);
+            toRet.put(ContentDescriptor.IntervalCols.LATLONLIST, item.latLonList);
+            toRet.put(ContentDescriptor.IntervalCols.DISTANCE, item.distance);
+            toRet.put(ContentDescriptor.IntervalCols.PACETEXT, item.paceText);
+            toRet.put(ContentDescriptor.IntervalCols.FASTEST, item.isFastest ? 1 : 0);
 
             return toRet;
         }
@@ -153,13 +161,13 @@ public class Interval{
                 return null;
             }
             Interval toRet = new Interval();
-            toRet.interval_id = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.ID));
-            toRet.running_id = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.RUNNING_ID));
-            toRet.latLonList = cursor.getString(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.LATLONLIST));
-            toRet.milliseconds = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.MILLISECONDS));
-            toRet.distance = cursor.getFloat(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.DISTANCE));
-            toRet.paceText = cursor.getString(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.PACETEXT));
-            toRet.isFastest = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.Interval.Cols.FASTEST))==1;
+            toRet.interval_id = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.IntervalCols.ID));
+            toRet.running_id = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.IntervalCols.RUNNING_ID));
+            toRet.latLonList = cursor.getString(cursor.getColumnIndex(ContentDescriptor.IntervalCols.LATLONLIST));
+            toRet.milliseconds = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.IntervalCols.MILLISECONDS));
+            toRet.distance = cursor.getFloat(cursor.getColumnIndex(ContentDescriptor.IntervalCols.DISTANCE));
+            toRet.paceText = cursor.getString(cursor.getColumnIndex(ContentDescriptor.IntervalCols.PACETEXT));
+            toRet.isFastest = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.IntervalCols.FASTEST))==1;
             return toRet;
         }
     }
@@ -170,15 +178,15 @@ public class Interval{
      * @param resolver
      * @param item
      */
-    public static void save(ContentResolver resolver, Interval item) {
-        if (item.interval_id == Database.INVALID_ID)
-            resolver.insert(ContentDescriptor.Interval.CONTENT_URI, Interval.asContentValues(item));
-        else
-            resolver.update(ContentDescriptor.Interval.CONTENT_URI, Interval.asContentValues(item),
-                    String.format("%s=?", ContentDescriptor.Interval.Cols.ID),
-                    new String[]{
-                            String.valueOf(item.interval_id)
-                    });
-    }
+//    public static void save(ContentResolver resolver, Interval item) {
+//        if (item.interval_id == Database.INVALID_ID)
+//            resolver.insert(ContentDescriptor.Interval.CONTENT_URI, Interval.asContentValues(item));
+//        else
+//            resolver.update(ContentDescriptor.Interval.CONTENT_URI, Interval.asContentValues(item),
+//                    String.format("%s=?", ContentDescriptor.IntervalCols.ID),
+//                    new String[]{
+//                            String.valueOf(item.interval_id)
+//                    });
+//    }
 
 }
