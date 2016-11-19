@@ -116,7 +116,20 @@ public class FrgShowRuns extends Fragment {
 
 
 
-
+    private void showIntervalsForRun(Running running){
+        intervals.clear();
+        // DO NOT USE: intervals = running.getIntervals() !!!! IT WILL CHANGE THE OBJECT REFERENCED
+        for (Interval interval : running.getIntervals()){
+            intervals.add(interval);
+        }
+        viewFlipper.setDisplayedChild(1);
+        adapterInterval.notifyDataSetChanged();
+        if (googleMap!=null) {
+            drawMap();
+        }else{
+            Toast.makeText(getActivity(), "Google maps not present...", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     
     private void setList(){
