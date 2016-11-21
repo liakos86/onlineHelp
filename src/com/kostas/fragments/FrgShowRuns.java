@@ -3,6 +3,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -510,13 +511,26 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
                 }
             });
 
+            final Activity act = getActivity();
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    currentRun = child.get(childPosition);
-                    showIntervalsForRun(child.get(childPosition));
+
+                    Intent goToIntervals = new Intent(act, ActViewIntervals.class);
+
+                    goToIntervals.putExtra("run", child.get(childPosition).getRunning_id());
+                    goToIntervals.putExtra("myRun", true);
+                    startActivity(goToIntervals);
                 }
             });
+
+//            convertView.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    currentRun = child.get(childPosition);
+//                    showIntervalsForRun(child.get(childPosition));
+//                }
+//            });
             return convertView;
         }
 

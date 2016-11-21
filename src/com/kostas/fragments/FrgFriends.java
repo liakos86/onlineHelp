@@ -47,7 +47,7 @@ public class FrgFriends extends Fragment {
 
     TextView textLogin, textRegister, textForgot;
 
-    Button buttonLogin, buttonRegister, buttonShowFriends, buttonShowFriendsRuns;
+    Button buttonLogin, buttonRegister;
 
     int type = 0 ;//register
 
@@ -80,22 +80,9 @@ public class FrgFriends extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View v = inflater.inflate(R.layout.frg_friends, container, false);
-
-
         setViewsAndListeners(v);
-
-
-//        setTitleActionBar();
-
         setBroadcastReceiver();
         setCorrectFlipperChild();
-
-
-
-
-
-
-        
         return  v;
     }
 
@@ -139,18 +126,11 @@ public class FrgFriends extends Fragment {
 
     private void setViewsAndListeners(View v){
        getFriendRequests();
-
         friendRequestsList = ((ListView) v.findViewById(R.id.listFriendRequests));
         friendRunsList = ((ListView) v.findViewById(R.id.listFriendRuns));
-
         infoText = (TextView) v.findViewById(R.id.infoText);
-
         friendsFlipper = (ViewFlipper) v.findViewById(R.id.friends_flipper);
-
         buttonRegister = (Button) v.findViewById(R.id.buttonRegister);
-
-        buttonShowFriends = (Button) v.findViewById(R.id.showFriendsButton);
-        buttonShowFriendsRuns = (Button) v.findViewById(R.id.showFriendsRunsButton);
         addFriend = (Button)v.findViewById(R.id.buttonAddFriend);
 
         buttonLogin = (Button) v.findViewById(R.id.buttonLogin);
@@ -216,30 +196,12 @@ public class FrgFriends extends Fragment {
                 validateAndCallAsync();
             }
         });
-
-
         addFriend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 fetchFriend();
             }
         });
-
-        buttonShowFriends.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                friendsFlipper.setDisplayedChild(2);
-            }
-        });
-
-        buttonShowFriendsRuns.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                friendsFlipper.setDisplayedChild(1);
-            }
-        });
-
-
     }
 
     void getFriendRuns(){
@@ -252,7 +214,6 @@ public class FrgFriends extends Fragment {
 
     void getFriendRequests(){
         SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
-
         String friends = app_preferences.getString("friendRequests", "");
         Toast.makeText(getActivity(), friends, Toast.LENGTH_SHORT).show();
         friends = friends.replace("null ", "");
@@ -260,14 +221,11 @@ public class FrgFriends extends Fragment {
         // if (friends.length() > 3) {
         friendsArray = friends.split(" ");
         //}
-
         friendRequests.clear();
         for (String friend : friendsArray){
             friendRequests.add(friend);
         }
         friendRequests.remove("");
-
-
     }
 
     private void fetchFriend() {
@@ -535,6 +493,9 @@ public class FrgFriends extends Fragment {
 
 
             requestsAdapter.notifyDataSetChanged();
+            if (friendRequests.size() == 0){
+                friendsFlipper.setDisplayedChild(1);
+            }
 
 
         }
@@ -549,6 +510,11 @@ public class FrgFriends extends Fragment {
             ((ExtApplication) getActivity().getApplication()).setMe(new User(app_preferences));
             friendsFlipper.setDisplayedChild(1);
             startMongoService();
+
+            if (friendRequests.size() > 0){
+                friendsFlipper.setDisplayedChild(2);
+            }
+
         }else{
             friendsFlipper.setDisplayedChild(0);
             prepareForLogin();

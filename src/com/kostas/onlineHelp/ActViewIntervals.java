@@ -71,7 +71,7 @@ public class ActViewIntervals extends BaseFrgActivityWithBottomButtons implement
     /**
      * Open the map for the interval, close the current interval and go to runs list
      */
-    Button openMapButton,  shareFriendsButton;
+    Button openMapButton,  shareFriendsButton, closeIntervalsButton;
 
     /**
      * If the map is drawn we dont need to redraw
@@ -172,6 +172,8 @@ public class ActViewIntervals extends BaseFrgActivityWithBottomButtons implement
 
         shareFriendsButton = ((Button) findViewById(R.id.buttonShareFriends));
 
+        closeIntervalsButton = ((Button) findViewById(R.id.buttonCloseIntervals));
+
         shareFriendsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -184,6 +186,15 @@ public class ActViewIntervals extends BaseFrgActivityWithBottomButtons implement
         if (!isMyRun){
             shareFriendsButton.setVisibility(View.GONE);
         }
+
+        closeIntervalsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                goBack();
+
+            }
+        });
 
 
 
@@ -208,6 +219,9 @@ public class ActViewIntervals extends BaseFrgActivityWithBottomButtons implement
         });
     }
 
+    public void goBack(){
+        this.onBackPressed();
+    }
 
     public void drawMap(){
         alreadyDrawn = true;

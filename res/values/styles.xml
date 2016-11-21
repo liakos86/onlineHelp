@@ -73,4 +73,26 @@
         <item name="android:layout_width">match_parent</item>
     </style>
 
+    <style name="buttonStyle2">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/white_back</item>
+        <item name="android:layout_height">@dimen/standard_view_height</item>
+        <item name="android:layout_width">@dimen/zero</item>
+        <item name="android:textSize">@dimen/medium_text</item>
+        <item name="android:layout_margin">@dimen/four_dp</item>
+    </style>
+
+    <style name="editTextStyle">
+        <item name="android:layout_margin">@dimen/ten_device_pixels</item>
+        <item name="android:textColorHint">@android:color/darker_gray</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textSize">@dimen/medium_text</item>
+        <item name="android:textColor">@color/primary_grey</item>
+        <item name="android:background">@drawable/edit_text_back</item>
+        <item name="android:paddingLeft">@dimen/eight</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/standard_view_height</item>
+    </style>
+
 </resources>
