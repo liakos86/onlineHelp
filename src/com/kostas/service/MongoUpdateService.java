@@ -19,10 +19,7 @@ import com.kostas.dbObjects.User;
 import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 import com.kostas.mongo.SyncHelper;
-import com.kostas.onlineHelp.ActIntervalNew;
-import com.kostas.onlineHelp.ActMain;
-import com.kostas.onlineHelp.ExtApplication;
-import com.kostas.onlineHelp.R;
+import com.kostas.onlineHelp.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,10 +30,6 @@ public class MongoUpdateService extends IntentService {
     public static final String NEW_FRIEND = "new_friend";
     public static final String NEW_FRIEND_REQUEST = "new_request";
     public static final String NEW_FRIEND_RUN = "new_run";
-
-
-    public static final String NOTIFICATION = "com.kostas.onlineHelp";
-
 
     private Handler mHandler = new Handler();
     SharedPreferences app_preferences;
@@ -232,8 +225,8 @@ public class MongoUpdateService extends IntentService {
      */
     private void checkMyFriendsAndRequests() {
 
-        String mongoFriends = meFromMongo.getFriends() != null ? meFromMongo.getFriends().trim() : "";
-        String dbFriends = meFromDb.getFriends() != null ? meFromDb.getFriends().trim() : "";
+        String mongoFriends = meFromMongo.getFriends() != null ? meFromMongo.getFriends().trim() : AppConstants.EMPTY;
+        String dbFriends = meFromDb.getFriends() != null ? meFromDb.getFriends().trim() : AppConstants.EMPTY;
 
         if ( dbFriends.length() < mongoFriends.length()) {
             createForegroundNotification("You have a new friend!!!");
@@ -241,20 +234,20 @@ public class MongoUpdateService extends IntentService {
             app_preferences.edit().putString("friends", mongoFriends).apply();
             application.getMe().setFriends(mongoFriends);
 
-            Intent intent = new Intent(NOTIFICATION);
+            Intent intent = new Intent(AppConstants.NOTIFICATION);
             intent.putExtra(NEW_FRIEND, true);
             sendBroadcast(intent);
         }
 
-        String mongoRequests = meFromMongo.getFriendRequests() != null ? meFromMongo.getFriendRequests().trim() : "";
-        String dbRequests = meFromDb.getFriendRequests() != null ? meFromDb.getFriendRequests().trim() : "";
+        String mongoRequests = meFromMongo.getFriendRequests() != null ? meFromMongo.getFriendRequests().trim() : AppConstants.EMPTY;
+        String dbRequests = meFromDb.getFriendRequests() != null ? meFromDb.getFriendRequests().trim() : AppConstants.EMPTY;
 
         if (dbRequests.length() < mongoRequests.length()) {
             app_preferences.edit().putString("friendRequests", mongoRequests).apply();
             application.getMe().setFriendRequests(mongoRequests);
             createForegroundNotification("You have a new friend request!!!");
 
-            Intent intent = new Intent(NOTIFICATION);
+            Intent intent = new Intent(AppConstants.NOTIFICATION);
             intent.putExtra(NEW_FRIEND_REQUEST, true);
             sendBroadcast(intent);
 
@@ -380,9 +373,9 @@ public class MongoUpdateService extends IntentService {
 
             if (type == CallTypes.FETCH_FRIENDS) {
 
-                String friends = app_preferences.getString("friends", "");
+                String friends = app_preferences.getString("friends", AppConstants.EMPTY);
                 String[] friendsArray = friends.split(" ");
-                String myUsername = meFromDb != null ? meFromDb.getUsername() : app_preferences.getString("username", "");
+                String myUsername = meFromDb != null ? meFromDb.getUsername() : app_preferences.getString("username", AppConstants.EMPTY);
 
                 ArrayList<String> usernames = new ArrayList<String>();
                 for (String name : friendsArray) {
@@ -392,7 +385,7 @@ public class MongoUpdateService extends IntentService {
                 usernames.add(myUsername);
 
                 usernames.remove(null);
-                usernames.remove("");
+                usernames.remove(AppConstants.EMPTY);
 
                 friendsFromMongo = sh.getUsersByUsernamesList(usernames);
 
@@ -412,7 +405,7 @@ public class MongoUpdateService extends IntentService {
                     }
                     createForegroundNotification("A friend added a run");
 
-                    Intent intent = new Intent(NOTIFICATION);
+                    Intent intent = new Intent(AppConstants.NOTIFICATION);
                     intent.putExtra(NEW_FRIEND_RUN, true);
                     sendBroadcast(intent);
                 }

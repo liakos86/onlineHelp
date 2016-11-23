@@ -16,6 +16,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.kostas.onlineHelp.ActMain;
+import com.kostas.onlineHelp.AppConstants;
 import com.kostas.onlineHelp.R;
 import com.kostas.service.RunningService;
 import org.w3c.dom.Text;
@@ -63,7 +64,7 @@ public class FrgSettings extends Fragment {
                     Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
                             "mailto", "intervalplusrunning@gmail.com", null));
                     emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Feedback to Interval+");
-                    emailIntent.putExtra(Intent.EXTRA_TEXT, "");
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, AppConstants.EMPTY);
                     emailIntent.putExtra(Intent.EXTRA_EMAIL, addresses);
                     startActivity(Intent.createChooser(emailIntent, "Send your feedback..."));
                 }catch (Exception e){
@@ -77,7 +78,7 @@ public class FrgSettings extends Fragment {
 
         final CheckBox metric =(CheckBox) v.findViewById(R.id.checkbox_metric);
 
-        boolean isMiles = app_preferences.getBoolean(RunningService.METRIC_MILES, false);
+        boolean isMiles = app_preferences.getBoolean(AppConstants.METRIC_MILES, false);
 
         metric.setChecked(!isMiles);
 

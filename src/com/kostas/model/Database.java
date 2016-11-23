@@ -12,6 +12,7 @@ import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Plan;
 import com.kostas.dbObjects.Running;
 import com.kostas.dbObjects.User;
+import com.kostas.onlineHelp.AppConstants;
 import com.kostas.onlineHelp.ExtApplication;
 
 import java.util.ArrayList;
@@ -138,10 +139,10 @@ public class Database extends SQLiteOpenHelper {
 
     public void addUser(User user) {
         if (user.getFriends() == null){
-            user.setFriends("");
+            user.setFriends(AppConstants.EMPTY);
         }
         if (user.getFriendRequests() == null){
-            user.setFriendRequests("");
+            user.setFriendRequests(AppConstants.EMPTY);
         }
         ContentResolver resolver = mApp.getContentResolver();
         resolver.insert(ContentDescriptor.User.CONTENT_URI, User.asContentValues(user));

@@ -18,12 +18,11 @@ import com.kostas.custom.ViewHolderRow;
 import com.kostas.dbObjects.Plan;
 import com.kostas.model.Database;
 import com.kostas.onlineHelp.ActMain;
+import com.kostas.onlineHelp.AppConstants;
 import com.kostas.onlineHelp.R;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.kostas.service.RunningService.METRIC_MILES;
 
 /**
  * Created by liakos on 10/10/2015.
@@ -120,7 +119,7 @@ public class FrgPlans extends Fragment {
         });
 
         SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
-        isMiles = app_preferences.getBoolean(METRIC_MILES, false);
+        isMiles = app_preferences.getBoolean(AppConstants.METRIC_MILES, false);
         setDistancePicketText();
     }
 
@@ -144,7 +143,7 @@ public class FrgPlans extends Fragment {
     }
 
     private void clearViews(){
-        planDescription.setText("");
+        planDescription.setText(AppConstants.EMPTY);
         planIntervalDistancePicker.setValue(100);
         planIntervalRoundsPicker.setValue(0);
         planIntervalStartRestPicker.setValue(10);
@@ -240,7 +239,7 @@ public class FrgPlans extends Fragment {
                 metricWord = " miles";
             }
 
-            holder.bottomText.setText(plan.getDistanceUnits() + metricWord+ " with " + plan.getSeconds() + "secs rest" + (plan.getRounds() > 0 ? " x " + plan.getRounds() + " rounds" : ""));
+            holder.bottomText.setText(plan.getDistanceUnits() + metricWord+ " with " + plan.getSeconds() + "secs rest" + (plan.getRounds() > 0 ? " x " + plan.getRounds() + " rounds" : AppConstants.EMPTY));
 
             convertView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
@@ -325,7 +324,7 @@ public class FrgPlans extends Fragment {
     public void changeNewPlanTextsIfNeeded(){
 
         SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
-        boolean newIsMiles = app_preferences.getBoolean(METRIC_MILES, false);
+        boolean newIsMiles = app_preferences.getBoolean(AppConstants.METRIC_MILES, false);
         if (newIsMiles != isMiles){
             isMiles = newIsMiles;
             setDistancePicketText();

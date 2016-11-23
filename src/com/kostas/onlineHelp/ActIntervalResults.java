@@ -16,7 +16,6 @@ import com.kostas.dbObjects.Running;
 import com.kostas.dbObjects.User;
 import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
-import com.kostas.service.RunningService;
 
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
@@ -84,9 +83,9 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
      */
     public void resetAppPrefs() {
         SharedPreferences.Editor editor = app_preferences.edit();
-        boolean hasNoSound = app_preferences.getBoolean(NO_SOUND, false);
-        boolean hasNoVibration = app_preferences.getBoolean(NO_VIBRATION, false);
-        boolean metricMiles = app_preferences.getBoolean(METRIC_MILES, false);
+        boolean hasNoSound = app_preferences.getBoolean(AppConstants.NO_SOUND, false);
+        boolean hasNoVibration = app_preferences.getBoolean(AppConstants.NO_VIBRATION, false);
+        boolean metricMiles = app_preferences.getBoolean(AppConstants.METRIC_MILES, false);
         String mongoId  = app_preferences.getString("mongoId", null);
         String username  = app_preferences.getString("username", null);
 
@@ -96,9 +95,9 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
 
 
         editor.clear().apply();
-        editor.putBoolean(NO_SOUND, hasNoSound);
-        editor.putBoolean(NO_VIBRATION, hasNoVibration);
-        editor.putBoolean(METRIC_MILES, metricMiles);
+        editor.putBoolean(AppConstants.NO_SOUND, hasNoSound);
+        editor.putBoolean(AppConstants.NO_VIBRATION, hasNoVibration);
+        editor.putBoolean(AppConstants.METRIC_MILES, metricMiles);
         editor.putString("mongoId", mongoId);
         editor.putString("username", username);
         editor.putString("friends", friends);
@@ -164,13 +163,13 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
     private void setIntervalsListAndAdapter() {
         Gson gson = new Gson();
         Type listOfObjects = new TypeToken<List<Interval>>() {}.getType();
-        String intervalsGson = app_preferences.getString(INTERVALS, "");
+        String intervalsGson = app_preferences.getString(AppConstants.INTERVALS, AppConstants.EMPTY);
         ArrayList<Interval> intervalsListJson = gson.fromJson(intervalsGson, listOfObjects);
         intervalsList = intervalsListJson != null ? intervalsListJson : new ArrayList<Interval>();
-        float coveredDist = app_preferences.getFloat(TOTAL_DIST, 0);
+        float coveredDist = app_preferences.getFloat(AppConstants.TOTAL_DIST, 0);
         if (coveredDist > 0) {//an interrupted run must be added to list
             Type listOfLocation = new TypeToken<List<Location>>() {}.getType();
-            String locsGson = app_preferences.getString(LATLONLIST, "");
+            String locsGson = app_preferences.getString(AppConstants.LATLONLIST, AppConstants.EMPTY);
             List<Location> locationList = gson.fromJson(locsGson, listOfLocation);
             StringBuilder sb = new StringBuilder(locationList.get(0).getLatitude() + "," + locationList.get(0).getLongitude());
             locationList.remove(0);
@@ -178,11 +177,11 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
                 sb.append("," + l.getLatitude() + "," + l.getLongitude() + "," + l.getLatitude() + "," + l.getLongitude());
             }
 
-            long millis = SystemClock.uptimeMillis() - app_preferences.getLong(MSTART_TIME, 0);
+            long millis = SystemClock.uptimeMillis() - app_preferences.getLong(AppConstants.MSTART_TIME, 0);
             intervalsList.add(new Interval(-1, sb.toString(), millis, coveredDist));
         }
 
-        boolean metricMiles = app_preferences.getBoolean(RunningService.METRIC_MILES, false);
+        boolean metricMiles = app_preferences.getBoolean(AppConstants.METRIC_MILES, false);
         totalPace = computeTotalPace(metricMiles);
 
         adapterInterval = new IntervalAdapterItem(this, this.getApplicationContext(),
@@ -196,8 +195,8 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
     private void saveRunWithIntervalsDB() {
         buttonDismiss.setClickable(false);
         buttonSave.setClickable(false);
-        long intervalTime = app_preferences.getLong(INTERVAL_TIME, 0);
-        float intervalDistance = app_preferences.getFloat(INTERVAL_DISTANCE, 0);
+        long intervalTime = app_preferences.getLong(AppConstants.INTERVAL_TIME, 0);
+        float intervalDistance = app_preferences.getFloat(AppConstants.INTERVAL_DISTANCE, 0);
 
         Running running = new Running(-1, descText.getText().toString().trim(), intervalTime, new SimpleDateFormat("dd/MM/yyyy, HH:mm").format(new Date()), intervalDistance, intervalsList);
         running.setAvgPaceText(totalPace);

@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.view.View;
+import com.kostas.onlineHelp.AppConstants;
 import com.kostas.onlineHelp.R;
 
 
@@ -82,7 +83,7 @@ public class ProgressWheel extends View {
     boolean isSpinning = false;
 
     //Other
-    private String text = "";
+    private String text = AppConstants.EMPTY;
     private String[] splitText;
 
     int startAngle = 0;

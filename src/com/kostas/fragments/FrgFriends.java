@@ -23,10 +23,7 @@ import com.kostas.dbObjects.User;
 import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 import com.kostas.mongo.SyncHelper;
-import com.kostas.onlineHelp.ActMain;
-import com.kostas.onlineHelp.ActViewIntervals;
-import com.kostas.onlineHelp.ExtApplication;
-import com.kostas.onlineHelp.R;
+import com.kostas.onlineHelp.*;
 import com.kostas.service.MongoUpdateService;
 
 import java.lang.reflect.Type;
@@ -214,9 +211,9 @@ public class FrgFriends extends Fragment {
 
     void getFriendRequests(){
         SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
-        String friends = app_preferences.getString("friendRequests", "");
+        String friends = app_preferences.getString("friendRequests", AppConstants.EMPTY);
         Toast.makeText(getActivity(), friends, Toast.LENGTH_SHORT).show();
-        friends = friends.replace("null ", "");
+        friends = friends.replace("null ", AppConstants.EMPTY);
         String[]friendsArray  = new String[]{};
         // if (friends.length() > 3) {
         friendsArray = friends.split(" ");
@@ -225,7 +222,7 @@ public class FrgFriends extends Fragment {
         for (String friend : friendsArray){
             friendRequests.add(friend);
         }
-        friendRequests.remove("");
+        friendRequests.remove(AppConstants.EMPTY);
     }
 
     private void fetchFriend() {
@@ -254,7 +251,7 @@ public class FrgFriends extends Fragment {
 
         String friends = app_preferences.getString("friends", null);
         String sentRequests = app_preferences.getString("sentRequests",null);
-        if (friends != null && !friends.equals("")) {
+        if (friends != null && !friends.equals(AppConstants.EMPTY)) {
             String[] friendsList = friends.split(" ");
             for (String friendEmail : friendsList) {
                 if (friendEmail.equals(friendName)) {
@@ -264,7 +261,7 @@ public class FrgFriends extends Fragment {
             }
 
         }
-        if (sentRequests != null && !sentRequests.equals("")) {
+        if (sentRequests != null && !sentRequests.equals(AppConstants.EMPTY)) {
             String[] sentList = sentRequests.split(" ");
             for (String friendEmail : sentList) {
                 if (friendEmail.equals(friendName)) {
@@ -337,7 +334,7 @@ public class FrgFriends extends Fragment {
             getActivity().startService(intent);
 
 
-            getActivity().registerReceiver(receiver, new IntentFilter(NOTIFICATION));
+            getActivity().registerReceiver(receiver, new IntentFilter(AppConstants.NOTIFICATION));
 
 
         }
@@ -415,7 +412,7 @@ public class FrgFriends extends Fragment {
 
         protected void onPreExecute() {
             addFriend.setClickable(false);
-            infoText.setText("");
+            infoText.setText(AppConstants.EMPTY);
         }
 
         @Override
@@ -433,7 +430,7 @@ public class FrgFriends extends Fragment {
         protected void onPostExecute(List<User> users) {
 
             addFriend.setClickable(true);
-            friendName.setText("");
+            friendName.setText(AppConstants.EMPTY);
 
 
                 if (users.size() == 1) {

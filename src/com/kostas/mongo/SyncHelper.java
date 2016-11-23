@@ -9,9 +9,9 @@ import com.google.gson.reflect.TypeToken;
 import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Running;
 import com.kostas.dbObjects.User;
-import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 import com.kostas.onlineHelp.ActMain;
+import com.kostas.onlineHelp.AppConstants;
 import com.kostas.onlineHelp.ExtApplication;
 import com.kostas.onlineHelp.R;
 import org.apache.http.Header;
@@ -243,7 +243,7 @@ public class SyncHelper {
             User me  = application.getMe();
 
             JSONObject workout = new JSONObject();
-            workout.put("username", app_preferences.getString("username",""));
+            workout.put("username", app_preferences.getString("username", AppConstants.EMPTY));
             workout.put("time", runToShare.getTime());
             workout.put("date", runToShare.getDate());
             workout.put("distance", runToShare.getDistance());
@@ -251,7 +251,7 @@ public class SyncHelper {
             workout.put("description", runToShare.getDescription());
             workout.put("sharedId", me.getSharedRunsNum()+1);
 
-            Log.v("SHAREDID", (me.getSharedRunsNum() + 1) + "");
+            Log.v("SHAREDID", (me.getSharedRunsNum() + 1) + AppConstants.EMPTY);
 
                     StringEntity se = new StringEntity(workout.toString());
             setDefaultPostHeaders(httpPost);
@@ -391,7 +391,7 @@ public class SyncHelper {
             Log.v(TAG, "Fetching user "+friend);
             String query;
 
-            if (friend == null || friend.equals("")) {
+            if (friend == null || friend.equals(AppConstants.EMPTY)) {
                 return users;
             } else {
                     query = "{ 'username' : '"+friend+"'}";
@@ -465,11 +465,11 @@ public class SyncHelper {
 
     public User getMongoUserByUsernameForFriend(User user) {// 1 send request, 0 accept, 2 reject, else just get user
 
-        String myUsername = app_preferences.getString("username", "");
-            String currentRequests = user.getFriendRequests() != null ? user.getFriendRequests()+" " : "";
+        String myUsername = app_preferences.getString("username", AppConstants.EMPTY);
+            String currentRequests = user.getFriendRequests() != null ? user.getFriendRequests()+" " : AppConstants.EMPTY;
                 uploadNewFriendOrRequest(currentRequests  + myUsername, user.getUsername());
                 SharedPreferences.Editor editor = app_preferences.edit();
-                editor.putString("sentRequests",  app_preferences.getString("sentRequests","")+user.getUsername());
+                editor.putString("sentRequests",  app_preferences.getString("sentRequests",AppConstants.EMPTY)+user.getUsername());
                 editor.apply();
 
         Log.v(TAG, String.format("Fetching user - done"));
@@ -614,7 +614,7 @@ public class SyncHelper {
 
         Log.v(TAG, "Fetching user");
 
-        String myUsername = app_preferences.getString("username", "");
+        String myUsername = app_preferences.getString("username", AppConstants.EMPTY);
 
         User user = null;
 
@@ -678,23 +678,23 @@ public class SyncHelper {
             // refresh other users requests
            if (type==0|| type==2) {
                 //add friend to both users list
-                if ((type==0)&&((user.getFriends()==null || !user.getFriends().contains(myUsername) )&& !app_preferences.getString("friends", "").contains(user.getUsername()))){
+                if ((type==0)&&((user.getFriends()==null || !user.getFriends().contains(myUsername) )&& !app_preferences.getString("friends", AppConstants.EMPTY).contains(user.getUsername()))){
                     fixFriendsListForUser(user.getFriends() + " " + myUsername, user.getUsername(), type);
-                    fixFriendsListForUser(app_preferences.getString("friends", "") + " " + user.getUsername(), myUsername, type);
+                    fixFriendsListForUser(app_preferences.getString("friends", AppConstants.EMPTY) + " " + user.getUsername(), myUsername, type);
                     dbHelper.addUser(user);
                 }
 
                 //remove his name
-                String  newFriendRequests = app_preferences.getString("friendRequests","").replace(" " + user.getUsername() + " ", " ");
+                String  newFriendRequests = app_preferences.getString("friendRequests",AppConstants.EMPTY).replace(" " + user.getUsername() + " ", " ");
                 newFriendRequests = newFriendRequests.replace(user.getUsername() + " ", " ");
                 newFriendRequests = newFriendRequests.replace(" "+user.getUsername(), " ");
-                newFriendRequests = newFriendRequests.replace(user.getUsername(), "");
+                newFriendRequests = newFriendRequests.replace(user.getUsername(), AppConstants.EMPTY);
                fixFriendsListForUser(newFriendRequests, myUsername, 1);
 
                 SharedPreferences.Editor editor = app_preferences.edit();
                 editor.putString("friendRequests", newFriendRequests);
                 if (type==0) {
-                    editor.putString("friends", app_preferences.getString("friends", "") + " " + user.getUsername());
+                    editor.putString("friends", app_preferences.getString("friends", AppConstants.EMPTY) + " " + user.getUsername());
                 }
                 editor.apply();
 
@@ -899,7 +899,7 @@ public class SyncHelper {
 
         String query = "{$or:[";
 
-        Log.v("SIZE", size+"");
+        Log.v("SIZE", size+AppConstants.EMPTY);
         Log.v("SIZE", users.toString());
 
         for (int i=0; i<size-1; i++) {

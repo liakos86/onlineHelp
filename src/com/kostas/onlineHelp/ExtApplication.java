@@ -167,7 +167,7 @@ public class ExtApplication extends Application {
         } catch (NoSuchAlgorithmException e) {
             //Log.v("SERVICE",e.getMessage());
         }
-        return "";
+        return AppConstants.EMPTY;
     }
 
     private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {

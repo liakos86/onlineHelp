@@ -110,7 +110,7 @@ public class Utils {
     public synchronized static String convertNullToSpace(String is) {
 
         if (is == null)
-            is = "";
+            is = AppConstants.EMPTY;
 
         return is;
     }
@@ -213,7 +213,7 @@ public class Utils {
 
     public static String implodeConditionally(boolean discardEmptyEntries, String glue,
             String... strings) {
-        String toRet = "";
+        String toRet = AppConstants.EMPTY;
         // in case the last one is empty and we discard empty entries
         int actualLength = strings.length;
         if (discardEmptyEntries) {
@@ -246,7 +246,7 @@ public class Utils {
      */
     public static final String convertTimestampString(final String str,
             final SimpleDateFormat input, final SimpleDateFormat output) {
-        return convertTimestampString(str, input, output, "");
+        return convertTimestampString(str, input, output, AppConstants.EMPTY);
     }
 
     /**
@@ -292,7 +292,7 @@ public class Utils {
         public String selection;
 
         public DlgSelectionString() {
-            this("");
+            this(AppConstants.EMPTY);
         }
 
         public DlgSelectionString(String selection) {
@@ -571,7 +571,7 @@ public class Utils {
         HashMap<String, Long> toRet = new HashMap<String, Long>();
         if (cursor.moveToFirst()) {
             do {
-                if (!cursor.getString(0).equals("")) {
+                if (!cursor.getString(0).equals(AppConstants.EMPTY)) {
                     Log.v(TAG, String.format("putting [%s] = [%s]", cursor.getString(0),
                             cursor.getString(1)));
                     toRet.put(cursor.getString(0), cursor.getLong(1));
@@ -586,7 +586,7 @@ public class Utils {
     }
 
     public static boolean stringValidator(String s) {
-        if (null != s && !s.matches("") && !s.matches("null"))
+        if (null != s && !s.matches(AppConstants.EMPTY) && !s.matches("null"))
             return true;
         else
             return false;

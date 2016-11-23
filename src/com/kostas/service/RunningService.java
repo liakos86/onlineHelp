@@ -19,10 +19,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.kostas.dbObjects.Interval;
-import com.kostas.onlineHelp.ActIntervalNew;
-import com.kostas.onlineHelp.ExtApplication;
-import com.kostas.onlineHelp.ActMain;
-import com.kostas.onlineHelp.R;
+import com.kostas.onlineHelp.*;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -30,39 +27,6 @@ import java.util.List;
 
 public class RunningService extends IntentService
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
-
-    /**
-     * Strings for shared preferences use.
-     */
-    public static final String INTERVAL_IN_PROGRESS = "intervalInProgress";
-    public static final String NO_SOUND = "noSound";
-    public static final String NO_VIBRATION = "noVibration";
-    public static final String METRIC_MILES = "metricMiles";
-    public static final String INTERVAL_DISTANCE = "intervalDistance";
-    public static final String INTERVAL_TIME = "intervalTime";
-    public static final String INTERVAL_START_REST = "intervalStartRest";
-    public static final String INTERVAL_ROUNDS = "intervalRounds";
-    public static final String INTERVAL_COMPLETED = "intervalCompleted";
-    public static final String LATLONLIST = "latLonList";
-    public static final String COMPLETED_NUM = "completed_num";
-    public static final String TOTAL_DIST = "totalDist";
-    public static final String TOTAL_TIME = "totalTime";
-    public static final String MSTART_TIME = "mStartTime";
-    public static final String MSTART_COUNTDOWN_TIME = "mStartCountdownTime";
-    public static final String INTERVALS = "intervals";
-    public static final String IS_RUNNING = "is_running";
-    public static final String CONNECTION_FAILED = "connectionFailed";
-    public static final String FIRST_LOCATION = "firstLocation";
-
-    /**
-     * Tag to indicate that there is
-     */
-    public static final String HAS_RUN_METERS = "hasRunMeters";
-
-    /**
-     * Intent filter
-     */
-    public static final String NOTIFICATION = "com.kostas.onlineHelp";
 
     /**
      * The DURATION for updates and vibration
@@ -134,7 +98,7 @@ public class RunningService extends IntentService
         buildGoogleApiClient();
         ttsManager = application.getTtsManager();
 
-        isMetricMiles = app_preferences.getBoolean(METRIC_MILES, false);
+        isMetricMiles = app_preferences.getBoolean(AppConstants.METRIC_MILES, false);
 
     }
 
@@ -182,7 +146,7 @@ public class RunningService extends IntentService
 
         SharedPreferences.Editor editor = app_preferences.edit();
         if (startId == 1) {//first
-            editor.putBoolean(INTERVAL_IN_PROGRESS, false).apply();
+            editor.putBoolean(AppConstants.INTERVAL_IN_PROGRESS, false).apply();
             intervalInProgress = false;
             connectAndReceive();
             return;
@@ -195,21 +159,21 @@ public class RunningService extends IntentService
         fastest_position = 0;
         fastest_millis = Long.MAX_VALUE;
 
-        editor.putBoolean(INTERVAL_IN_PROGRESS, true).apply();
-        hasSound = !app_preferences.getBoolean(NO_SOUND, false);
-        hasVibration = !app_preferences.getBoolean(NO_VIBRATION, false);
+        editor.putBoolean(AppConstants.INTERVAL_IN_PROGRESS, true).apply();
+        hasSound = !app_preferences.getBoolean(AppConstants.NO_SOUND, false);
+        hasVibration = !app_preferences.getBoolean(AppConstants.NO_VIBRATION, false);
         createForegroundNotification();
-        intervalTime = intent.getLongExtra(INTERVAL_TIME, 0);
-        intervalStartRest = intent.getLongExtra(INTERVAL_START_REST, 0);
+        intervalTime = intent.getLongExtra(AppConstants.INTERVAL_TIME, 0);
+        intervalStartRest = intent.getLongExtra(AppConstants.INTERVAL_START_REST, 0);
         startCountDownForNextInterval(intervalStartRest);
         intervals = new ArrayList<Interval>();
-        intervalDistance = intent.getFloatExtra(INTERVAL_DISTANCE, 0);
+        intervalDistance = intent.getFloatExtra(AppConstants.INTERVAL_DISTANCE, 0);
 
         if (isMetricMiles){
             intervalDistance *= MILE_TO_METERS_CONST;//meters to miles
         }
 
-        intervalRounds = intent.getIntExtra(INTERVAL_ROUNDS, 0);
+        intervalRounds = intent.getIntExtra(AppConstants.INTERVAL_ROUNDS, 0);
         new PerformAsyncTask(0).execute();
     }
 
@@ -360,21 +324,21 @@ public class RunningService extends IntentService
         toSpeak += computeRemainingSpeakText();
         speak(toSpeak);
         SharedPreferences.Editor editor = app_preferences.edit();
-        editor.putBoolean(INTERVAL_COMPLETED, completed);
-        editor.putInt(COMPLETED_NUM, intervals.size());
-        editor.putBoolean(IS_RUNNING, false);
-        editor.putFloat(TOTAL_DIST, 0);
-        editor.putLong(TOTAL_TIME, 0);
+        editor.putBoolean(AppConstants.INTERVAL_COMPLETED, completed);
+        editor.putInt(AppConstants.COMPLETED_NUM, intervals.size());
+        editor.putBoolean(AppConstants.IS_RUNNING, false);
+        editor.putFloat(AppConstants.TOTAL_DIST, 0);
+        editor.putLong(AppConstants.TOTAL_TIME, 0);
         Type listOfIntervals = new TypeToken<List<Interval>>() {
         }.getType();
         String json = (new Gson()).toJson(intervals, listOfIntervals);
-        editor.putString(INTERVALS, json);
-        if (!app_preferences.getBoolean(HAS_RUN_METERS, false)){
-            editor.putBoolean(HAS_RUN_METERS, true);
+        editor.putString(AppConstants.INTERVALS, json);
+        if (!app_preferences.getBoolean(AppConstants.HAS_RUN_METERS, false)){
+            editor.putBoolean(AppConstants.HAS_RUN_METERS, true);
         }
         editor.apply();
-        Intent intent = new Intent(NOTIFICATION);
-        intent.putExtra(INTERVAL_COMPLETED, completed);
+        Intent intent = new Intent(AppConstants.NOTIFICATION);
+        intent.putExtra(AppConstants.INTERVAL_COMPLETED, completed);
         sendBroadcast(intent);
         totalTime = 0;
     }
@@ -416,10 +380,10 @@ public class RunningService extends IntentService
         Type locType = new TypeToken<Location>() {
         }.getType();
         String json = (new Gson()).toJson(loc, locType);
-        editor.putString(FIRST_LOCATION, json);
+        editor.putString(AppConstants.FIRST_LOCATION, json);
         editor.apply();
-        Intent intent = new Intent(NOTIFICATION);
-        intent.putExtra(FIRST_LOCATION, "loc");
+        Intent intent = new Intent(AppConstants.NOTIFICATION);
+        intent.putExtra(AppConstants.FIRST_LOCATION, "loc");
         sendBroadcast(intent);
     }
 
@@ -435,7 +399,7 @@ public class RunningService extends IntentService
     private void startCountDownForNextInterval(long millis) {
         mHandler.postDelayed(mStartRunnable, millis);
         SharedPreferences.Editor editor = app_preferences.edit();
-        editor.putLong(MSTART_COUNTDOWN_TIME, SystemClock.uptimeMillis());
+        editor.putLong(AppConstants.MSTART_COUNTDOWN_TIME, SystemClock.uptimeMillis());
         editor.apply();
     }
 
@@ -477,8 +441,8 @@ public class RunningService extends IntentService
             startReceiving();
             intervalInProgress = true;
             SharedPreferences.Editor editor = app_preferences.edit();
-            editor.putBoolean(IS_RUNNING, true);
-            editor.putLong(MSTART_TIME, mStartTime);
+            editor.putBoolean(AppConstants.IS_RUNNING, true);
+            editor.putLong(AppConstants.MSTART_TIME, mStartTime);
             editor.apply();
         }
     };
@@ -508,8 +472,8 @@ public class RunningService extends IntentService
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Intent intent = new Intent(NOTIFICATION);
-        intent.putExtra(CONNECTION_FAILED, true);
+        Intent intent = new Intent(AppConstants.NOTIFICATION);
+        intent.putExtra(AppConstants.CONNECTION_FAILED, true);
         sendBroadcast(intent);
     }
 
@@ -527,21 +491,21 @@ public class RunningService extends IntentService
         protected Void doInBackground(Void... unused) {
             SharedPreferences.Editor editor = app_preferences.edit();
             if (type == 0) {
-                editor.putFloat(INTERVAL_DISTANCE, intervalDistance);
-                editor.putLong(INTERVAL_START_REST, intervalStartRest);
-                editor.putLong(INTERVAL_TIME, intervalTime);
-                editor.putInt(INTERVAL_ROUNDS, intervalRounds);
+                editor.putFloat(AppConstants.INTERVAL_DISTANCE, intervalDistance);
+                editor.putLong(AppConstants.INTERVAL_START_REST, intervalStartRest);
+                editor.putLong(AppConstants.INTERVAL_TIME, intervalTime);
+                editor.putInt(AppConstants.INTERVAL_ROUNDS, intervalRounds);
             } else if (type == 2) {
                // if (((PowerManager) getSystemService(Context.POWER_SERVICE)).isScreenOn()) {
-                    Intent intent = new Intent(NOTIFICATION);
-                    intent.putExtra(INTERVAL_DISTANCE, currentDistance);
+                    Intent intent = new Intent(AppConstants.NOTIFICATION);
+                    intent.putExtra(AppConstants.INTERVAL_DISTANCE, currentDistance);
 
-                    intent.putExtra(INTERVAL_TIME, totalTime);
+                    intent.putExtra(AppConstants.INTERVAL_TIME, totalTime);
                     sendBroadcast(intent);
                // }
 
-                if (!app_preferences.getBoolean(HAS_RUN_METERS, false)){
-                    editor.putBoolean(HAS_RUN_METERS, true);
+                if (!app_preferences.getBoolean(AppConstants.HAS_RUN_METERS, false)){
+                    editor.putBoolean(AppConstants.HAS_RUN_METERS, true);
                 }
 
                 Type listOfLocations = new TypeToken<List<Location>>() {
@@ -549,9 +513,9 @@ public class RunningService extends IntentService
 
                 List <Location> locationListSafeCopy = new ArrayList<Location>(locationList);
                 String json = (new Gson()).toJson(locationListSafeCopy, listOfLocations);
-                editor.putString(LATLONLIST, json);
-                editor.putFloat(TOTAL_DIST, currentDistance);
-                editor.putLong(TOTAL_TIME, totalTime);
+                editor.putString(AppConstants.LATLONLIST, json);
+                editor.putFloat(AppConstants.TOTAL_DIST, currentDistance);
+                editor.putLong(AppConstants.TOTAL_TIME, totalTime);
             }
             editor.apply();
             return null;

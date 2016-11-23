@@ -1,43 +1,23 @@
 package com.kostas.onlineHelp;
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.SystemClock;
-import android.provider.ContactsContract;
-import android.provider.Settings;
 import android.view.View;
 import android.widget.*;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.*;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.kostas.custom.MapWrapperLayout;
 import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Running;
-import com.kostas.dbObjects.User;
 import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 import com.kostas.mongo.SyncHelper;
 
-import java.lang.reflect.Type;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
-import static com.kostas.service.RunningService.*;
-import static com.kostas.service.RunningService.INTERVAL_DISTANCE;
 
 /**
  * Created by liakos on 25/7/2016.
@@ -77,17 +57,11 @@ public class ActViewIntervals extends BaseFrgActivityWithBottomButtons implement
      * If the map is drawn we dont need to redraw
      */
     boolean alreadyDrawn, isMyRun;
-
-   
     ArrayList<Marker> markers = new ArrayList<Marker>();
     ListView intervalListView;
     IntervalAdapterItem adapterInterval;
-
     SyncHelper sh;
-
-
     Running run;
-    
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -100,30 +74,16 @@ public class ActViewIntervals extends BaseFrgActivityWithBottomButtons implement
 
         if (isMyRun){
             run = Running.getFromId(getApplication(), runId, ContentDescriptor.Running.CONTENT_URI);
-
             intervals = db.fetchIntervalsForRun(runId, ContentDescriptor.Interval.CONTENT_URI);
             run.setIntervals(intervals);
-
         }else{
             run = Running.getFromId(getApplication(), runId, ContentDescriptor.RunningFriend.CONTENT_URI);
             intervals = db.fetchIntervalsForRun(runId, ContentDescriptor.IntervalFriend.CONTENT_URI);
             run.setIntervals(intervals);
         }
-
-
-        
         initializeViews();
-
         initializeMap();
-
-
-
-
-
-
         intervalListView.setDivider(null);
-
-
     }
 
     @Override
@@ -318,39 +278,24 @@ public class ActViewIntervals extends BaseFrgActivityWithBottomButtons implement
 
         @Override
         protected Integer doInBackground(Void... unused) {
-
             return  sh.shareRunToMongo(run);
-
-
-
-
         }
 
         @Override
         protected void onPostExecute(Integer result) {
-
-
-
 //            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 //            imm.hideSoftInputFromWindow(getWindow().getWindowToken(), 0);
 
             if (result==0) {
                 Toast.makeText(app, "Share failed", Toast.LENGTH_LONG).show();
                 shareFriendsButton.setClickable(true);
-
             }else if (result==1){
                 Toast.makeText(app, "Run shared", Toast.LENGTH_LONG).show();
                 Database db = new Database(app);
                 db.setSharedFlagTrue(run.getRunning_id());
-
                 shareFriendsButton.setText("Run already shared");
-
             }
-
         }
-
-
     }
-
 
 }

@@ -154,7 +154,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
         runs = ((ExtApplication)getActivity().getApplication()).getRuns();
         computeParentAndChildRuns();
         SharedPreferences preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
-        isMetricMiles = preferences.getBoolean(RunningService.METRIC_MILES, false);
+        isMetricMiles = preferences.getBoolean(AppConstants.METRIC_MILES, false);
         computeInfoTexts();
         createExpandableList();
         setButtonListeners();
@@ -633,7 +633,7 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
 
     public void refreshPaceTextsIfNeeded(){
         SharedPreferences preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
-        boolean newIsMetricMiles = preferences.getBoolean(RunningService.METRIC_MILES, false);
+        boolean newIsMetricMiles = preferences.getBoolean(AppConstants.METRIC_MILES, false);
         if (newIsMetricMiles != isMetricMiles){
             isMetricMiles = newIsMetricMiles;
             createExpandableList();

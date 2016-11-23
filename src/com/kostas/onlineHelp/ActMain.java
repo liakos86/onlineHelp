@@ -1,21 +1,16 @@
 package com.kostas.onlineHelp;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 import com.kostas.custom.NonSwipeableViewPager;
 import com.kostas.fragments.FrgPlans;
-import com.kostas.dbObjects.User;
 import com.kostas.fragments.FrgShowRuns;
-import com.kostas.mongo.SyncHelper;
 import com.kostas.service.RunningService;
 
 import java.io.ByteArrayOutputStream;
@@ -102,7 +97,7 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
                 final Fragment fragmentByTag = fragmentManager.findFragmentByTag(name);
                 if (fragmentByTag == null) {
                     final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    fragmentManager.dump("", null, new PrintWriter(outputStream, true), null);
+                    fragmentManager.dump(AppConstants.EMPTY, null, new PrintWriter(outputStream, true), null);
                 }
                 return fragmentByTag;
             }
@@ -194,7 +189,7 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
 //        SharedPreferences.Editor editor = app_preferences.edit();
 //        editor.remove("mongoId").apply();
 
-        if ((isMyServiceRunning() && (app_preferences.getBoolean(RunningService.INTERVAL_IN_PROGRESS, false)))||(((ExtApplication) getApplication()).isInRunningAct())) {//service is on
+        if ((isMyServiceRunning() && (app_preferences.getBoolean(AppConstants.INTERVAL_IN_PROGRESS, false)))||(((ExtApplication) getApplication()).isInRunningAct())) {//service is on
             startIntervalAct();
         }else  if (((ExtApplication) getApplication()).isInResultsAct()) {
             startResultsAct();

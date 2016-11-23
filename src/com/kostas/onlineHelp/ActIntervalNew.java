@@ -105,7 +105,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         if (!isMyServiceRunning()) {
             resetAppPrefs();
             startRunningService(false);
-            registerReceiver(receiver, new IntentFilter(NOTIFICATION));
+            registerReceiver(receiver, new IntentFilter(AppConstants.NOTIFICATION));
         }
     }
 
@@ -126,21 +126,21 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
 
                 Bundle bundle = intent.getExtras();
                 if (bundle != null) {
-                    if (bundle.get(FIRST_LOCATION) !=null ){
+                    if (bundle.get(AppConstants.FIRST_LOCATION) !=null ){
                         Gson gson = new Gson();
                         Type locType = new TypeToken<Location>() {}.getType();
-                        String locGson = app_preferences.getString(FIRST_LOCATION, "");
+                        String locGson = app_preferences.getString(AppConstants.FIRST_LOCATION, AppConstants.EMPTY);
                         Location loc =  gson.fromJson(locGson, locType);
                         setAddressText(loc);
                     }
-                    else if (bundle.getBoolean(CONNECTION_FAILED)) {
+                    else if (bundle.getBoolean(AppConstants.CONNECTION_FAILED)) {
                         Toast.makeText(getApplication(), "Google services api is not correctly configured!", Toast.LENGTH_LONG).show();
                         stopRunningService();
 
                         clearAndReturnToMain();
                     }
-                    else if (bundle.getFloat(INTERVAL_DISTANCE) != 0) {
-                        coveredDist = bundle.getFloat(INTERVAL_DISTANCE);
+                    else if (bundle.getFloat(AppConstants.INTERVAL_DISTANCE) != 0) {
+                        coveredDist = bundle.getFloat(AppConstants.INTERVAL_DISTANCE);
 
                         if (isMiles){
                             coveredDist /= RunningService.MILE_TO_METERS_CONST;
@@ -148,7 +148,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
 
                         setDistanceProgress(coveredDist);
                     } else {//todo add another message to identify ending
-                        prepareForNextInterval(bundle.getBoolean(INTERVAL_COMPLETED, false));
+                        prepareForNextInterval(bundle.getBoolean(AppConstants.INTERVAL_COMPLETED, false));
                     }
                 }
             }
@@ -207,7 +207,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         progressWheel = (ProgressWheel) findViewById(R.id.timerProgressWheel);
 
 
-        isMiles = app_preferences.getBoolean(METRIC_MILES, false);
+        isMiles = app_preferences.getBoolean(AppConstants.METRIC_MILES, false);
         String distString = isMiles ? getResources().getString(R.string.distance_miles): getResources().getString(R.string.distance_meters);
         intervalDistancePicker.setDescriptionText(distString+" to run");
 
@@ -265,7 +265,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
             progressWheel.setVisibility(View.VISIBLE);
             progressWheel.setText((int) ((millisecondsToCount - (SystemClock.uptimeMillis() - startOfCountdown)) / 1000) + " secs");
 
-            if ((isMyServiceRunning()) && !(app_preferences.getBoolean(INTERVAL_IN_PROGRESS, false))) {
+            if ((isMyServiceRunning()) && !(app_preferences.getBoolean(AppConstants.INTERVAL_IN_PROGRESS, false))) {
                 startRunningService(true);
             }
 
@@ -371,15 +371,15 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
      */
     public void resetAppPrefs() {
         SharedPreferences.Editor editor = app_preferences.edit();
-        boolean hasNoSound = app_preferences.getBoolean(NO_SOUND, false);
-        boolean hasNoVibration = app_preferences.getBoolean(NO_VIBRATION, false);
-        boolean metricMiles = app_preferences.getBoolean(METRIC_MILES, false);
+        boolean hasNoSound = app_preferences.getBoolean(AppConstants.NO_SOUND, false);
+        boolean hasNoVibration = app_preferences.getBoolean(AppConstants.NO_VIBRATION, false);
+        boolean metricMiles = app_preferences.getBoolean(AppConstants.METRIC_MILES, false);
         String mongoId  = app_preferences.getString("mongoId", null);
         String username  = app_preferences.getString("username", null);
         editor.clear().apply();
-        editor.putBoolean(NO_SOUND, hasNoSound);
-        editor.putBoolean(NO_VIBRATION, hasNoVibration);
-        editor.putBoolean(METRIC_MILES, metricMiles);
+        editor.putBoolean(AppConstants.NO_SOUND, hasNoSound);
+        editor.putBoolean(AppConstants.NO_VIBRATION, hasNoVibration);
+        editor.putBoolean(AppConstants.METRIC_MILES, metricMiles);
         editor.putString("mongoId", mongoId);
         editor.putString("username", username);
         editor.apply();
@@ -409,14 +409,14 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         sound.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                app_preferences.edit().putBoolean(NO_SOUND, !sound.isChecked()).apply();
+                app_preferences.edit().putBoolean(AppConstants.NO_SOUND, !sound.isChecked()).apply();
             }
         });
 
         vibration.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                app_preferences.edit().putBoolean(NO_VIBRATION, !vibration.isChecked()).apply();
+                app_preferences.edit().putBoolean(AppConstants.NO_VIBRATION, !vibration.isChecked()).apply();
             }
         });
 
@@ -488,11 +488,11 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
 
     private void setRoundsText(int rounds) {
 
-        int size = app_preferences.getInt(COMPLETED_NUM, 0);
+        int size = app_preferences.getInt(AppConstants.COMPLETED_NUM, 0);
         if (rounds > 0) {
             roundsText.setText(size + " / " + rounds);
         } else {
-            roundsText.setText(""+size);
+            roundsText.setText(AppConstants.EMPTY+size);
         }
     }
 
@@ -564,7 +564,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         }
 
         coveredDist = 0;
-        if (app_preferences.getBoolean(HAS_RUN_METERS, false) ){
+        if (app_preferences.getBoolean(AppConstants.HAS_RUN_METERS, false) ){
             ((ExtApplication) getApplication()).setInRunningMode(false);
             ((ExtApplication) getApplication()).setInRunningAct(false);
             Intent intentForResultAct = new Intent(this, ActIntervalResults.class);
@@ -607,10 +607,10 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
         setBroadcastReceiver();
         Intent intent = new Intent(getBaseContext(), RunningService.class);
         if (forInterval) {
-            intent.putExtra(INTERVAL_DISTANCE, intervalDistance);
-            intent.putExtra(INTERVAL_TIME, intervalTime);
-            intent.putExtra(INTERVAL_START_REST, intervalStartRest);
-            intent.putExtra(INTERVAL_ROUNDS, (int)intervalRoundsPicker.getValue());
+            intent.putExtra(AppConstants.INTERVAL_DISTANCE, intervalDistance);
+            intent.putExtra(AppConstants.INTERVAL_TIME, intervalTime);
+            intent.putExtra(AppConstants.INTERVAL_START_REST, intervalStartRest);
+            intent.putExtra(AppConstants.INTERVAL_ROUNDS, (int)intervalRoundsPicker.getValue());
         }
         startService(intent);
     }
@@ -728,7 +728,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
     private class LoadAsync extends AsyncTask<Void, Void, Void> {
 
         Location loc;
-        String addressText = "";
+        String addressText = AppConstants.EMPTY;
 
         LoadAsync(){};
 
@@ -791,24 +791,24 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
     public void onResume() {
         super.onResume();
         ( findViewById(R.id.buttonStart)).setClickable(true);
-        if (isMyServiceRunning() && (app_preferences.getBoolean(INTERVAL_IN_PROGRESS, false))) {//service is on and i am running
+        if (isMyServiceRunning() && (app_preferences.getBoolean(AppConstants.INTERVAL_IN_PROGRESS, false))) {//service is on and i am running
             setBroadcastReceiver();
-            intervalDistance = app_preferences.getFloat(INTERVAL_DISTANCE, 0);
-            intervalTime = app_preferences.getLong(INTERVAL_TIME, 0);
-            intervalStartRest = app_preferences.getLong(INTERVAL_START_REST, 0);
-            startTimeMillis = app_preferences.getLong(MSTART_TIME, SystemClock.uptimeMillis());
+            intervalDistance = app_preferences.getFloat(AppConstants.INTERVAL_DISTANCE, 0);
+            intervalTime = app_preferences.getLong(AppConstants.INTERVAL_TIME, 0);
+            intervalStartRest = app_preferences.getLong(AppConstants.INTERVAL_START_REST, 0);
+            startTimeMillis = app_preferences.getLong(AppConstants.MSTART_TIME, SystemClock.uptimeMillis());
             //mHandler.post(mUpdateTimeTask);
-            coveredDist = app_preferences.getFloat(TOTAL_DIST, 0);
+            coveredDist = app_preferences.getFloat(AppConstants.TOTAL_DIST, 0);
             if (isMiles){
                 coveredDist /= RunningService.MILE_TO_METERS_CONST;
                 intervalDistance /= MILE_TO_METERS_CONST;//meters to miles
             }
-            setRoundsText(app_preferences.getInt(INTERVAL_ROUNDS, 0));
-            registerReceiver(receiver, new IntentFilter(NOTIFICATION));
-            getInRunningMode(app_preferences.getBoolean(IS_RUNNING, false),
-                    app_preferences.getBoolean(INTERVAL_COMPLETED, false),
-                    app_preferences.getInt(INTERVAL_ROUNDS, 0) == 0,
-                    app_preferences.getLong(MSTART_COUNTDOWN_TIME, SystemClock.uptimeMillis()),
+            setRoundsText(app_preferences.getInt(AppConstants.INTERVAL_ROUNDS, 0));
+            registerReceiver(receiver, new IntentFilter(AppConstants.NOTIFICATION));
+            getInRunningMode(app_preferences.getBoolean(AppConstants.IS_RUNNING, false),
+                    app_preferences.getBoolean(AppConstants.INTERVAL_COMPLETED, false),
+                    app_preferences.getInt(AppConstants.INTERVAL_ROUNDS, 0) == 0,
+                    app_preferences.getLong(AppConstants.MSTART_COUNTDOWN_TIME, SystemClock.uptimeMillis()),
                     coveredDist);
         }
     }
