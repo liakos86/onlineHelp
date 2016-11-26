@@ -14,11 +14,7 @@ import com.kostas.onlineHelp.ActMain;
 import com.kostas.onlineHelp.AppConstants;
 import com.kostas.onlineHelp.ExtApplication;
 import com.kostas.onlineHelp.R;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.*;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -29,10 +25,13 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 //todo sendme
@@ -41,9 +40,7 @@ public class SyncHelper {
     private static final String TAG = Thread.currentThread().getStackTrace()[2].getClassName()
             .substring(0, 23);
     private ExtApplication application;
-    Database dbHelper;
-    String running_collection, interval_collection, runner_collection, authUrl, apiKey ;
-    DefaultHttpClient client;
+    String running_collection, interval_collection, runner_collection, authUrl, apiKey;
     private SharedPreferences app_preferences;
 
     public SyncHelper(ExtApplication application) {
@@ -54,79 +51,94 @@ public class SyncHelper {
         apiKey = application.getResources().getString(R.string.apiKey);
         runner_collection = application.getResources().getString(R.string.runner_collection_mongo_path);
         app_preferences = application.getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
-        dbHelper = new Database(application);
-        client = application.getHttpClient();
     }
 
-    public int insertMongoUser(String email, String username, String password){
+    private String getResultStringFromResponse(HttpResponse response) throws IOException{
+        HttpEntity entity = response.getEntity();
+        String resultString = null;
+        if (entity != null) {
+            InputStream instream = entity.getContent();
+            Header contentEncoding = response.getFirstHeader("Content-Encoding");
+            if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+                instream = new GZIPInputStream(instream);
+            }
+            resultString = Utils.convertStreamToString(instream);
+            instream.close();
+        }
+        Log.v(TAG, String.format("Deserialising [%s]", resultString));
+        return resultString;
+    }
+
+    private void setMyUser(User user2){
+        user2.setMongoId(user2.get_id().get$oid());//it comes with object, I unpack to store in db
+        application.setMe(user2);
+        SharedPreferences.Editor editor = app_preferences.edit();
+        editor.putString("mongoId", user2.get_id().get$oid());
+        editor.putString("username", user2.getUsername());
+        editor.putLong("totalTime", user2.getTotalTime());
+        editor.putFloat("totalDistance", user2.getTotalDistance());
+        editor.putString("friends", user2.getFriends());
+        editor.putString("friendRequests", user2.getFriendRequests());
+        editor.apply();
+    }
+
+    private <T> List<T> unmarshallingFromResultString(String result, boolean isList, T input){
+        Gson gson = new Gson();
+        return  gson.fromJson(result,
+                new TypeToken<List<T>>() {
+                }.getType());
+    }
+
+    private String getStringUri(String collectionPath, Map<String, String> queryParams){
+        Uri.Builder uriBuilder = new Uri.Builder()
+                .scheme("https")
+                .authority(authUrl)
+                .path(collectionPath)
+                .appendQueryParameter("apiKey", apiKey);
+        for (Map.Entry<String, String> entry : queryParams.entrySet()){
+            uriBuilder.appendQueryParameter(entry.getKey(), entry.getValue());
+        }
+       return uriBuilder.build().toString();
+    }
+
+    public int insertMongoUser(String email, String username, String password) {
         Log.v(TAG, "Inserting user");
         int returnCode = -2;//server error default ?
-        Uri uri = new Uri.Builder()
-                    .scheme("https")
-                    .authority(authUrl)
-                    .path(runner_collection)
-                    .appendQueryParameter("apiKey", apiKey)
-                    .build();
+
+        String uriString  = getStringUri(runner_collection, new HashMap<String, String>());
 
         DefaultHttpClient client = application.getHttpClient();
         client.setParams(getMyParams());
 
-        try{
-            HttpResponse response;
-                JSONObject runner = new JSONObject();
-                runner.put("username", username);
-                runner.put("password", password);
-                runner.put("email", email);
-                StringEntity se = new StringEntity( runner.toString());
+        try {
 
-                HttpPost httpPost = new HttpPost(uri.toString());
-                setDefaultPostHeaders(httpPost);
-                httpPost.setEntity(se);
-                Log.v(TAG, "inserting new user");
-                response = client.execute(httpPost);
+            JSONObject runner = new JSONObject();
+            runner.put("username", username);
+            runner.put("password", password);
+            runner.put("email", email);
+            StringEntity se = new StringEntity(runner.toString());
 
-            Log.v(TAG, "user acquisition- response received");
-            HttpEntity entity = response.getEntity();
-            StatusLine statusLine = response.getStatusLine();
+            HttpPost httpPost = new HttpPost(uriString);
+            httpPost.setEntity(se);
+            setDefaultHttpHeaders(httpPost);
+            HttpResponse response = client.execute(httpPost);
 
-            if (statusLine.getStatusCode() >= 300) {
-                Log.e(TAG,statusLine.getStatusCode()+" - "+statusLine.getReasonPhrase());
-            }
-
-            String resultString = null;
-            if (entity != null) {
-                InputStream instream = entity.getContent();
-                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-                    instream = new GZIPInputStream(instream);
-                }
-                resultString = Utils.convertStreamToString(instream);
-                instream.close();
-            }
-            Log.v(TAG, String.format("Deserialising [%s]", resultString));
+            String resultString = getResultStringFromResponse(response);
 
             Gson gson = new Gson();
             User user2 = (User) gson.fromJson(resultString,
                     new TypeToken<User>() {
                     }.getType());
 
-            if (user2==null){
+            if (user2 == null) {
                 return 0; //no user found
             }
 
-            user2.setMongoId(user2.get_id().get$oid());//it comes with object, I unpack to store in db
-            application.setMe(user2);
+            setMyUser(user2);
 
-            SharedPreferences.Editor editor = app_preferences.edit();
-            editor.putString("mongoId", user2.get_id().get$oid());
-            editor.putString("username", user2.getUsername());
-            editor.putLong("totalTime", user2.getTotalTime());
-            editor.putFloat("totalDistance", user2.getTotalDistance());
-            editor.putString("friends", user2.getFriends());
-            editor.putString("friendRequests", user2.getFriendRequests());
-            editor.apply();
+
             returnCode = 3;
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.e(TAG, "Exception inserting user", e);
             return -2;
         }
@@ -138,79 +150,42 @@ public class SyncHelper {
     public int getMongoUser(String email, String username, String password) {
         Log.v(TAG, "Fetching user");
         int returnCode = -2;//server error default ?
-        Uri uri=null;
+        String uri = null;
 
-         if (username.length()>0 || email.length()>0){//try get existing user by email or username
+        if (username.length() > 0 || email.length() > 0) {//try get existing user by email or username
 
-            String query = "{ 'email':'"+email+"' , 'password' :'"+password+"' }";
-            if (username.length()>0){
-               query =  "{ 'username':'"+username+"' , 'password' :'"+password+"' }";
+            String query = "{ 'email':'" + email + "' , 'password' :'" + password + "' }";
+            if (username.length() > 0) {
+                query = "{ 'username':'" + username + "' , 'password' :'" + password + "' }";
             }
 
-             uri = new Uri.Builder()
-                    .scheme("https")
-                    .authority(authUrl)
-                    .path(runner_collection)
-                    .appendQueryParameter("q", query)
-                    .appendQueryParameter("apiKey", apiKey)
-                     .appendQueryParameter("fo", "true")
-                    .build();
+            Map<String, String> queryParams = new HashMap<String, String>();
+            queryParams.put("q", query);
+            queryParams.put("fo", "true");
+
+            uri = getStringUri(runner_collection, queryParams);
         }
 
-            DefaultHttpClient client = application.getHttpClient();
-            client.setParams(getMyParams());
+        DefaultHttpClient client = application.getHttpClient();
+        client.setParams(getMyParams());
 
         try {
+            HttpGet httpRequest = new HttpGet(uri);
+            setDefaultHttpHeaders(httpRequest);
+            HttpResponse response = client.execute(httpRequest);
 
-            HttpResponse response;
-
-                HttpGet httpRequest = new HttpGet(uri.toString());
-                setDefaultGetHeaders(httpRequest);
-                Log.v(TAG, "fetching existing user");
-                response = client.execute(httpRequest);
-            Log.v(TAG, "user acquisition- response received");
-
-            HttpEntity entity = response.getEntity();
-            StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() >= 300) {
-                Log.e(TAG,statusLine.getStatusCode()+" - "+statusLine.getReasonPhrase());
-            }
-
-            String resultString = null;
-
-            if (entity != null) {
-                InputStream instream = entity.getContent();
-                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-                    instream = new GZIPInputStream(instream);
-                }
-                resultString = Utils.convertStreamToString(instream);
-                instream.close();
-            }
-            Log.v(TAG, String.format("Deserialising [%s]", resultString));
+            String resultString = getResultStringFromResponse(response);
 
             Gson gson = new Gson();
             User user2 = (User) gson.fromJson(resultString,
                     new TypeToken<User>() {
                     }.getType());
 
-            if (user2==null){
+            if (user2 == null) {
                 return -1; //no user found
             }
-
-                user2.setMongoId(user2.get_id().get$oid());//it comes with object, I unpack to store in db
-                application.setMe(user2);
-
-               SharedPreferences.Editor editor = app_preferences.edit();
-               editor.putString("mongoId", user2.get_id().get$oid());
-                editor.putString("username", user2.getUsername());
-                editor.putLong("totalTime", user2.getTotalTime());
-                editor.putFloat("totalDistance", user2.getTotalDistance());
-                editor.putString("friends", user2.getFriends());
-                editor.putString("friendRequests", user2.getFriendRequests());
-                editor.apply();
-               returnCode = 2;
-
+            setMyUser(user2);
+            returnCode = 2;
         } catch (Exception e) {
             Log.e(TAG, "Exception fetching user", e);
             return -2;
@@ -226,22 +201,14 @@ public class SyncHelper {
 
         Log.v(TAG, "sharing run");
 
-        Uri uri = new Uri.Builder()
-                .scheme("https")
-                .authority(authUrl)
-                .path(running_collection)
-                .appendQueryParameter("apiKey", apiKey)
-                .build();
+        String uri = getStringUri(running_collection, new HashMap<String, String>());
 
 //        HashMap  params = new HashMap();
         DefaultHttpClient client = application.getHttpClient();
         client.setParams(getMyParams());
-        HttpPost httpPost = new HttpPost(uri.toString());
 
         try {
-
-            User me  = application.getMe();
-
+            User me = application.getMe();
             JSONObject workout = new JSONObject();
             workout.put("username", app_preferences.getString("username", AppConstants.EMPTY));
             workout.put("time", runToShare.getTime());
@@ -249,46 +216,23 @@ public class SyncHelper {
             workout.put("distance", runToShare.getDistance());
             workout.put("avgPaceText", runToShare.getAvgPaceText());
             workout.put("description", runToShare.getDescription());
-            workout.put("sharedId", me.getSharedRunsNum()+1);
-
+            workout.put("sharedId", me.getSharedRunsNum() + 1);
             Log.v("SHAREDID", (me.getSharedRunsNum() + 1) + AppConstants.EMPTY);
+            StringEntity se = new StringEntity(workout.toString());
 
-                    StringEntity se = new StringEntity(workout.toString());
-            setDefaultPostHeaders(httpPost);
+            HttpPost httpPost = new HttpPost(uri);
+            setDefaultHttpHeaders(httpPost);
             httpPost.setEntity(se);
-            Log.v(TAG, "uploading run - requesting");
             HttpResponse response = client.execute(httpPost);
-            Log.v(TAG, "uploading run - response received");
-            HttpEntity entity = response.getEntity();
-            StatusLine statusLine = response.getStatusLine();
-            Log.v(TAG, String.format(" status [%s]", statusLine));
-            if (statusLine.getStatusCode() >= 300) {
-                Log.e(TAG,statusLine.getStatusCode()+" - "+statusLine.getReasonPhrase());
-            }
 
-            String resultString = null;
-
-            if (entity != null) {
-                InputStream instream = entity.getContent();
-                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-                    instream = new GZIPInputStream(instream);
-                }
-                resultString = Utils.convertStreamToString(instream);
-
-                instream.close();
-            }
-
+            String resultString = getResultStringFromResponse(response);
             Gson gson = new Gson();
-
 
             Running run = (Running) gson.fromJson(resultString,
                     new TypeToken<Running>() {
                     }.getType());
 
-
-
-            if (run == null || run.get_id() == null){
+            if (run == null || run.get_id() == null) {
                 return 0;
             }
 
@@ -297,10 +241,10 @@ public class SyncHelper {
 
             updateMySharedRunsNum();
 
-            for (Interval interval : runToShare.getIntervals()){
+            for (Interval interval : runToShare.getIntervals()) {
                 interval.setRunning_mongo_id(run.get_id().get$oid());
                 int code = shareIntervalForRunMongo(interval);
-                if (code == 0){
+                if (code == 0) {
                     return 0;
                 }
             }
@@ -315,24 +259,11 @@ public class SyncHelper {
     }
 
     public int shareIntervalForRunMongo(Interval intervalToShare) {
-
-        Log.v(TAG, "sharing interval");
-
-        Uri uri = new Uri.Builder()
-                .scheme("https")
-                .authority(authUrl)
-                .path(interval_collection)
-                .appendQueryParameter("apiKey", apiKey)
-                .build();
-
-//        HashMap  params = new HashMap();
+        String uri = getStringUri(interval_collection, new HashMap<String, String>());
         DefaultHttpClient client = application.getHttpClient();
         client.setParams(getMyParams());
-        HttpPost httpPost = new HttpPost(uri.toString());
-
 
         try {
-
             JSONObject intervalSession = new JSONObject();
             intervalSession.put("paceText", intervalToShare.getPaceText());
             intervalSession.put("milliseconds", intervalToShare.getMilliseconds());
@@ -340,40 +271,20 @@ public class SyncHelper {
             intervalSession.put("distance", intervalToShare.getDistance());
             intervalSession.put("latLonList", intervalToShare.getLatLonList());
             intervalSession.put("running_mongo_id", intervalToShare.getRunning_mongo_id());
+            StringEntity se = new StringEntity(intervalSession.toString());
 
-            StringEntity se = new StringEntity( intervalSession.toString());
-            setDefaultPostHeaders(httpPost);
+            HttpPost httpPost = new HttpPost(uri);
+            setDefaultHttpHeaders(httpPost);
             httpPost.setEntity(se);
-            Log.v(TAG, "uploading run - requesting");
             HttpResponse response = client.execute(httpPost);
-            Log.v(TAG, "uploading run - response received");
-            HttpEntity entity = response.getEntity();
-            StatusLine statusLine = response.getStatusLine();
-            Log.v(TAG, String.format(" status [%s]", statusLine));
-            if (statusLine.getStatusCode() >= 300) {
-                Log.e(TAG,statusLine.getStatusCode()+" - "+statusLine.getReasonPhrase());
-            }
-
-            String resultString = null;
-
-            if (entity != null) {
-                InputStream instream = entity.getContent();
-                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-                    instream = new GZIPInputStream(instream);
-                }
-                resultString = Utils.convertStreamToString(instream);
-
-                instream.close();
-            }
-
+            String resultString = getResultStringFromResponse(response);
             Gson gson = new Gson();
 
-            Interval intervalSaved = (Interval) gson.fromJson(resultString,
+            Interval intervalSaved = gson.fromJson(resultString,
                     new TypeToken<Interval>() {
                     }.getType());
 
-            if (intervalSaved == null ){
+            if (intervalSaved == null) {
                 return 0;
             }
 
@@ -386,594 +297,279 @@ public class SyncHelper {
         return 1;
     }
 
-    public List<User> sentFriendRequest(String friend){
+    public List<User> sentFriendRequest(String friend) {
+
         List<User> users = new ArrayList<User>();
-            Log.v(TAG, "Fetching user "+friend);
-            String query;
-
-            if (friend == null || friend.equals(AppConstants.EMPTY)) {
-                return users;
-            } else {
-                    query = "{ 'username' : '"+friend+"'}";
-            }
-
-            Uri uri = new Uri.Builder()
-                    .scheme("https")
-                    .authority(authUrl)
-                    .path(runner_collection)
-                    .appendQueryParameter("q", query)
-                    .appendQueryParameter("s", "{'totalScore': -1}")
-                    .appendQueryParameter("apiKey", apiKey)
-                    .build();
-
-            DefaultHttpClient client = application.getHttpClient();
-            client.setParams(getMyParams());
-
-            try {
-                HttpGet httpRequest = new HttpGet(uri.toString());
-                setDefaultGetHeaders(httpRequest);
-
-                Log.v(TAG, "Fetching runs - requesting");
-                HttpResponse response = client.execute(httpRequest);
-                Log.v(TAG, "Fetching runs - responce received");
-
-                HttpEntity entity = response.getEntity();
-
-                StatusLine statusLine = response.getStatusLine();
-
-                Log.v(TAG, String.format("Fetching stores - status [%s]", statusLine));
-
-                if (statusLine.getStatusCode() >= 300) {
-                    Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
-                }
-
-                String resultString = null;
-
-                if (entity != null) {
-                    InputStream instream = entity.getContent();
-                    Header contentEncoding = response.getFirstHeader("Content-Encoding");
-                    if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-                        instream = new GZIPInputStream(instream);
-                    }
-                    resultString = Utils.convertStreamToString(instream);
-
-                    instream.close();
-                }
-
-                Log.v(TAG, String.format("Deserialising [%s]", resultString));
-
-                Gson gson = new Gson();
-                users = (List<User>) gson.fromJson(resultString,
-                        new TypeToken<List<User>>() {
-                        }.getType());
-
-                //add a new friend request to the other user
-                if (users.size() == 1) {
-                    getMongoUserByUsernameForFriend(users.get(0));
-                }
-                Log.v(TAG, String.format("Fetching parts - retrieved [%d] users", users.size()));
-
-           } catch (Exception e) {
-                Log.e(TAG, "Exception fetching leaderboard or friend", e);
-                return users;
-            }
-
-            Log.v(TAG, String.format("Fetching leader or friend - done"));
-
-            return users;
-    }
-
-    public User getMongoUserByUsernameForFriend(User user) {// 1 send request, 0 accept, 2 reject, else just get user
-
-        String myUsername = app_preferences.getString("username", AppConstants.EMPTY);
-            String currentRequests = user.getFriendRequests() != null ? user.getFriendRequests()+" " : AppConstants.EMPTY;
-                uploadNewFriendOrRequest(currentRequests  + myUsername, user.getUsername());
-                SharedPreferences.Editor editor = app_preferences.edit();
-                editor.putString("sentRequests",  app_preferences.getString("sentRequests",AppConstants.EMPTY)+user.getUsername());
-                editor.apply();
-
-        Log.v(TAG, String.format("Fetching user - done"));
-        return user;
-    }
-
-    public boolean uploadNewFriendOrRequest(String friends,String username){
-
-        Log.v(TAG, "Uploading new friend");
-        String query = "{'username': '"+username+"'}";
-
-        Uri uri = new Uri.Builder()
-                .scheme("https")
-                .authority(authUrl)
-                .path(runner_collection)
-                .appendQueryParameter("q", query)
-                .appendQueryParameter("apiKey", apiKey)
-                .build();
-
-        DefaultHttpClient client = application.getHttpClient();
-        client.setParams(getMyParams());
-
-        try {
-            JSONObject obj = new JSONObject();
-
-
-            obj.put("friendRequests" , friends);
-
-            JSONObject lastObj = new JSONObject();
-            lastObj.put("$set", obj);
-
-            StringEntity se = new StringEntity(lastObj.toString());
-
-            HttpPut httpRequest = new HttpPut(uri.toString());
-
-            httpRequest.setEntity(se);
-
-
-            setDefaultPutHeaders(httpRequest);
-
-            Log.v(TAG, "new friend - requesting");
-            HttpResponse response = client.execute(httpRequest);
-            Log.v(TAG, "new friend - responce received");
-
-            HttpEntity entity = response.getEntity();
-
-            StatusLine statusLine = response.getStatusLine();
-
-            Log.v(TAG, String.format("Fetching stores - status [%s]", statusLine));
-
-            if (statusLine.getStatusCode() >= 300) {
-//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
-                Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
-                return false;
-            }
-
-            String resultString = null;
-
-            if (entity != null) {
-                InputStream instream = entity.getContent();
-                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-                    instream = new GZIPInputStream(instream);
-                }
-                resultString = Utils.convertStreamToString(instream);
-
-                instream.close();
-            }
-
-            Log.v(TAG, String.format("Deserialising [%s]", resultString));
-
-            Log.v(TAG, String.format("Fetching parts - new friend added"));
-        } catch (Exception e) {
-            Log.e(TAG, "Exception inserting friend", e);
-            return false;
-        }
-
-        Log.v(TAG, String.format("uploaded friend - done"));
-        return true;
-
-    }
-
-    public void updateMySharedRunsNum(){
-
-        String query = "{'username': '"+application.getMe().getUsername()+"'}";
-
-        Uri uri = new Uri.Builder()
-                .scheme("https")
-                .authority(authUrl)
-                .path(runner_collection)
-                .appendQueryParameter("q", query)
-                .appendQueryParameter("apiKey", apiKey)
-                .build();
-
-
-        DefaultHttpClient client = application.getHttpClient();
-        client.setParams(getMyParams());
-
-
-        try {
-            JSONObject obj = new JSONObject();
-            obj.put(User.SHARED_RUNS_NUM , application.getMe().getSharedRunsNum());
-            JSONObject lastObj = new JSONObject();
-            lastObj.put("$set", obj);
-
-            StringEntity se = new StringEntity(lastObj.toString());
-            HttpPut httpRequest = new HttpPut(uri.toString());
-            httpRequest.setEntity(se);
-            setDefaultPutHeaders(httpRequest);
-            HttpResponse response = client.execute(httpRequest);
-            HttpEntity entity = response.getEntity();
-            StatusLine statusLine = response.getStatusLine();
-
-            if (statusLine.getStatusCode() >= 300) {
-                Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
-                return;
-            }
-
-            String resultString = null;
-
-            if (entity != null) {
-                InputStream instream = entity.getContent();
-                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-                    instream = new GZIPInputStream(instream);
-                }
-                resultString = Utils.convertStreamToString(instream);
-                instream.close();
-            }
-
-        } catch (Exception e) {
-            Log.e(TAG, "Exception updating sharedRunsNum", e);
-            return;
-        }
-
-        Log.v(TAG, String.format("updated sharedRunsNum - done"));
-        return;
-
-    }
-
-    public User acceptOrRejectFriend(String username, int type) {// 1 send request, 0 accept, 2 reject, else just get user
-
-        Log.v(TAG, "Fetching user");
-
-        String myUsername = app_preferences.getString("username", AppConstants.EMPTY);
-
-        User user = null;
-
-        Uri uri = new Uri.Builder()
-                .scheme("https")
-                .authority(authUrl)
-                .path(runner_collection)
-                .appendQueryParameter("q", "{ 'username':'"+username+"' }")
-                .appendQueryParameter("fo", "true")
-                .appendQueryParameter("apiKey", apiKey)
-                .build();
-
-        DefaultHttpClient client = application.getHttpClient();
-        client.setParams(getMyParams());
-
-        try {
-
-            HttpResponse response;
-
-
-            HttpGet httpRequest = new HttpGet(uri.toString());
-            setDefaultGetHeaders(httpRequest);
-            Log.v(TAG, "Fetching user - requesting");
-            response = client.execute(httpRequest);
-
-
-
-            Log.v(TAG, "Fetching user - responce received");
-
-            HttpEntity entity = response.getEntity();
-
-            StatusLine statusLine = response.getStatusLine();
-
-            Log.v(TAG, String.format("Fetching user - status [%s]", statusLine));
-
-            if (statusLine.getStatusCode() >= 300) {
-//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
-                Log.e(TAG,statusLine.getStatusCode()+" - "+statusLine.getReasonPhrase());
-            }
-
-            String resultString = null;
-
-            if (entity != null) {
-                InputStream instream = entity.getContent();
-                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-                    instream = new GZIPInputStream(instream);
-                }
-                resultString = Utils.convertStreamToString(instream);
-
-                instream.close();
-            }
-
-            Log.v(TAG, String.format("Deserialising [%s]", resultString));
-
-            Gson gson = new Gson();
-            user = (User) gson.fromJson(resultString,
-                    new TypeToken<User>() {
-                    }.getType());
-
-            // refresh other users requests
-           if (type==0|| type==2) {
-                //add friend to both users list
-                if ((type==0)&&((user.getFriends()==null || !user.getFriends().contains(myUsername) )&& !app_preferences.getString("friends", AppConstants.EMPTY).contains(user.getUsername()))){
-                    fixFriendsListForUser(user.getFriends() + " " + myUsername, user.getUsername(), type);
-                    fixFriendsListForUser(app_preferences.getString("friends", AppConstants.EMPTY) + " " + user.getUsername(), myUsername, type);
-                    dbHelper.addUser(user);
-                }
-
-                //remove his name
-                String  newFriendRequests = app_preferences.getString("friendRequests",AppConstants.EMPTY).replace(" " + user.getUsername() + " ", " ");
-                newFriendRequests = newFriendRequests.replace(user.getUsername() + " ", " ");
-                newFriendRequests = newFriendRequests.replace(" "+user.getUsername(), " ");
-                newFriendRequests = newFriendRequests.replace(user.getUsername(), AppConstants.EMPTY);
-               fixFriendsListForUser(newFriendRequests, myUsername, 1);
-
-                SharedPreferences.Editor editor = app_preferences.edit();
-                editor.putString("friendRequests", newFriendRequests);
-                if (type==0) {
-                    editor.putString("friends", app_preferences.getString("friends", AppConstants.EMPTY) + " " + user.getUsername());
-                }
-                editor.apply();
-
-            }
-
-        } catch (Exception e) {
-            Log.e(TAG, "Exception fetching user", e);
-            return user;
-        }
-
-        Log.v(TAG, String.format("Fetching user - done"));
-        return user;
-
-    }
-
-    public boolean fixFriendsListForUser(String friends,String username, int type){
-
-
-        Log.v(TAG, "Uploading new friend");
-
-        String query = "{'username': '"+username+"'}";
-        Uri uri = new Uri.Builder()
-                .scheme("https")
-                .authority(authUrl)
-                .path(runner_collection)
-                .appendQueryParameter("q", query)
-                .appendQueryParameter("apiKey", apiKey)
-                .build();
-
-
-        DefaultHttpClient client = application.getHttpClient();
-        client.setParams(getMyParams());
-
-
-        try {
-            JSONObject obj = new JSONObject();
-
-            if (type==0)
-                obj.put("friends" , friends);
-            else if (type==1)
-                obj.put("friendRequests" , friends);
-
-            JSONObject lastObj = new JSONObject();
-            lastObj.put("$set", obj);
-
-            StringEntity se = new StringEntity(lastObj.toString());
-            HttpPut httpRequest = new HttpPut(uri.toString());
-            httpRequest.setEntity(se);
-            setDefaultPutHeaders(httpRequest);
-
-            Log.v(TAG, "new friend - requesting");
-            HttpResponse response = client.execute(httpRequest);
-            Log.v(TAG, "new friend - responce received");
-
-            HttpEntity entity = response.getEntity();
-
-            StatusLine statusLine = response.getStatusLine();
-
-            Log.v(TAG, String.format("Fetching stores - status [%s]", statusLine));
-
-            if (statusLine.getStatusCode() >= 300) {
-//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
-                Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
-                return false;
-            }
-
-            String resultString = null;
-
-            if (entity != null) {
-                InputStream instream = entity.getContent();
-                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-                    instream = new GZIPInputStream(instream);
-                }
-                resultString = Utils.convertStreamToString(instream);
-
-                instream.close();
-            }
-
-            Log.v(TAG, String.format("Deserialising [%s]", resultString));
-
-            Log.v(TAG, String.format("Fetching parts - new friend added"));
-        } catch (Exception e) {
-            Log.e(TAG, "Exception inserting friend", e);
-            return false;
-        }
-
-        Log.v(TAG, String.format("uploaded friend - done"));
-        return true;
-
-    }
-
-    public List<User> getUsersByUsernamesList(ArrayList<String>usernames){//0 leaderboard
-
-        List<User>users = new ArrayList<User>();
-        if (usernames.size() == 0){
-            return users;
-        }
-
-        Log.v(TAG, "Fetching users");
         String query;
 
-        int size = usernames.size();
-
-        query = "{ $or: [";
-        for (int i = 0; i < size - 1; i++) {
-            query += "{ 'username': '" + usernames.get(i).trim() + "'},";
+        if (friend == null || friend.equals(AppConstants.EMPTY)) {
+            return users;
+        } else {
+            query = "{ 'username' : '" + friend + "'}";
         }
-        query += "{ 'username': '" + usernames.get(size-1).trim() + "'}";
-        query += "] }";
 
-        Uri uri = new Uri.Builder()
-                .scheme("https")
-                .authority(authUrl)
-                .path(runner_collection)
-                .appendQueryParameter("q", query)
-                .appendQueryParameter("s", "{'totalRuns': -1}")
-                .appendQueryParameter("apiKey", apiKey)
-                .build();
-
+        Map<String, String>queryMap = new HashMap<String, String>();
+        queryMap.put("q", query);
+        queryMap.put("s", "{'totalScore': -1}");//sorting not used here
+        String uri = getStringUri(runner_collection, queryMap);
 
         DefaultHttpClient client = application.getHttpClient();
         client.setParams(getMyParams());
 
-
         try {
+            HttpGet httpRequest = new HttpGet(uri);
+            setDefaultHttpHeaders(httpRequest);
 
-            HttpGet httpRequest = new HttpGet(uri.toString());
-
-
-            setDefaultGetHeaders(httpRequest);
-
-            Log.v(TAG, "Fetching friends - requesting");
             HttpResponse response = client.execute(httpRequest);
-            Log.v(TAG, "Fetching friends - responce received");
 
-            HttpEntity entity = response.getEntity();
-
-            StatusLine statusLine = response.getStatusLine();
-
-            Log.v(TAG, String.format("Fetching stores - status [%s]", statusLine));
-
-            if (statusLine.getStatusCode() >= 300) {
-//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
-                Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
-            }
-
-            String resultString = null;
-
-            if (entity != null) {
-                InputStream instream = entity.getContent();
-                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-                    instream = new GZIPInputStream(instream);
-                }
-                resultString = Utils.convertStreamToString(instream);
-
-                instream.close();
-            }
-
-            Log.v(TAG, String.format("Deserialising [%s]", resultString));
-
+            String resultString = getResultStringFromResponse(response);
             Gson gson = new Gson();
-
-
-            users = (List<User>) gson.fromJson(resultString,
+            users = gson.fromJson(resultString,
                     new TypeToken<List<User>>() {
                     }.getType());
 
-
+            //add a new friend request to the other user
+            if (users.size() == 1) {
+                getMongoUserByUsernameForFriend(users.get(0));
+            }
             Log.v(TAG, String.format("Fetching parts - retrieved [%d] users", users.size()));
 
         } catch (Exception e) {
             Log.e(TAG, "Exception fetching leaderboard or friend", e);
             return users;
         }
-
-        Log.v(TAG, String.format("Fetching leader or friend - done"));
-
-
         return users;
     }
 
-    public List<Running> getNewRunsForUsers(List<User> users) {
+    public User getMongoUserByUsernameForFriend(User user) {// 1 send request, 0 accept, 2 reject, else just get user
 
-        List<Running> newRuns = new ArrayList<Running>();
+        String myUsername = app_preferences.getString("username", AppConstants.EMPTY);
+        String currentRequests = user.getFriendRequests() != null ? user.getFriendRequests() + " " : AppConstants.EMPTY;
+        uploadNewFriendOrRequest(currentRequests + myUsername, user.getUsername());
+        SharedPreferences.Editor editor = app_preferences.edit();
+        editor.putString("sentRequests", app_preferences.getString("sentRequests", AppConstants.EMPTY) + user.getUsername());
+        editor.apply();
 
-        for (User user : users){
-            if (user.get_id() == null){
-                users.remove(user);
-            }
-        }
+        Log.v(TAG, String.format("Fetching user - done"));
+        return user;
+    }
 
+    public boolean uploadNewFriendOrRequest(String friends, String username) {
+        Log.v(TAG, "Uploading new friend");
+        String query = "{'username': '" + username + "'}";
 
-   //     {$or:[    {$and:[{'username':'user1','sharedId':1}]} , {$and:[{'username':'user2','sharedId':1}]}   ]}
-
-        int size = users.size();
-
-        if(size == 0){
-            return newRuns;
-        }
-
-        String query = "{$or:[";
-
-        Log.v("SIZE", size+AppConstants.EMPTY);
-        Log.v("SIZE", users.toString());
-
-        for (int i=0; i<size-1; i++) {
-
-            query += "{ $and:[{ 'username': '" + users.get(i).getUsername() + "' ,";
-            query += " 'sharedId': " + users.get(i).getSharedRunsNum() + "}]} ,";
-
-        }
-        query += "{ $and:[{ 'username': '" + users.get(size-1).getUsername() + "' ,";
-        query += " 'sharedId': " + users.get(size-1).getSharedRunsNum() + "}]} ";
-
-        query+= "]}";
-
-        Uri uri = new Uri.Builder()
-                .scheme("https")
-                .authority(authUrl)
-                .path(running_collection)
-                .appendQueryParameter("q", query)
-                .appendQueryParameter("apiKey", apiKey)
-                .build();
-
+        Map<String, String>queryMap = new HashMap<String, String>();
+        queryMap.put("q", query);
+        String uri = getStringUri(runner_collection, queryMap);
 
         DefaultHttpClient client = application.getHttpClient();
         client.setParams(getMyParams());
 
+        try {
+            JSONObject obj = new JSONObject();
+            obj.put("friendRequests", friends);
+            JSONObject lastObj = new JSONObject();
+            lastObj.put("$set", obj);
+            StringEntity se = new StringEntity(lastObj.toString());
+            HttpPut httpRequest = new HttpPut(uri);
+            httpRequest.setEntity(se);
+            setDefaultHttpHeaders(httpRequest);
+            HttpResponse response = client.execute(httpRequest);
+            String resultString = getResultStringFromResponse(response);
+            Log.v(TAG, String.format("Deserialising [%s]", resultString));
+        } catch (Exception e) {
+            Log.e(TAG, "Exception inserting friend", e);
+            return false;
+        }
+        return true;
+    }
+
+    public void updateMySharedRunsNum() {
+        String query = "{'username': '" + application.getMe().getUsername() + "'}";
+        Map<String, String>queryMap = new HashMap<String, String>();
+        queryMap.put("q", query);
+        String uri = getStringUri(runner_collection, queryMap);
+        DefaultHttpClient client = application.getHttpClient();
+        client.setParams(getMyParams());
 
         try {
-
-            HttpGet httpRequest = new HttpGet(uri.toString());
-
-
-            setDefaultGetHeaders(httpRequest);
-
+            JSONObject obj = new JSONObject();
+            obj.put(User.SHARED_RUNS_NUM, application.getMe().getSharedRunsNum());
+            JSONObject lastObj = new JSONObject();
+            lastObj.put("$set", obj);
+            StringEntity se = new StringEntity(lastObj.toString());
+            HttpPut httpRequest = new HttpPut(uri);
+            httpRequest.setEntity(se);
+            setDefaultHttpHeaders(httpRequest);
             HttpResponse response = client.execute(httpRequest);
+            String resultString = getResultStringFromResponse(response);
+        } catch (Exception e) {
+            Log.e(TAG, "Exception updating sharedRunsNum", e);
+        }
+    }
 
-            HttpEntity entity = response.getEntity();
+    public User acceptOrRejectFriend(String username, int type) {// 1 send request, 0 accept, 2 reject, else just get user
+        String myUsername = app_preferences.getString("username", AppConstants.EMPTY);
+        User user = null;
 
-            StatusLine statusLine = response.getStatusLine();
+        Map<String, String>queryMap = new HashMap<String, String>();
+        queryMap.put("q", "{ 'username':'" + username + "' }");
+        queryMap.put("fo", "true");
+        String uri = getStringUri(runner_collection, queryMap);
+        DefaultHttpClient client = application.getHttpClient();
+        client.setParams(getMyParams());
 
-            Log.v(TAG, String.format("Fetching stores - status [%s]", statusLine));
-
-            if (statusLine.getStatusCode() >= 300) {
-//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
-                Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
-            }
-
-            String resultString = null;
-
-            if (entity != null) {
-                InputStream instream = entity.getContent();
-                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-                    instream = new GZIPInputStream(instream);
-                }
-                resultString = Utils.convertStreamToString(instream);
-
-                instream.close();
-            }
-
-            Log.v(TAG, String.format("Deserialising [%s]", resultString));
-
+        try {
+            HttpGet httpRequest = new HttpGet(uri);
+            setDefaultHttpHeaders(httpRequest);
+            HttpResponse response = client.execute(httpRequest);
+            String resultString = getResultStringFromResponse(response);
             Gson gson = new Gson();
+            user = (User) gson.fromJson(resultString,
+                    new TypeToken<User>() {
+                    }.getType());
 
+            if (type == 0 || type == 2) {// refresh other user's requests
+                //add friend to both users list
+                if ((type == 0) && ((user.getFriends() == null || !user.getFriends().contains(myUsername)) && !app_preferences.getString("friends", AppConstants.EMPTY).contains(user.getUsername()))) {
+                    fixFriendsListForUser(user.getFriends() + " " + myUsername, user.getUsername(), type);
+                    fixFriendsListForUser(app_preferences.getString("friends", AppConstants.EMPTY) + " " + user.getUsername(), myUsername, type);
+                    Database dbHelper = new Database(application);
+                    dbHelper.addUser(user);
+                }
 
-            newRuns = (List<Running>) gson.fromJson(resultString,
+                //remove his name
+                String newFriendRequests = app_preferences.getString("friendRequests", AppConstants.EMPTY).replace(" " + user.getUsername() + " ", " ");
+                newFriendRequests = newFriendRequests.replace(user.getUsername() + " ", " ");
+                newFriendRequests = newFriendRequests.replace(" " + user.getUsername(), " ");
+                newFriendRequests = newFriendRequests.replace(user.getUsername(), AppConstants.EMPTY);
+                fixFriendsListForUser(newFriendRequests, myUsername, 1);
+
+                SharedPreferences.Editor editor = app_preferences.edit();
+                editor.putString("friendRequests", newFriendRequests);
+                if (type == 0) {
+                    editor.putString("friends", app_preferences.getString("friends", AppConstants.EMPTY) + " " + user.getUsername());
+                }
+                editor.apply();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Exception fetching user", e);
+            return user;
+        }
+        return user;
+    }
+
+    public boolean fixFriendsListForUser(String friends, String username, int type) {
+        String query = "{'username': '" + username + "'}";
+        Map<String, String>queryMap = new HashMap<String, String>();
+        queryMap.put("q", query);
+        String uri = getStringUri(runner_collection, queryMap);
+        DefaultHttpClient client = application.getHttpClient();
+        client.setParams(getMyParams());
+
+        try {
+            JSONObject obj = new JSONObject();
+            if (type == 0)
+                obj.put("friends", friends);
+            else if (type == 1)
+                obj.put("friendRequests", friends);
+
+            JSONObject lastObj = new JSONObject();
+            lastObj.put("$set", obj);
+            StringEntity se = new StringEntity(lastObj.toString());
+            HttpPut httpRequest = new HttpPut(uri);
+            httpRequest.setEntity(se);
+            setDefaultHttpHeaders(httpRequest);
+            HttpResponse response = client.execute(httpRequest);
+            String resultString = getResultStringFromResponse(response);
+        } catch (Exception e) {
+            Log.e(TAG, "Exception inserting friend", e);
+            return false;
+        }
+        return true;
+    }
+
+    public List<User> getUsersByUsernamesList(ArrayList<String> usernames) {//0 leaderboard
+
+        List<User> users = new ArrayList<User>();
+        if (usernames.size() == 0) {
+            return users;
+        }
+
+        int size = usernames.size();
+        String query = "{ $or: [";
+        for (int i = 0; i < size - 1; i++) {
+            query += "{ 'username': '" + usernames.get(i).trim() + "'},";
+        }
+        query += "{ 'username': '" + usernames.get(size - 1).trim() + "'}";
+        query += "] }";
+
+        Map<String, String>queryMap = new HashMap<String, String>();
+        queryMap.put("q", query);
+        queryMap.put("s", "{'totalRuns': -1}");
+        String uri = getStringUri(runner_collection, queryMap);
+
+        DefaultHttpClient client = application.getHttpClient();
+        client.setParams(getMyParams());
+
+        try {
+            HttpGet httpRequest = new HttpGet(uri);
+            setDefaultHttpHeaders(httpRequest);
+            HttpResponse response = client.execute(httpRequest);
+            String resultString = getResultStringFromResponse(response);
+            Gson gson = new Gson();
+            users = gson.fromJson(resultString,
+                    new TypeToken<List<User>>() {
+                    }.getType());
+        } catch (Exception e) {
+            Log.e(TAG, "Exception fetching leaderboard or friend", e);
+            return users;
+        }
+        return users;
+    }
+
+    public List<Running> getNewRunsForUsers(List<User> users) {
+        List<Running> newRuns = new ArrayList<Running>();
+        for (User user : users) {
+            if (user.get_id() == null) {
+                users.remove(user);
+            }
+        }
+
+        int size = users.size();
+        if (size == 0) {
+            return newRuns;
+        }
+
+        String query = "{$or:[";
+        for (int i = 0; i < size - 1; i++) {
+            query += "{ $and:[{ 'username': '" + users.get(i).getUsername() + "' ,";
+            query += " 'sharedId': " + users.get(i).getSharedRunsNum() + "}]} ,";
+        }
+        query += "{ $and:[{ 'username': '" + users.get(size - 1).getUsername() + "' ,";
+        query += " 'sharedId': " + users.get(size - 1).getSharedRunsNum() + "}]} ";
+        query += "]}";
+
+        Map<String, String>queryMap = new HashMap<String, String>();
+        queryMap.put("q", query);
+        String uri = getStringUri(running_collection, queryMap);
+
+        DefaultHttpClient client = application.getHttpClient();
+        client.setParams(getMyParams());
+
+        try {
+            HttpGet httpRequest = new HttpGet(uri);
+            setDefaultHttpHeaders(httpRequest);
+            HttpResponse response = client.execute(httpRequest);
+            String resultString = getResultStringFromResponse(response);
+            Gson gson = new Gson();
+            newRuns = gson.fromJson(resultString,
                     new TypeToken<List<Running>>() {
                     }.getType());
 
-            for (Running run : newRuns){
+            for (Running run : newRuns) {
                 run.setIntervals(fetchIntervalsForRun(run));
             }
-
-
-
         } catch (Exception e) {
             Log.e(TAG, "Exception fetching leaderboard or friend", e);
             return newRuns;
@@ -981,109 +577,43 @@ public class SyncHelper {
         return newRuns;
     }
 
-    public List<Interval> fetchIntervalsForRun(Running run){//0 leaderboard
-
+    public List<Interval> fetchIntervalsForRun(Running run) {//0 leaderboard
         List<Interval> intervals = new ArrayList<Interval>();
 
-        String query;
-
-
-        query = "{ $or: [";
-            query += "{ 'running_mongo_id': '" + run.get_id().get$oid() + "'}";
-
+        String query = "{ $or: [";
+        query += "{ 'running_mongo_id': '" + run.get_id().get$oid() + "'}";
         query += "] }";
+        Map<String, String> queryParams = new HashMap<String, String>();
+        queryParams.put("q", query);
 
-        Uri uri = new Uri.Builder()
-                .scheme("https")
-                .authority(authUrl)
-                .path(interval_collection)
-                .appendQueryParameter("q", query)
-                .appendQueryParameter("apiKey", apiKey)
-                .build();
-
-
+        String uri = getStringUri(interval_collection, queryParams);
         DefaultHttpClient client = application.getHttpClient();
         client.setParams(getMyParams());
 
-
         try {
-
-            HttpGet httpRequest = new HttpGet(uri.toString());
-
-
-            setDefaultGetHeaders(httpRequest);
-
+            HttpGet httpRequest = new HttpGet(uri);
+            setDefaultHttpHeaders(httpRequest);
             HttpResponse response = client.execute(httpRequest);
 
-            HttpEntity entity = response.getEntity();
-
-            StatusLine statusLine = response.getStatusLine();
-
-            Log.v(TAG, String.format("Fetching stores - status [%s]", statusLine));
-
-            if (statusLine.getStatusCode() >= 300) {
-//                Toast.makeText(activity,R.string.server_error,Toast.LENGTH_LONG).show();
-                Log.e(TAG, statusLine.getStatusCode() + " - " + statusLine.getReasonPhrase());
-            }
-
-            String resultString = null;
-
-            if (entity != null) {
-                InputStream instream = entity.getContent();
-                Header contentEncoding = response.getFirstHeader("Content-Encoding");
-                if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-                    instream = new GZIPInputStream(instream);
-                }
-                resultString = Utils.convertStreamToString(instream);
-
-                instream.close();
-            }
-
-            Log.v(TAG, String.format("Deserialising [%s]", resultString));
-
+            String resultString = getResultStringFromResponse(response);
             Gson gson = new Gson();
-
-
-            intervals = (List<Interval>) gson.fromJson(resultString,
+            intervals = gson.fromJson(resultString,
                     new TypeToken<List<Interval>>() {
                     }.getType());
 
-            for (Interval interval : intervals){
+            for (Interval interval : intervals) {
                 interval.setInterval_id(-1);
             }
-
-
-
-
         } catch (Exception e) {
             Log.e(TAG, "Exception fetching leaderboard or friend", e);
             return intervals;
         }
-
-        Log.v(TAG, String.format("Fetching leader or friend - done"));
-
-
         return intervals;
     }
 
-    private void setDefaultDeleteHeaders(HttpDelete httpRequest) throws UnsupportedEncodingException {
-        httpRequest.setHeader("Accept", "application/json");
-        httpRequest.setHeader("Content-type", "application/json");
-    }
-
-    private void setDefaultGetHeaders(HttpGet httpRequest) throws UnsupportedEncodingException {
-        httpRequest.setHeader("Accept", "application/json");
-        httpRequest.setHeader("Content-type", "application/json");
-    }
-
-    private void setDefaultPostHeaders(HttpPost httpPost) throws UnsupportedEncodingException {
-        httpPost.setHeader("Accept", "application/json");
-        httpPost.setHeader("Content-type", "application/json");
-    }
-
-    private void setDefaultPutHeaders(HttpPut httpPut) throws UnsupportedEncodingException {
-        httpPut.setHeader("Accept", "application/json");
-        httpPut.setHeader("Content-type", "application/json");
+    private void setDefaultHttpHeaders(HttpRequest httpReq) throws UnsupportedEncodingException {
+        httpReq.setHeader("Accept", "application/json");
+        httpReq.setHeader("Content-type", "application/json");
     }
 
     private HttpParams getMyParams() {

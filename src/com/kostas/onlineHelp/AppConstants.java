@@ -41,5 +41,5 @@ public interface AppConstants {
     /**
      * Empty string
      */
-    public static final String EMPTY = AppConstants.EMPTY;
+    public static final String EMPTY = "";
 }
