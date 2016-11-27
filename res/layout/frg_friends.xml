@@ -20,6 +20,7 @@
             <EditText
                     style="@style/editTextStyle"
                     android:id="@+id/user_email"
+                    android:inputType="textEmailAddress"
                     android:hint="your email here"/>
 
             <EditText

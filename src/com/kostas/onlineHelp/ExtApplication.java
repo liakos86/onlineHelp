@@ -184,7 +184,7 @@ public class ExtApplication extends Application {
         @Override
         protected Void doInBackground(Void... unused) {
             Database db = new Database(application);
-            runs = db.fetchRunsFromDb(ContentDescriptor.Running.CONTENT_URI, ContentDescriptor.Interval.CONTENT_URI);
+            runs = db.fetchRunsFromDbForUser(ContentDescriptor.Running.CONTENT_URI, ContentDescriptor.Interval.CONTENT_URI, null);
 
             Collections.reverse(runs);
             return null;

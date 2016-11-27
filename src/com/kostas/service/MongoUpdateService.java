@@ -13,7 +13,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.widget.Toast;
 import com.kostas.dbObjects.Running;
 import com.kostas.dbObjects.User;
 import com.kostas.model.ContentDescriptor;
@@ -23,7 +22,6 @@ import com.kostas.onlineHelp.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class MongoUpdateService extends IntentService {
 
@@ -36,36 +34,22 @@ public class MongoUpdateService extends IntentService {
     ExtApplication application;
     SyncHelper sh;
     Database db;
-
-
     User meFromDb;
-
     User meFromMongo;
-
     List<User> friendsFromDb = new ArrayList<User>();
-
     List<User> friendsFromMongo = new ArrayList<User>();
-
     List<User> friendsWithNewRuns = new ArrayList<User>();
-
 
     private enum CallTypes {
         FETCH_FRIENDS(0), FETCH_FRIEND_RUNS(1);
-
         private int value;
-
         public int getValue() {
             return value;
         }
-
         private CallTypes(int value) {
             this.value = value;
         }
-
     }
-
-    ;
-
 
     @Override
     protected void onHandleIntent(Intent intent) {
@@ -74,13 +58,10 @@ public class MongoUpdateService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-
         application = (ExtApplication) getApplication();
         app_preferences = getApplication().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
         sh = new SyncHelper(application);
         db = new Database(application);
-
-
     }
 
 
@@ -97,28 +78,19 @@ public class MongoUpdateService extends IntentService {
      */
     @Override
     public void onStart(Intent intent, int startId) {
-
         friendsFromDb = db.fetchUsersFromDb();
-
         meFromDb = application.getMe();
-
         mHandler.post(mFriendsListRunnable);
-
         startForeground(0, new Notification());
-
     }
-
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-
         super.onTaskRemoved(rootIntent);
     }
 
     @Override
     public boolean stopService(Intent name) {
-
-
         return super.stopService(name);
     }
 
@@ -183,14 +155,10 @@ public class MongoUpdateService extends IntentService {
     private void checkForChanges() {
 
 
-
         for (User friendFromMongo : friendsFromMongo) {
-
             if (friendFromMongo.get_id().get$oid().equals(meFromDb.getMongoId())) {
                 meFromMongo = friendFromMongo;
-
                 checkMyFriendsAndRequests();
-
             }
 
             for (User friendFromDb : friendsFromDb) {
@@ -198,9 +166,7 @@ public class MongoUpdateService extends IntentService {
                 if (friendFromMongo.get_id().get$oid().equals(friendFromDb.getMongoId())) {
                     checkRunsForUser(friendFromDb, friendFromMongo);
                 }
-
             }
-
         }
 
         /**
@@ -212,11 +178,6 @@ public class MongoUpdateService extends IntentService {
         application.getMe().setSharedRunsNum(meFromMongo.getSharedRunsNum());
         friendsFromMongo.remove(meFromMongo);
         getNewFriendRuns();
-
-
-
-
-
     }
 
     /**
@@ -246,13 +207,10 @@ public class MongoUpdateService extends IntentService {
             app_preferences.edit().putString("friendRequests", mongoRequests).apply();
             application.getMe().setFriendRequests(mongoRequests);
             createForegroundNotification("You have a new friend request!!!");
-
             Intent intent = new Intent(AppConstants.NOTIFICATION);
             intent.putExtra(NEW_FRIEND_REQUEST, true);
             sendBroadcast(intent);
-
         }
-
     }
 
     /**
@@ -261,22 +219,17 @@ public class MongoUpdateService extends IntentService {
      * @param userDb
      * @param userMongo
      */
-    private void checkRunsForUser(User userDb, User userMongo) {
-
-        if (userMongo.getSharedRunsNum() > userDb.getSharedRunsNum()) {
+    private void checkRunsForUser(User userDb, User userMongo) {//TODO: check runs for everyone!!!
+        //if (userMongo.getSharedRunsNum() > userDb.getSharedRunsNum()) {
             friendsWithNewRuns.add(userMongo);
-
             userDb.setSharedRunsNum(userMongo.getSharedRunsNum());
-
-        }
-
+        //}
     }
 
     /**
      * create an async call for every user in the list of the friends with new runs
      */
     private void getNewFriendRuns(){//todo turn friendsWithNewRuns to HashMap in order to get the new N runs. Now i get only the last
-
         for (User friend : friendsWithNewRuns){
             db.updateUserRuns(friend.get_id().get$oid(), friend.getSharedRunsNum());
         }
@@ -286,24 +239,17 @@ public class MongoUpdateService extends IntentService {
         } else{
             refreshFriends();
         }
-
     }
-
 
     @Override
     public void onDestroy() {
         try {
-
             mHandler.removeCallbacks(mFriendsListRunnable);
-
-
         } catch (Exception e) {
             //Log.v("LATLNG", "Crash");
-
         } finally {
             super.onDestroy();
         }
-
     }
 
     /**
@@ -316,14 +262,10 @@ public class MongoUpdateService extends IntentService {
             db.deleteAllFriends();
             friendsFromDb.clear();
             for (User fr : friendsFromMongo){
-
                 fr.setMongoId(fr.get_id().get$oid());
                 db.addUser(fr);
                 friendsFromDb.add(fr);
             }
-
-
-
         }
     }
 
@@ -333,44 +275,37 @@ public class MongoUpdateService extends IntentService {
     }
 
 
+    /**
+     * Starts an async task to fetch all friends
+     */
     private Runnable mFriendsListRunnable = new Runnable() {
 
         public void run() {
-
             if (meFromDb == null && app_preferences.getString("username", null) != null) {
                 meFromDb = application.getMe();
             }
-
 
             if (app_preferences.getString("username", null) != null) {
                 new PerformAsyncTask(CallTypes.FETCH_FRIENDS).execute();
             }
 
-            mHandler.postDelayed(mFriendsListRunnable, 30000);//todo: 30 minutes
+            mHandler.postDelayed(mFriendsListRunnable, 50000);//todo: 30 minutes
 
         }
     };
 
 
     private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
-
-
         CallTypes type;
 
         PerformAsyncTask(CallTypes type) {
             this.type = type;
         }
 
-
-        protected void onPreExecute() {
-
-        }
+        protected void onPreExecute() {}
 
         @Override
         protected Void doInBackground(Void... unused) {
-            // SharedPreferences.Editor editor = app_preferences.edit();
-
-
             if (type == CallTypes.FETCH_FRIENDS) {
 
                 String friends = app_preferences.getString("friends", AppConstants.EMPTY);
@@ -383,7 +318,6 @@ public class MongoUpdateService extends IntentService {
                 }
 
                 usernames.add(myUsername);
-
                 usernames.remove(null);
                 usernames.remove(AppConstants.EMPTY);
 

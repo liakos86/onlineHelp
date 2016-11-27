@@ -158,9 +158,11 @@ public class Database extends SQLiteOpenHelper {
         return toRet;
     }
 
-    public List<Running> fetchRunsFromDb(Uri runUri, Uri intervalUri) {
+    public List<Running> fetchRunsFromDbForUser(Uri runUri, Uri intervalUri, String username) {
 
-       
+
+        String query = username == null ? null : ContentDescriptor.RunningCols.USERNAME+" = '"+username+"'";
+
         String[] FROM = {
                 // ! beware. I mark the position of the fields
                 ContentDescriptor.RunningCols.DESCRIPTION,
@@ -171,7 +173,6 @@ public class Database extends SQLiteOpenHelper {
                 ContentDescriptor.RunningCols.DISTANCE,
                 ContentDescriptor.RunningCols.IS_SHARED,
                 ContentDescriptor.RunningCols.USERNAME
-
         };
         int sDescPosition = 0;
         int sDatePosition = 1;
@@ -183,9 +184,8 @@ public class Database extends SQLiteOpenHelper {
         int sUsernamePosition = 7;
 
 
-
         Cursor c = mApp.getContentResolver().query(runUri, FROM,
-                null,
+                query,
                 null, null);
 
         List<Running> St = new ArrayList<Running>();
@@ -371,6 +371,7 @@ public class Database extends SQLiteOpenHelper {
                         c.getLong(sTotalTimePosition)
                 );
 
+                newUser.setSharedRuns(fetchRunsFromDbForUser(ContentDescriptor.RunningFriend.CONTENT_URI, ContentDescriptor.IntervalFriend.CONTENT_URI, newUser.getUsername()));
                 St.add(newUser);
             }
         }

@@ -10,6 +10,7 @@ import android.util.Log;
 import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,6 +35,7 @@ public class User {
     private String friendRequests;
     private int sharedRunsNum;
     private String mongoId;
+    List<Running> sharedRuns = new ArrayList<Running>();
 
     public User(){}
 
@@ -79,6 +81,14 @@ public class User {
         this.totalIntervals = sp.getInt("totalIntervals", 0);
         this.totalRuns = sp.getInt("totalRuns", 0);
         this.totalTime = sp.getLong("totalTime", 0);
+    }
+
+    public List<Running> getSharedRuns() {
+        return sharedRuns;
+    }
+
+    public void setSharedRuns(List<Running> sharedRuns) {
+        this.sharedRuns = sharedRuns;
     }
 
     public String getMongoId() {

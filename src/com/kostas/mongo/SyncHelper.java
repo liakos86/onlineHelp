@@ -489,7 +489,7 @@ public class SyncHelper {
         return true;
     }
 
-    public List<User> getUsersByUsernamesList(ArrayList<String> usernames) {//0 leaderboard
+    public List<User> getUsersByUsernamesList(ArrayList<String> usernames) {
 
         List<User> users = new ArrayList<User>();
         if (usernames.size() == 0) {
