@@ -16,18 +16,10 @@
 
             <LinearLayout android:layout_width="match_parent" android:id="@+id/runsInfo"
                           android:layout_height="@dimen/standard_view_height">
-                <TextView android:layout_weight="1" android:id="@+id/runsCount" android:layout_width="@dimen/zero" android:layout_height="wrap_content"
-                          android:textSize="@dimen/medium_text" android:gravity="center" android:layout_gravity="center"
-                        />
-                <TextView  android:layout_weight="1" android:id="@+id/intervalsCount" android:layout_width="@dimen/zero" android:layout_height="wrap_content"
-                           android:textSize="@dimen/medium_text" android:gravity="center" android:layout_gravity="center"
-                        />
-                <TextView android:layout_weight="1" android:id="@+id/metersCount" android:layout_width="@dimen/zero" android:layout_height="wrap_content"
-                          android:textSize="@dimen/medium_text" android:gravity="center" android:layout_gravity="center"
-                        />
-                <TextView android:layout_weight="1" android:id="@+id/durationCount" android:layout_width="@dimen/zero" android:layout_height="wrap_content"
-                          android:textSize="@dimen/medium_text" android:gravity="center" android:layout_gravity="center"
-                        />
+                <TextView android:id="@+id/runsCount" style="@style/topSmallTextStyle" />
+                <TextView  android:id="@+id/intervalsCount" style="@style/topSmallTextStyle"/>
+                <TextView android:id="@+id/metersCount" style="@style/topSmallTextStyle"/>
+                <TextView android:id="@+id/durationCount" style="@style/topSmallTextStyle"/>
             </LinearLayout>
             <View android:id="@+id/hr" android:layout_below="@+id/runsInfo" android:layout_width="match_parent" android:layout_height="2dp" android:background="@color/white_back"/>
             <ExpandableListView

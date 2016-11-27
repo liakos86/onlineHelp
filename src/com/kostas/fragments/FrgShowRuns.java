@@ -524,13 +524,6 @@ public class FrgShowRuns extends Fragment implements OnMapReadyCallback{
                 }
             });
 
-//            convertView.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    currentRun = child.get(childPosition);
-//                    showIntervalsForRun(child.get(childPosition));
-//                }
-//            });
             return convertView;
         }
 

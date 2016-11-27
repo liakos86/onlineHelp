@@ -95,4 +95,14 @@
         <item name="android:layout_height">@dimen/standard_view_height</item>
     </style>
 
+    <style name="topSmallTextStyle">
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">@dimen/medium_text</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_width">@dimen/zero</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+
+
 </resources>

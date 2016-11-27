@@ -27,7 +27,7 @@ public class MongoUpdateService extends IntentService {
 
     public static final String NEW_FRIEND = "new_friend";
     public static final String NEW_FRIEND_REQUEST = "new_request";
-    public static final String NEW_FRIEND_RUN = "new_run";
+    public static final String NEW_FRIEND_RUN_IN_DB = "new_run";
 
     private Handler mHandler = new Handler();
     SharedPreferences app_preferences;
@@ -329,6 +329,7 @@ public class MongoUpdateService extends IntentService {
 
                 List<Running> newRuns = sh.getNewRunsForUsers(friendsWithNewRuns);
 
+                db.deleteAllFriendRuns();
 
                 for (Running run : newRuns){
 
@@ -340,7 +341,7 @@ public class MongoUpdateService extends IntentService {
                     createForegroundNotification("A friend added a run");
 
                     Intent intent = new Intent(AppConstants.NOTIFICATION);
-                    intent.putExtra(NEW_FRIEND_RUN, true);
+                    intent.putExtra(NEW_FRIEND_RUN_IN_DB, true);
                     sendBroadcast(intent);
                 }
 
