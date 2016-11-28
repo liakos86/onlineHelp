@@ -2,6 +2,7 @@ package com.kostas.onlineHelp;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.test.mock.MockApplication;
 import android.view.View;
 import android.widget.*;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -143,26 +144,25 @@ public class ActViewIntervals extends BaseFrgActivityWithBottomButtons implement
             }
         });
 
-        if (!isMyRun){
+        if (!isMyRun || ((ExtApplication) getApplication()).getMe()==null){
             shareFriendsButton.setVisibility(View.GONE);
+        }
+
+        if (run.isShared()) {
+            shareFriendsButton.setClickable(false);
+            shareFriendsButton.setText("Run already shared");
         }
 
         closeIntervalsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 goBack();
-
             }
         });
-
-
 
         adapterInterval = new IntervalAdapterItem(this, getApplicationContext(),
                 R.layout.list_interval_row, intervals, true);
         intervalListView.setAdapter(adapterInterval);
-
-
 
         closeMapButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -274,6 +274,8 @@ public class ActViewIntervals extends BaseFrgActivityWithBottomButtons implement
 
         protected void onPreExecute() {
             shareFriendsButton.setClickable(false);
+            closeIntervalsButton.setClickable(false);
+            openMapButton.setClickable(false);
         }
 
         @Override
@@ -286,6 +288,9 @@ public class ActViewIntervals extends BaseFrgActivityWithBottomButtons implement
 //            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 //            imm.hideSoftInputFromWindow(getWindow().getWindowToken(), 0);
 
+            closeIntervalsButton.setClickable(true);
+            openMapButton.setClickable(true);
+
             if (result==0) {
                 Toast.makeText(app, "Share failed", Toast.LENGTH_LONG).show();
                 shareFriendsButton.setClickable(true);
@@ -295,6 +300,8 @@ public class ActViewIntervals extends BaseFrgActivityWithBottomButtons implement
                 db.setSharedFlagTrue(run.getRunning_id());
                 shareFriendsButton.setText("Run already shared");
             }
+
+
         }
     }
 

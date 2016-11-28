@@ -216,8 +216,17 @@ public class SyncHelper {
             workout.put("distance", runToShare.getDistance());
             workout.put("avgPaceText", runToShare.getAvgPaceText());
             workout.put("description", runToShare.getDescription());
-            workout.put("sharedId", me.getSharedRunsNum() + 1);
-            Log.v("SHAREDID", (me.getSharedRunsNum() + 1) + AppConstants.EMPTY);
+            List<Running> runs = application.getRuns();
+            int newSharedRunId = 1;
+            for (Running run : runs){
+                if (run.isShared()){
+                  ++newSharedRunId;
+                }
+            }
+
+
+            workout.put("sharedId", newSharedRunId);
+            Log.v("SHAREDID", (newSharedRunId) + AppConstants.EMPTY);
             StringEntity se = new StringEntity(workout.toString());
 
             HttpPost httpPost = new HttpPost(uri);
@@ -239,7 +248,7 @@ public class SyncHelper {
             me.setSharedRunsNum(me.getSharedRunsNum() + 1);
             app_preferences.edit().putInt(User.SHARED_RUNS_NUM, me.getSharedRunsNum()).apply();
 
-            updateMySharedRunsNum();
+            updateMyMongoSharedRunsNum();
 
             for (Interval interval : runToShare.getIntervals()) {
                 interval.setRunning_mongo_id(run.get_id().get$oid());
@@ -384,7 +393,10 @@ public class SyncHelper {
         return true;
     }
 
-    public void updateMySharedRunsNum() {
+    /**
+     * refers to mongo
+     */
+    public void updateMyMongoSharedRunsNum() {
         String query = "{'username': '" + application.getMe().getUsername() + "'}";
         Map<String, String>queryMap = new HashMap<String, String>();
         queryMap.put("q", query);
@@ -543,12 +555,20 @@ public class SyncHelper {
 
         String query = "{$or:[";
         for (int i = 0; i < size - 1; i++) {
-            query += "{ $and:[{ 'username': '" + users.get(i).getUsername() + "' ,";
-            query += " 'sharedId': " + users.get(i).getSharedRunsNum() + "}]} ,";
+            query += "{ $and:[{ 'username': '" + users.get(i).getUsername() + "' }]},";
+
+
+//            query += "{ $and:[{ 'username': '" + users.get(i).getUsername() + "' ,";
+//            query += " 'sharedId': " + users.get(i).getSharedRunsNum() + "}]} ,";
         }
-        query += "{ $and:[{ 'username': '" + users.get(size - 1).getUsername() + "' ,";
-        query += " 'sharedId': " + users.get(size - 1).getSharedRunsNum() + "}]} ";
-        query += "]}";
+
+        query += "{ $and:[{ 'username': '" + users.get(size - 1).getUsername() + "' }]}";
+
+//        query += "{ $and:[{ 'username': '" + users.get(size - 1).getUsername() + "' ,";
+//        query += " 'sharedId': " + users.get(size - 1).getSharedRunsNum() + "}]} ";
+
+
+        query += "]}";//close or
 
         Map<String, String>queryMap = new HashMap<String, String>();
         queryMap.put("q", query);

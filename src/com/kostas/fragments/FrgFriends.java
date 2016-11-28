@@ -28,13 +28,12 @@ public class FrgFriends extends Fragment {
     String username, password, email;
     EditText editUsername, editPassword, editEmail, friendName;
     TextView textLogin, textRegister, textForgot;
-    Button buttonLogin, buttonRegister;
+    Button buttonLogin, buttonRegister, buttonBackToFriendsList, addFriend;
     int type = 0 ;//register
     ListView friendRequestsList;
     ListView friendsWithRunsList;
     ListView runsOfFriendList;
     ViewFlipper friendsFlipper;
-    Button addFriend;
     TextView infoText;
     RequestsAdapterItem requestsAdapter;
     UsersAdapterItem friendsWithRunsAdapter;
@@ -107,6 +106,7 @@ public class FrgFriends extends Fragment {
         friendsFlipper = (ViewFlipper) v.findViewById(R.id.friends_flipper);
         buttonRegister = (Button) v.findViewById(R.id.buttonRegister);
         addFriend = (Button)v.findViewById(R.id.buttonAddFriend);
+        buttonBackToFriendsList = (Button)v.findViewById(R.id.buttonBackToFriendsList);
         buttonLogin = (Button) v.findViewById(R.id.buttonLogin);
         textLogin = (TextView) v.findViewById(R.id.textLogin);
         textRegister = (TextView) v.findViewById(R.id.textRegister);
@@ -164,6 +164,12 @@ public class FrgFriends extends Fragment {
             @Override
             public void onClick(View view) {
                 fetchFriend();
+            }
+        });
+        buttonBackToFriendsList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                friendsFlipper.setDisplayedChild(1);
             }
         });
     }
@@ -580,7 +586,7 @@ public class FrgFriends extends Fragment {
             final User user = data.get(position);
 
             holder.topText.setText(user.getUsername());
-            holder.bottomText.setText(String.valueOf(user.getSharedRunsNum())+" public runs");
+            holder.bottomText.setText(String.valueOf(user.getSharedRuns().size())+" public runs");
 
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
