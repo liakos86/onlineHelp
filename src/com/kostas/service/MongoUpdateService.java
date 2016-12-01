@@ -36,20 +36,10 @@ public class MongoUpdateService extends IntentService {
     Database db;
     User meFromDb;
     User meFromMongo;
-    List<User> friendsFromDb = new ArrayList<User>();
-    List<User> friendsFromMongo = new ArrayList<User>();
-    List<User> friendsWithNewRuns = new ArrayList<User>();
+    List<User> friendsWithRunsAndIntervalsFromDb = new ArrayList<User>();
+    List<User> friendsFromMongoIncludingMe = new ArrayList<User>();
+    List<Running> allFriendRunsFromMongo = new ArrayList<Running>();
 
-    private enum CallTypes {
-        FETCH_FRIENDS(0), FETCH_FRIEND_RUNS(1);
-        private int value;
-        public int getValue() {
-            return value;
-        }
-        private CallTypes(int value) {
-            this.value = value;
-        }
-    }
 
     @Override
     protected void onHandleIntent(Intent intent) {
@@ -78,9 +68,9 @@ public class MongoUpdateService extends IntentService {
      */
     @Override
     public void onStart(Intent intent, int startId) {
-        friendsFromDb = db.fetchUsersFromDb();
+        friendsWithRunsAndIntervalsFromDb = db.fetchUsersWithRunsAndIntervalsFromDb();
         meFromDb = application.getMe();
-        mHandler.post(mFriendsListRunnable);
+        mHandler.post(mUpdateFriendsFromMongoRunnable);
         startForeground(0, new Notification());
     }
 
@@ -152,32 +142,26 @@ public class MongoUpdateService extends IntentService {
     }
 
 
-    private void checkForChanges() {
-
-
-        for (User friendFromMongo : friendsFromMongo) {
+    private void checkForNewFriendRuns() {
+        for (User friendFromMongo : friendsFromMongoIncludingMe) {
             if (friendFromMongo.get_id().get$oid().equals(meFromDb.getMongoId())) {
                 meFromMongo = friendFromMongo;
                 checkMyFriendsAndRequests();
+                continue;
             }
 
-            for (User friendFromDb : friendsFromDb) {
-
+            for (User friendFromDb : friendsWithRunsAndIntervalsFromDb) {
                 if (friendFromMongo.get_id().get$oid().equals(friendFromDb.getMongoId())) {
-                    checkRunsForUser(friendFromDb, friendFromMongo);
+                    if (friendFromMongo.getSharedRuns().size() > friendFromDb.getSharedRuns().size()){
+                        createForegroundNotification(friendFromMongo.getUsername()+" has added a new run");
+
+                    }
+
                 }
             }
-        }
 
-        /**
-         * todo
-         * what if i uninstalled and then reinstalled? i have lost my sharednum
-         *
-         */
-        app_preferences.edit().putInt("sharedRunsNum", meFromMongo.getSharedRunsNum()).apply();
-        application.getMe().setSharedRunsNum(meFromMongo.getSharedRunsNum());
-        friendsFromMongo.remove(meFromMongo);
-        getNewFriendRuns();
+            allFriendRunsFromMongo.addAll(friendFromMongo.getSharedRuns());
+        }
     }
 
     /**
@@ -191,10 +175,8 @@ public class MongoUpdateService extends IntentService {
 
         if ( dbFriends.length() < mongoFriends.length()) {
             createForegroundNotification("You have a new friend!!!");
-
             app_preferences.edit().putString("friends", mongoFriends).apply();
             application.getMe().setFriends(mongoFriends);
-
             Intent intent = new Intent(AppConstants.NOTIFICATION);
             intent.putExtra(NEW_FRIEND, true);
             sendBroadcast(intent);
@@ -214,37 +196,26 @@ public class MongoUpdateService extends IntentService {
     }
 
     /**
-     * For every user I have in db i check his runs against the ones i got from mongo
-     * If the number is larger his means he has shared a new run
-     * @param userDb
-     * @param userMongo
+     *
+     * TODO maybe a more clever way
      */
-    private void checkRunsForUser(User userDb, User userMongo) {//TODO: check runs for everyone!!!
-        //if (userMongo.getSharedRunsNum() > userDb.getSharedRunsNum()) {
-            friendsWithNewRuns.add(userMongo);
-            userDb.setSharedRunsNum(userMongo.getSharedRunsNum());
-        //}
-    }
-
-    /**
-     * create an async call for every user in the list of the friends with new runs
-     */
-    private void getNewFriendRuns(){//todo turn friendsWithNewRuns to HashMap in order to get the new N runs. Now i get only the last
-        for (User friend : friendsWithNewRuns){
-            db.updateUserRuns(friend.get_id().get$oid(), friend.getSharedRunsNum());
-        }
-
-        if (friendsWithNewRuns.size() > 0) {
-            new PerformAsyncTask(CallTypes.FETCH_FRIEND_RUNS).execute();
-        } else{
-            refreshFriends();
+    private void refreshFriends(){
+        if (friendsFromMongoIncludingMe.size() > friendsWithRunsAndIntervalsFromDb.size()) {
+            //todo: ???
+            db.deleteAllFriends();
+            friendsWithRunsAndIntervalsFromDb.clear();
+            for (User fr : friendsFromMongoIncludingMe){
+                fr.setMongoId(fr.get_id().get$oid());
+                db.addUser(fr);
+                friendsWithRunsAndIntervalsFromDb.add(fr);
+            }
         }
     }
 
     @Override
     public void onDestroy() {
         try {
-            mHandler.removeCallbacks(mFriendsListRunnable);
+            mHandler.removeCallbacks(mUpdateFriendsFromMongoRunnable);
         } catch (Exception e) {
             //Log.v("LATLNG", "Crash");
         } finally {
@@ -252,22 +223,7 @@ public class MongoUpdateService extends IntentService {
         }
     }
 
-    /**
-     *
-     * TODO maybe a more clever way
-     */
-    private void refreshFriends(){
-        if (friendsFromMongo.size() > friendsFromDb.size()) {
-            //todo: ???
-            db.deleteAllFriends();
-            friendsFromDb.clear();
-            for (User fr : friendsFromMongo){
-                fr.setMongoId(fr.get_id().get$oid());
-                db.addUser(fr);
-                friendsFromDb.add(fr);
-            }
-        }
-    }
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -276,9 +232,12 @@ public class MongoUpdateService extends IntentService {
 
 
     /**
-     * Starts an async task to fetch all friends
+     * Starts an async task to fetch all friends.
+     * First I set my user from the application.
+     * Then, only if user is logged I start the async process.
+     * The circle is repeated after selected time.
      */
-    private Runnable mFriendsListRunnable = new Runnable() {
+    private Runnable mUpdateFriendsFromMongoRunnable = new Runnable() {
 
         public void run() {
             if (meFromDb == null && app_preferences.getString("username", null) != null) {
@@ -286,73 +245,55 @@ public class MongoUpdateService extends IntentService {
             }
 
             if (app_preferences.getString("username", null) != null) {
-                new PerformAsyncTask(CallTypes.FETCH_FRIENDS).execute();
+                new PerformAsyncTask().execute();
             }
 
-            mHandler.postDelayed(mFriendsListRunnable, 50000);//todo: 30 minutes
+            mHandler.postDelayed(mUpdateFriendsFromMongoRunnable, 50000);//todo: 30 minutes
 
         }
     };
 
 
     private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
-        CallTypes type;
 
-        PerformAsyncTask(CallTypes type) {
-            this.type = type;
+        protected void onPreExecute() {
         }
-
-        protected void onPreExecute() {}
 
         @Override
         protected Void doInBackground(Void... unused) {
-            if (type == CallTypes.FETCH_FRIENDS) {
+            String friends = app_preferences.getString("friends", AppConstants.EMPTY);
+            String[] friendsArray = friends.split(" ");
+            String myUsername = meFromDb != null ? meFromDb.getUsername() : app_preferences.getString("username", AppConstants.EMPTY);
 
-                String friends = app_preferences.getString("friends", AppConstants.EMPTY);
-                String[] friendsArray = friends.split(" ");
-                String myUsername = meFromDb != null ? meFromDb.getUsername() : app_preferences.getString("username", AppConstants.EMPTY);
+            ArrayList<String> userNames = new ArrayList<String>();
+            for (String name : friendsArray) {
+                userNames.add(name);
+            }
+            userNames.add(myUsername);
+            userNames.remove(null);
+            userNames.remove(AppConstants.EMPTY);
 
-                ArrayList<String> usernames = new ArrayList<String>();
-                for (String name : friendsArray) {
-                    usernames.add(name);
+            friendsFromMongoIncludingMe = sh.getUsersWithRunsAndIntervalsByUsernameMongo(userNames);
+            checkForNewFriendRuns();
+            refreshFriends();
+            db.deleteAllFriendRuns();
+
+            for (Running run : allFriendRunsFromMongo) {
+                if (run.get_id() != null) {
+                    run.setRunning_id(-1);
+                    db.addRunning(run, ContentDescriptor.RunningFriend.CONTENT_URI, ContentDescriptor.IntervalFriend.CONTENT_URI);
                 }
 
-                usernames.add(myUsername);
-                usernames.remove(null);
-                usernames.remove(AppConstants.EMPTY);
+                Intent intent = new Intent(AppConstants.NOTIFICATION);
+                intent.putExtra(NEW_FRIEND_RUN_IN_DB, true);
+                sendBroadcast(intent);
 
-                friendsFromMongo = sh.getUsersByUsernamesList(usernames);
-
-                checkForChanges();
-
-            }else{
-
-                List<Running> newRuns = sh.getNewRunsForUsers(friendsWithNewRuns);
-
-                db.deleteAllFriendRuns();
-
-                for (Running run : newRuns){
-
-
-                    if (run.get_id()!=null) {
-                        run.setRunning_id(-1);
-                        db.addRunning(run, ContentDescriptor.RunningFriend.CONTENT_URI, ContentDescriptor.IntervalFriend.CONTENT_URI);
-                    }
-                    createForegroundNotification("A friend added a run");
-
-                    Intent intent = new Intent(AppConstants.NOTIFICATION);
-                    intent.putExtra(NEW_FRIEND_RUN_IN_DB, true);
-                    sendBroadcast(intent);
-                }
-
-                friendsWithNewRuns.clear();
-
-               refreshFriends();
 
             }
-
+            allFriendRunsFromMongo.clear();
             return null;
         }
+
 
         @Override
         protected void onPostExecute(Void result) {

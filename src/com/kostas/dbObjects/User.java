@@ -20,9 +20,6 @@ public class User {
 
     private static final String TAG = Thread.currentThread().getStackTrace()[2].getClassName();
 
-    public static final String SHARED_RUNS_NUM = "sharedRunsNum";
-
-
     private String username;
     private ObjectId _id;
     private long user_id;
@@ -33,7 +30,6 @@ public class User {
     private String friends;
     private String email;
     private String friendRequests;
-    private int sharedRunsNum;
     private String mongoId;
     List<Running> sharedRuns = new ArrayList<Running>();
 
@@ -47,7 +43,6 @@ public class User {
             String email,
             String friends,
             String friendRequests,
-            int sharedRunsNum,
 
             float totalDistance,
             int totalIntervals,
@@ -62,7 +57,6 @@ public class User {
         this.email = email;
         this.friends = friends;
         this.friendRequests = friendRequests;
-        this.sharedRunsNum = sharedRunsNum;
         this.totalDistance = totalDistance;
         this.totalIntervals = totalIntervals;
         this.totalRuns = totalRuns;
@@ -76,7 +70,6 @@ public class User {
         this.email = sp.getString("email", null);
         this.friends = sp.getString("friends", null);
         this.friendRequests = sp.getString("friendRequests", null);
-        this.sharedRunsNum = sp.getInt(SHARED_RUNS_NUM, 0);
         this.totalDistance = sp.getFloat("totalDistance", 0);
         this.totalIntervals = sp.getInt("totalIntervals", 0);
         this.totalRuns = sp.getInt("totalRuns", 0);
@@ -97,14 +90,6 @@ public class User {
 
     public void setMongoId(String mongoId) {
         this.mongoId = mongoId;
-    }
-
-    public int getSharedRunsNum() {
-        return sharedRunsNum;
-    }
-
-    public void setSharedRunsNum(int sharedRunsNum) {
-        this.sharedRunsNum = sharedRunsNum;
     }
 
     public int getTotalIntervals() {
@@ -221,9 +206,6 @@ public class User {
             toRet.put(ContentDescriptor.User.Cols.FRIEND_REQUESTS, item.friendRequests);
             toRet.put(ContentDescriptor.User.Cols.TOTAL_RUNS, item.totalRuns);
             toRet.put(ContentDescriptor.User.Cols.TOTAL_TIME, item.totalTime);
-            toRet.put(ContentDescriptor.User.Cols.SHARED_RUNS_NUM, item.sharedRunsNum);
-
-
 
             return toRet;
         }
@@ -240,7 +222,6 @@ public class User {
             toRet.username = cursor.getString(cursor.getColumnIndex(ContentDescriptor.User.Cols.USERNAME));
             toRet.mongoId = cursor.getString(cursor.getColumnIndex(ContentDescriptor.User.Cols.MONGO_ID));
             toRet.email = cursor.getString(cursor.getColumnIndex(ContentDescriptor.User.Cols.EMAIL));
-            toRet.sharedRunsNum = cursor.getInt(cursor.getColumnIndex(ContentDescriptor.User.Cols.SHARED_RUNS_NUM));
             toRet.friends = cursor.getString(cursor.getColumnIndex(ContentDescriptor.User.Cols.FRIENDS));
             toRet.friendRequests = cursor.getString(cursor.getColumnIndex(ContentDescriptor.User.Cols.FRIEND_REQUESTS));
             toRet.totalDistance = cursor.getFloat(cursor.getColumnIndex(ContentDescriptor.User.Cols.TOTAL_DISTANCE));

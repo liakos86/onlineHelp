@@ -327,7 +327,6 @@ public class ContentDescriptor {
             public static final String FRIENDS = "friends";
             public static final String FRIEND_REQUESTS = "friend_requests";
             public static final String EMAIL = "email";
-            public static final String SHARED_RUNS_NUM = "shared_runs_num";
         }
 
         protected static UriMatcher addToUriMatcher(String authority, UriMatcher matcher) {
@@ -340,23 +339,16 @@ public class ContentDescriptor {
 
         public static String createTable() {
             return "CREATE TABLE " + User.TABLE_NAME + " ( "
-
                     + String.format(sFrmIdAutoinc, Cols.ID) + " , "
                     + String.format(sFrmTextNotNull, Cols.USERNAME) + " , "
                     + String.format(sFrmTextNotNull, Cols.MONGO_ID) + " , "
-
                     + String.format(sFrmFloat, Cols.TOTAL_DISTANCE) + " , "
                     + String.format(sFrmInt, Cols.TOTAL_INTERVALS) + " , "
                     + String.format(sFrmFloat, Cols.TOTAL_TIME) + " , "
                     + String.format(sFrmInt, Cols.TOTAL_RUNS) + " , "
-
                     + String.format(sFrmTextNotNull, Cols.FRIENDS) + " , "
                     + String.format(sFrmTextNotNull, Cols.FRIEND_REQUESTS) + " , "
-
-
-                    + String.format(sFrmInt, Cols.SHARED_RUNS_NUM) + " , "
                     + String.format(sFrmTextNotNull, Cols.EMAIL) + " , "
-
                     + String.format(sFrmPrimaryKey, Cols.ID) + ")";
         }
     }

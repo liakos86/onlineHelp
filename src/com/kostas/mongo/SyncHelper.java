@@ -245,9 +245,6 @@ public class SyncHelper {
                 return 0;
             }
 
-            me.setSharedRunsNum(me.getSharedRunsNum() + 1);
-            app_preferences.edit().putInt(User.SHARED_RUNS_NUM, me.getSharedRunsNum()).apply();
-
             updateMyMongoSharedRunsNum();
 
             for (Interval interval : runToShare.getIntervals()) {
@@ -406,7 +403,7 @@ public class SyncHelper {
 
         try {
             JSONObject obj = new JSONObject();
-            obj.put(User.SHARED_RUNS_NUM, application.getMe().getSharedRunsNum());
+            obj.put("sharedRunsNum", application.getMe().getSharedRuns().size());
             JSONObject lastObj = new JSONObject();
             lastObj.put("$set", obj);
             StringEntity se = new StringEntity(lastObj.toString());
@@ -501,7 +498,7 @@ public class SyncHelper {
         return true;
     }
 
-    public List<User> getUsersByUsernamesList(ArrayList<String> usernames) {
+    public List<User> getUsersWithRunsAndIntervalsByUsernameMongo(ArrayList<String> usernames) {
 
         List<User> users = new ArrayList<User>();
         if (usernames.size() == 0) {
@@ -518,7 +515,7 @@ public class SyncHelper {
 
         Map<String, String>queryMap = new HashMap<String, String>();
         queryMap.put("q", query);
-        queryMap.put("s", "{'totalRuns': -1}");
+        // queryMap.put("s", "{'totalRuns': -1}");
         String uri = getStringUri(runner_collection, queryMap);
 
         DefaultHttpClient client = application.getHttpClient();
@@ -533,6 +530,17 @@ public class SyncHelper {
             users = gson.fromJson(resultString,
                     new TypeToken<List<User>>() {
                     }.getType());
+
+
+            for (User user: users){
+
+                List<User> userlist = new ArrayList<User>();
+                userlist.add(user);
+                List<Running> newRuns = getRunsWithIntervalsForUsersMongo(userlist);
+                user.setSharedRuns(newRuns);
+            }
+
+
         } catch (Exception e) {
             Log.e(TAG, "Exception fetching leaderboard or friend", e);
             return users;
@@ -540,7 +548,7 @@ public class SyncHelper {
         return users;
     }
 
-    public List<Running> getNewRunsForUsers(List<User> users) {
+    public List<Running> getRunsWithIntervalsForUsersMongo(List<User> users) {
         List<Running> newRuns = new ArrayList<Running>();
         for (User user : users) {
             if (user.get_id() == null) {
@@ -588,7 +596,7 @@ public class SyncHelper {
                     }.getType());
 
             for (Running run : newRuns) {
-                run.setIntervals(fetchIntervalsForRun(run));
+                run.setIntervals(fetchIntervalsForMongoRun(run));
             }
         } catch (Exception e) {
             Log.e(TAG, "Exception fetching leaderboard or friend", e);
@@ -597,7 +605,7 @@ public class SyncHelper {
         return newRuns;
     }
 
-    public List<Interval> fetchIntervalsForRun(Running run) {//0 leaderboard
+    public List<Interval> fetchIntervalsForMongoRun(Running run) {//0 leaderboard
         List<Interval> intervals = new ArrayList<Interval>();
 
         String query = "{ $or: [";

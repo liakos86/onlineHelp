@@ -91,7 +91,6 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
 
         String friends  = app_preferences.getString("friends", null);
         String friendRequests  = app_preferences.getString("friendRequests", null);
-        int sharedRunsNum = app_preferences.getInt(User.SHARED_RUNS_NUM, 0);
 
 
         editor.clear().apply();
@@ -102,7 +101,6 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
         editor.putString("username", username);
         editor.putString("friends", friends);
         editor.putString("friendRequests", friendRequests);
-        editor.putInt(User.SHARED_RUNS_NUM, sharedRunsNum);
         editor.apply();
     }
 

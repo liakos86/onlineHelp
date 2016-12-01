@@ -29,13 +29,10 @@ public class Database extends SQLiteOpenHelper {
             ContentDescriptor.User.Cols.EMAIL,
             ContentDescriptor.User.Cols.FRIENDS,
             ContentDescriptor.User.Cols.FRIEND_REQUESTS,
-            ContentDescriptor.User.Cols.SHARED_RUNS_NUM,
             ContentDescriptor.User.Cols.TOTAL_DISTANCE,
             ContentDescriptor.User.Cols.TOTAL_INTERVALS,
             ContentDescriptor.User.Cols.TOTAL_RUNS,
             ContentDescriptor.User.Cols.TOTAL_TIME
-
-
     };
 
 
@@ -324,15 +321,7 @@ public class Database extends SQLiteOpenHelper {
 
     }
 
-    public void updateUserRuns(String mongoId, int newruns){
-        ContentResolver resolver = mApp.getContentResolver();
-        ContentValues values = new ContentValues();
-        values.put(ContentDescriptor.User.Cols.SHARED_RUNS_NUM, newruns);
-        resolver.update(ContentDescriptor.User.CONTENT_URI, values, ContentDescriptor.User.Cols.MONGO_ID + " = '"+mongoId+"'", null);
-
-    }
-
-    public List<User> fetchUsersFromDb() {
+    public List<User> fetchUsersWithRunsAndIntervalsFromDb() {
 
         int sIdPosition = 0;
         int sMongoIdPosition = 1;
@@ -340,12 +329,10 @@ public class Database extends SQLiteOpenHelper {
         int sEmailPosition = 3;
         int sFriendsPosition = 4;
         int sFriendRequestsPosition = 5;
-        int sSharedRunsNumPosition = 6;
-        int sTotalDistancePosition = 7;
-        int sTotalIntervalsPosition = 8;
-        int sTotalRunsPosition = 9;
-        int sTotalTimePosition = 10;
-
+        int sTotalDistancePosition = 6;
+        int sTotalIntervalsPosition = 7;
+        int sTotalRunsPosition = 8;
+        int sTotalTimePosition = 9;
 
         Cursor c = mApp.getContentResolver().query(ContentDescriptor.User.CONTENT_URI, USERS_FROM,
                 null,
@@ -364,7 +351,6 @@ public class Database extends SQLiteOpenHelper {
                         c.getString(sEmailPosition),
                         c.getString(sFriendsPosition),
                         c.getString(sFriendRequestsPosition),
-                        c.getInt(sSharedRunsNumPosition),
                         c.getFloat(sTotalDistancePosition),
                         c.getInt(sTotalIntervalsPosition),
                         c.getInt(sTotalRunsPosition),
@@ -390,12 +376,10 @@ public class Database extends SQLiteOpenHelper {
         int sEmailPosition = 3;
         int sFriendsPosition = 4;
         int sFriendRequestsPosition = 5;
-        int sSharedRunsNumPosition = 6;
-
-        int sTotalDistancePosition = 7;
-        int sTotalIntervalsPosition = 8;
-        int sTotalRunsPosition = 9;
-        int sTotalTimePosition = 10;
+        int sTotalDistancePosition = 6;
+        int sTotalIntervalsPosition = 6;
+        int sTotalRunsPosition = 8;
+        int sTotalTimePosition = 9;
 
         Cursor c = mApp.getContentResolver().query(ContentDescriptor.User.CONTENT_URI, USERS_FROM,
                 ContentDescriptor.User.Cols.USERNAME + " = '" + username + "' ",
@@ -407,17 +391,12 @@ public class Database extends SQLiteOpenHelper {
 
             while (c.moveToNext()) {
 
-
                 user = new User(c.getLong(sIdPosition),
                         c.getString(sMongoIdPosition),
                         c.getString(sUsernamePosition),
-
                         c.getString(sEmailPosition),
                         c.getString(sFriendsPosition),
                         c.getString(sFriendRequestsPosition),
-
-                        c.getInt(sSharedRunsNumPosition),
-
                         c.getFloat(sTotalDistancePosition),
                         c.getInt(sTotalIntervalsPosition),
                         c.getInt(sTotalRunsPosition),
@@ -426,9 +405,6 @@ public class Database extends SQLiteOpenHelper {
             }
             c.close();
             c = null;
-
-
-
         }
         return user;
     }
@@ -443,8 +419,6 @@ public class Database extends SQLiteOpenHelper {
         ContentResolver resolver = mApp.getContentResolver();
         resolver.delete(ContentDescriptor.RunningFriend.CONTENT_URI, null, null);
         resolver.delete(ContentDescriptor.IntervalFriend.CONTENT_URI, null, null);
-
-
     }
 
 

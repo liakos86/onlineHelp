@@ -177,7 +177,7 @@ public class FrgFriends extends Fragment {
     void getFriendsWithRunsFromDB(){
         Database db = new Database(getActivity().getApplication());
         friendsWithRuns.clear();
-        List<User> allFriends = db.fetchUsersFromDb();
+        List<User> allFriends = db.fetchUsersWithRunsAndIntervalsFromDb();
         friendsWithRuns.addAll(allFriends);
     }
 
