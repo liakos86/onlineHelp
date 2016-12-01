@@ -13,7 +13,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.kostas.dbObjects.Interval;
 import com.kostas.dbObjects.Running;
-import com.kostas.dbObjects.User;
 import com.kostas.model.ContentDescriptor;
 import com.kostas.model.Database;
 
@@ -22,8 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import static com.kostas.service.RunningService.*;
 
 public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
     SharedPreferences app_preferences;
@@ -200,7 +197,7 @@ public class ActIntervalResults extends BaseFrgActivityWithBottomButtons {
         running.setAvgPaceText(totalPace);
         
         Database db = new Database((ExtApplication)getApplication());
-        int runId = db.addRunning(running, ContentDescriptor.Running.CONTENT_URI, ContentDescriptor.Interval.CONTENT_URI);
+        int runId = db.addRunningWithIntervals(running, ContentDescriptor.Running.CONTENT_URI, ContentDescriptor.Interval.CONTENT_URI);
         running.setRunning_id(runId);
         ((ExtApplication)getApplication()).getRuns().add(0, running);
 

@@ -324,7 +324,7 @@ public class RunningService extends IntentService
         toSpeak += computeRemainingSpeakText();
         speak(toSpeak);
         SharedPreferences.Editor editor = app_preferences.edit();
-        editor.putBoolean(AppConstants.INTERVAL_COMPLETED, completed);
+        editor.putBoolean(AppConstants.RUNNING_COMPLETED, completed);
         editor.putInt(AppConstants.COMPLETED_NUM, intervals.size());
         editor.putBoolean(AppConstants.IS_RUNNING, false);
         editor.putFloat(AppConstants.TOTAL_DIST, 0);
@@ -338,7 +338,8 @@ public class RunningService extends IntentService
         }
         editor.apply();
         Intent intent = new Intent(AppConstants.NOTIFICATION);
-        intent.putExtra(AppConstants.INTERVAL_COMPLETED, completed);
+        intent.putExtra(AppConstants.RUNNING_COMPLETED, completed);
+        intent.putExtra(AppConstants.INTERVAL_COMPLETED, true);
         sendBroadcast(intent);
         totalTime = 0;
     }

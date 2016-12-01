@@ -19,7 +19,6 @@ import com.google.gson.reflect.TypeToken;
 import com.kostas.custom.NumberPickerKostas;
 import com.kostas.custom.ProgressWheel;
 import com.kostas.dbObjects.Plan;
-import com.kostas.dbObjects.Running;
 import com.kostas.model.Database;
 import com.kostas.service.RunningService;
 
@@ -147,8 +146,8 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
                         }
 
                         setDistanceProgress(coveredDist);
-                    } else {//todo add another message to identify ending
-                        prepareForNextInterval(bundle.getBoolean(AppConstants.INTERVAL_COMPLETED, false));
+                    } else if (bundle.getBoolean(AppConstants.INTERVAL_COMPLETED)) {
+                        prepareForNextInterval(bundle.getBoolean(AppConstants.RUNNING_COMPLETED, false));
                     }
                 }
             }
@@ -806,7 +805,7 @@ public class ActIntervalNew extends BaseFrgActivityWithBottomButtons {
             setRoundsText(app_preferences.getInt(AppConstants.INTERVAL_ROUNDS, 0));
             registerReceiver(receiver, new IntentFilter(AppConstants.NOTIFICATION));
             getInRunningMode(app_preferences.getBoolean(AppConstants.IS_RUNNING, false),
-                    app_preferences.getBoolean(AppConstants.INTERVAL_COMPLETED, false),
+                    app_preferences.getBoolean(AppConstants.RUNNING_COMPLETED, false),
                     app_preferences.getInt(AppConstants.INTERVAL_ROUNDS, 0) == 0,
                     app_preferences.getLong(AppConstants.MSTART_COUNTDOWN_TIME, SystemClock.uptimeMillis()),
                     coveredDist);

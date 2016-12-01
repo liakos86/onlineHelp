@@ -56,7 +56,7 @@ public class FrgFriends extends Fragment {
         getFriendsWithRunsFromDB();
         setViewsAndListeners(v);
         setBroadcastReceiver();
-        setCorrectFlipperChild();
+        setCorrectFlipperChild(v);
         return  v;
     }
 
@@ -451,10 +451,13 @@ public class FrgFriends extends Fragment {
 
     }
 
-    public void setCorrectFlipperChild(){
+    public void setCorrectFlipperChild(View v){
         SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
 
         if (app_preferences.getString("mongoId", null) != null){
+
+            v.findViewById(R.id.add_friend_linear).setVisibility(View.VISIBLE);
+
             ((ExtApplication) getActivity().getApplication()).setMe(new User(app_preferences));
             friendsFlipper.setDisplayedChild(1);
             startMongoService();
@@ -463,6 +466,7 @@ public class FrgFriends extends Fragment {
                 friendsFlipper.setDisplayedChild(2);
             }
         }else{
+            v.findViewById(R.id.add_friend_linear).setVisibility(View.GONE);
             friendsFlipper.setDisplayedChild(0);
             prepareForLogin();
         }

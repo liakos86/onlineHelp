@@ -37,7 +37,7 @@ public class MongoUpdateService extends IntentService {
     User meFromDb;
     User meFromMongo;
     List<User> friendsWithRunsAndIntervalsFromDb = new ArrayList<User>();
-    List<User> friendsFromMongoIncludingMe = new ArrayList<User>();
+    List<User> friendsFromMongo = new ArrayList<User>();
     List<Running> allFriendRunsFromMongo = new ArrayList<Running>();
 
 
@@ -107,6 +107,7 @@ public class MongoUpdateService extends IntentService {
             mBuilder.setContentText("Click for info");
 //            mBuilder.setOngoing(true);
             Intent resultIntent = new Intent(application, ActMain.class);
+            resultIntent.putExtra(AppConstants.NEW_FRIEND_OR_RUN, true);
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(application);
             stackBuilder.addParentStack(ActMain.class);
 // Adds the Intent that starts the Activity to the top of the stack
@@ -142,24 +143,25 @@ public class MongoUpdateService extends IntentService {
     }
 
 
-    private void checkForNewFriendRuns() {
-        for (User friendFromMongo : friendsFromMongoIncludingMe) {
+    private void checkForNewFriendRunsAndMyRequests() {
+
+        for (User friendFromMongo : friendsFromMongo){
             if (friendFromMongo.get_id().get$oid().equals(meFromDb.getMongoId())) {
                 meFromMongo = friendFromMongo;
-                checkMyFriendsAndRequests();
-                continue;
+                break;
             }
+        }
+        checkMyFriendsAndRequests();
+        friendsFromMongo.remove(meFromMongo);
 
+        for (User friendFromMongo : friendsFromMongo) {
             for (User friendFromDb : friendsWithRunsAndIntervalsFromDb) {
                 if (friendFromMongo.get_id().get$oid().equals(friendFromDb.getMongoId())) {
                     if (friendFromMongo.getSharedRuns().size() > friendFromDb.getSharedRuns().size()){
                         createForegroundNotification(friendFromMongo.getUsername()+" has added a new run");
-
                     }
-
                 }
             }
-
             allFriendRunsFromMongo.addAll(friendFromMongo.getSharedRuns());
         }
     }
@@ -200,11 +202,11 @@ public class MongoUpdateService extends IntentService {
      * TODO maybe a more clever way
      */
     private void refreshFriends(){
-        if (friendsFromMongoIncludingMe.size() > friendsWithRunsAndIntervalsFromDb.size()) {
+        if (friendsFromMongo.size() > friendsWithRunsAndIntervalsFromDb.size()) {
             //todo: ???
             db.deleteAllFriends();
             friendsWithRunsAndIntervalsFromDb.clear();
-            for (User fr : friendsFromMongoIncludingMe){
+            for (User fr : friendsFromMongo){
                 fr.setMongoId(fr.get_id().get$oid());
                 db.addUser(fr);
                 friendsWithRunsAndIntervalsFromDb.add(fr);
@@ -273,15 +275,15 @@ public class MongoUpdateService extends IntentService {
             userNames.remove(null);
             userNames.remove(AppConstants.EMPTY);
 
-            friendsFromMongoIncludingMe = sh.getUsersWithRunsAndIntervalsByUsernameMongo(userNames);
-            checkForNewFriendRuns();
+            friendsFromMongo = sh.getUsersWithRunsAndIntervalsByUsernameMongo(userNames);
+            checkForNewFriendRunsAndMyRequests();
             refreshFriends();
             db.deleteAllFriendRuns();
 
             for (Running run : allFriendRunsFromMongo) {
                 if (run.get_id() != null) {
                     run.setRunning_id(-1);
-                    db.addRunning(run, ContentDescriptor.RunningFriend.CONTENT_URI, ContentDescriptor.IntervalFriend.CONTENT_URI);
+                    db.addRunningWithIntervals(run, ContentDescriptor.RunningFriend.CONTENT_URI, ContentDescriptor.IntervalFriend.CONTENT_URI);
                 }
 
                 Intent intent = new Intent(AppConstants.NOTIFICATION);

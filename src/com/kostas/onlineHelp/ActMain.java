@@ -45,6 +45,7 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         setupPager();
 
@@ -140,41 +141,6 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
         return false;
     }
 
-//    private class AsyncLoadFriends extends AsyncTask<Void, Void, Integer> {
-//        private ExtApplication application;
-//
-//        public AsyncLoadFriends(ExtApplication application) {
-//            this.application = application;
-//        }
-//
-//        protected void onPreExecute() {
-//
-//        }
-//
-//        @Override
-//        protected Integer doInBackground(Void... unused) {
-//
-//
-//            SyncHelper sh = new SyncHelper(application);
-//         return sh.getMyMongoUser();
-//
-//
-//
-//
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Integer result) {
-//
-//            if (result == -1){
-//                Toast.makeText(getApplication(), "User profile could not be loaded", Toast.LENGTH_SHORT).show();
-//            }
-//
-//        }
-//
-//
-//    }
-
     /**
      * upon resuming i need to check three things.
      * 1. if the service is running and there is a run in progress or the app is in running act i need to start the Interval act.
@@ -184,6 +150,7 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
     @Override
     protected void onResume() {
         super.onResume();
+
         SharedPreferences app_preferences = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
 //        SharedPreferences.Editor editor = app_preferences.edit();
@@ -194,6 +161,12 @@ public class ActMain extends BaseFrgActivityWithBottomButtons {
         }else  if (((ExtApplication) getApplication()).isInResultsAct()) {
             startResultsAct();
         }else{
+
+            boolean newRun = getIntent().getBooleanExtra(AppConstants.NEW_FRIEND_OR_RUN, false);
+            if (newRun){
+                mPager.setCurrentItem(2);
+            }
+
             MyPagerAdapter adapter = (MyPagerAdapter) mPager.getAdapter();
             if (((ExtApplication) getApplication()).isNewIntervalInDb() && adapter.fragments[0] != null) {
                 ((FrgShowRuns)adapter.fragments[0]).refreshAfterAdd();

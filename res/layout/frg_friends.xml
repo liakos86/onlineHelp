@@ -123,7 +123,7 @@
                   android:id="@+id/infoText" android:textSize="@dimen/small_text"/>
 
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+        <LinearLayout  android:layout_width="match_parent" android:layout_height="wrap_content">
             <EditText style="@style/editTextStyle"
                       android:layout_weight="2" android:id="@+id/editNewFriend"
                       android:layout_width="0dp"

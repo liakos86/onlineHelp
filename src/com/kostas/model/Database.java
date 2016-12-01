@@ -94,7 +94,7 @@ public class Database extends SQLiteOpenHelper {
     }
     
     
-    public int addRunning(Running running, Uri runUri, Uri intervalUri) {
+    public int addRunningWithIntervals(Running running, Uri runUri, Uri intervalUri) {
         ContentResolver resolver = mApp.getContentResolver();
         Uri uri = resolver.insert(runUri, Running.asContentValues(running));
 
