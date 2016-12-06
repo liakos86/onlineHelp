@@ -349,7 +349,7 @@ public class ContentDescriptor {
                     + String.format(sFrmTextNotNull, Cols.FRIENDS) + " , "
                     + String.format(sFrmTextNotNull, Cols.FRIEND_REQUESTS) + " , "
                     + String.format(sFrmTextNotNull, Cols.EMAIL) + " , "
-                    + String.format(sFrmPrimaryKey, Cols.ID) + ")";
+                    + String.format(sFrmPrimaryKey, Cols.MONGO_ID) + ")";
         }
     }
 

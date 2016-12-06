@@ -6,11 +6,11 @@
                 android:layout_height="match_parent">
 
     <ViewFlipper
+            android:layout_alignParentTop="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/friends_flipper"
-
-            >
+            android:layout_above="@+id/add_friend_linear">
 
         <LinearLayout
                 android:orientation="vertical"
@@ -55,7 +55,6 @@
                       android:textColor="@color/white_back"/>
 
         </LinearLayout>
-
 
         <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                       android:orientation="vertical">

@@ -53,7 +53,6 @@ public class FrgFriends extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View v = inflater.inflate(R.layout.frg_friends, container, false);
         getFriendRequestsFromSP();
-        getFriendsWithRunsFromDB();
         setViewsAndListeners(v);
         setBroadcastReceiver();
         setCorrectFlipperChild(v);
@@ -119,9 +118,6 @@ public class FrgFriends extends Fragment {
         friendRequestsList.setAdapter(requestsAdapter);
         friendsWithRunsAdapter = new UsersAdapterItem(getActivity().getApplicationContext(), R.layout.list_run_row, friendsWithRuns);
         friendsWithRunsList.setAdapter(friendsWithRunsAdapter);
-//        SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
-//        friendRunsAdapter = new RunningAdapterItem(getActivity(), R.layout.list_run_row, runsOfFriend, app_preferences.getBoolean(AppConstants.METRIC_MILES, false));
-//        runsOfFriendList.setAdapter(friendRunsAdapter);
         buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -183,10 +179,10 @@ public class FrgFriends extends Fragment {
 
     void getFriendRequestsFromSP(){
         SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
-        String friends = app_preferences.getString("friendRequests", AppConstants.EMPTY);
-        Toast.makeText(getActivity(), "REQUESTS: "+friends, Toast.LENGTH_SHORT).show();
-        friends = friends.replace("null ", AppConstants.EMPTY);
-        String[]friendsArray  = friends.split(" ");
+        String friendReqs = app_preferences.getString("friendRequests", AppConstants.EMPTY);
+        Toast.makeText(getActivity(), "REQUESTS: "+friendReqs, Toast.LENGTH_SHORT).show();
+        friendReqs = friendReqs.replace("null ", AppConstants.EMPTY);
+        String[]friendsArray  = friendReqs.split(" ");
         //}
         friendRequests.clear();
         for (String friend : friendsArray){
@@ -455,13 +451,11 @@ public class FrgFriends extends Fragment {
         SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
 
         if (app_preferences.getString("mongoId", null) != null){
-
+            getFriendsWithRunsFromDB();
             v.findViewById(R.id.add_friend_linear).setVisibility(View.VISIBLE);
-
             ((ExtApplication) getActivity().getApplication()).setMe(new User(app_preferences));
             friendsFlipper.setDisplayedChild(1);
             startMongoService();
-
             if (friendRequests.size() > 0){
                 friendsFlipper.setDisplayedChild(2);
             }
@@ -592,18 +586,23 @@ public class FrgFriends extends Fragment {
             holder.topText.setText(user.getUsername());
             holder.bottomText.setText(String.valueOf(user.getSharedRuns().size())+" public runs");
 
-            convertView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+            if (user.getSharedRuns().size() == 0){
+                convertView.setClickable(false);
+            }else{
+                convertView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
 
-                    SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
+                        SharedPreferences app_preferences = getActivity().getSharedPreferences(ActMain.PREFS_NAME, Context.MODE_PRIVATE);
 
-                    runsOfFriend = user.getSharedRuns();
-                    friendRunsAdapter = new RunningAdapterItem(getActivity(), R.layout.list_run_row, runsOfFriend, app_preferences.getBoolean(AppConstants.METRIC_MILES, false));
-                    runsOfFriendList.setAdapter(friendRunsAdapter);
-                    friendsFlipper.setDisplayedChild(3);
-                }
-            });
+                        runsOfFriend = user.getSharedRuns();
+                        friendRunsAdapter = new RunningAdapterItem(getActivity(), R.layout.list_run_row, runsOfFriend, app_preferences.getBoolean(AppConstants.METRIC_MILES, false));
+                        runsOfFriendList.setAdapter(friendRunsAdapter);
+                        friendsFlipper.setDisplayedChild(3);
+                    }
+                });
+            }
+
 
             return convertView;
 

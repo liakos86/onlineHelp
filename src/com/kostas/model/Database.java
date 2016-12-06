@@ -134,18 +134,6 @@ public class Database extends SQLiteOpenHelper {
         resolver.delete(ContentDescriptor.Plan.CONTENT_URI, ContentDescriptor.Plan.Cols.ID + "=" + String.valueOf(id), null);
     }
 
-    public void addUser(User user) {
-        if (user.getFriends() == null){
-            user.setFriends(AppConstants.EMPTY);
-        }
-        if (user.getFriendRequests() == null){
-            user.setFriendRequests(AppConstants.EMPTY);
-        }
-        ContentResolver resolver = mApp.getContentResolver();
-        resolver.insert(ContentDescriptor.User.CONTENT_URI, User.asContentValues(user));
-    }
-
-
     public int countRuns(){
         String[] proj = {ContentDescriptor.RunningCols.ID};
         Cursor c = mApp.getContentResolver().query(ContentDescriptor.Running.CONTENT_URI, proj, null, null, null);
@@ -334,9 +322,7 @@ public class Database extends SQLiteOpenHelper {
         int sTotalRunsPosition = 8;
         int sTotalTimePosition = 9;
 
-        Cursor c = mApp.getContentResolver().query(ContentDescriptor.User.CONTENT_URI, USERS_FROM,
-                null,
-                null, null);
+        Cursor c = mApp.getContentResolver().query(ContentDescriptor.User.CONTENT_URI, USERS_FROM, null, null, null);
 
         List<User> St = new ArrayList<User>();
 

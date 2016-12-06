@@ -22,7 +22,7 @@ public class User {
 
     private String username;
     private ObjectId _id;
-    private long user_id;
+    private long user_id = -1;
     private float totalDistance;
     private int totalIntervals;
     private int totalRuns;
@@ -241,6 +241,11 @@ public class User {
      * @param item
      */
     public static void save(ContentResolver resolver, User item) {
+
+        if (item.get_id() != null){
+            item.setMongoId(item.get_id().get$oid());
+        }
+
         if (item.user_id == Database.INVALID_ID)
             resolver.insert(ContentDescriptor.User.CONTENT_URI, User.asContentValues(item));
         else

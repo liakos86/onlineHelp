@@ -434,17 +434,14 @@ public class SyncHelper {
             HttpResponse response = client.execute(httpRequest);
             String resultString = getResultStringFromResponse(response);
             Gson gson = new Gson();
-            user = (User) gson.fromJson(resultString,
-                    new TypeToken<User>() {
-                    }.getType());
+            user = gson.fromJson(resultString, new TypeToken<User>() {}.getType());
 
             if (type == 0 || type == 2) {// refresh other user's requests
                 //add friend to both users list
                 if ((type == 0) && ((user.getFriends() == null || !user.getFriends().contains(myUsername)) && !app_preferences.getString("friends", AppConstants.EMPTY).contains(user.getUsername()))) {
                     fixFriendsListForUser(user.getFriends() + " " + myUsername, user.getUsername(), type);
                     fixFriendsListForUser(app_preferences.getString("friends", AppConstants.EMPTY) + " " + user.getUsername(), myUsername, type);
-                    Database dbHelper = new Database(application);
-                    dbHelper.addUser(user);
+                    User.save(application.getContentResolver(), user);
                 }
 
                 //remove his name
@@ -490,7 +487,7 @@ public class SyncHelper {
             httpRequest.setEntity(se);
             setDefaultHttpHeaders(httpRequest);
             HttpResponse response = client.execute(httpRequest);
-            String resultString = getResultStringFromResponse(response);
+            //String resultString = getResultStringFromResponse(response);
         } catch (Exception e) {
             Log.e(TAG, "Exception inserting friend", e);
             return false;
@@ -527,19 +524,14 @@ public class SyncHelper {
             HttpResponse response = client.execute(httpRequest);
             String resultString = getResultStringFromResponse(response);
             Gson gson = new Gson();
-            users = gson.fromJson(resultString,
-                    new TypeToken<List<User>>() {
-                    }.getType());
-
+            users = gson.fromJson(resultString, new TypeToken<List<User>>() {}.getType());
 
             for (User user: users){
-
                 List<User> userlist = new ArrayList<User>();
                 userlist.add(user);
                 List<Running> newRuns = getRunsWithIntervalsForUsersMongo(userlist);
                 user.setSharedRuns(newRuns);
             }
-
 
         } catch (Exception e) {
             Log.e(TAG, "Exception fetching leaderboard or friend", e);
@@ -591,9 +583,7 @@ public class SyncHelper {
             HttpResponse response = client.execute(httpRequest);
             String resultString = getResultStringFromResponse(response);
             Gson gson = new Gson();
-            newRuns = gson.fromJson(resultString,
-                    new TypeToken<List<Running>>() {
-                    }.getType());
+            newRuns = gson.fromJson(resultString, new TypeToken<List<Running>>() {}.getType());
 
             for (Running run : newRuns) {
                 run.setIntervals(fetchIntervalsForMongoRun(run));
@@ -633,7 +623,7 @@ public class SyncHelper {
                 interval.setInterval_id(-1);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Exception fetching leaderboard or friend", e);
+            Log.e(TAG, "EXCEPTION FETCHING INTERVALS", e);
             return intervals;
         }
         return intervals;

@@ -143,17 +143,17 @@ public class MongoUpdateService extends IntentService {
     }
 
 
-    private void checkForNewFriendRunsAndMyRequests() {
-
+    private void findMeFromMongoResults(){
         for (User friendFromMongo : friendsFromMongo){
             if (friendFromMongo.get_id().get$oid().equals(meFromDb.getMongoId())) {
                 meFromMongo = friendFromMongo;
                 break;
             }
         }
-        checkMyFriendsAndRequests();
-        friendsFromMongo.remove(meFromMongo);
+    }
 
+
+    private void checkForNewFriendRuns() {
         for (User friendFromMongo : friendsFromMongo) {
             for (User friendFromDb : friendsWithRunsAndIntervalsFromDb) {
                 if (friendFromMongo.get_id().get$oid().equals(friendFromDb.getMongoId())) {
@@ -197,23 +197,6 @@ public class MongoUpdateService extends IntentService {
         }
     }
 
-    /**
-     *
-     * TODO maybe a more clever way
-     */
-    private void refreshFriends(){
-        if (friendsFromMongo.size() > friendsWithRunsAndIntervalsFromDb.size()) {
-            //todo: ???
-            db.deleteAllFriends();
-            friendsWithRunsAndIntervalsFromDb.clear();
-            for (User fr : friendsFromMongo){
-                fr.setMongoId(fr.get_id().get$oid());
-                db.addUser(fr);
-                friendsWithRunsAndIntervalsFromDb.add(fr);
-            }
-        }
-    }
-
     @Override
     public void onDestroy() {
         try {
@@ -225,13 +208,10 @@ public class MongoUpdateService extends IntentService {
         }
     }
 
-
-
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
-
 
     /**
      * Starts an async task to fetch all friends.
@@ -247,7 +227,7 @@ public class MongoUpdateService extends IntentService {
             }
 
             if (app_preferences.getString("username", null) != null) {
-                new PerformAsyncTask().execute();
+                new AsyncRefreshFriendsWithRuns().execute();
             }
 
             mHandler.postDelayed(mUpdateFriendsFromMongoRunnable, 50000);//todo: 30 minutes
@@ -256,7 +236,11 @@ public class MongoUpdateService extends IntentService {
     };
 
 
-    private class PerformAsyncTask extends AsyncTask<Void, Void, Void> {
+    /**
+     * Refreshes all friends and all their runs async.
+     * I will not cancel this even if there are no friends because a new request might come.
+     */
+    private class AsyncRefreshFriendsWithRuns extends AsyncTask<Void, Void, Void> {
 
         protected void onPreExecute() {
         }
@@ -275,22 +259,40 @@ public class MongoUpdateService extends IntentService {
             userNames.remove(null);
             userNames.remove(AppConstants.EMPTY);
 
-            friendsFromMongo = sh.getUsersWithRunsAndIntervalsByUsernameMongo(userNames);
-            checkForNewFriendRunsAndMyRequests();
-            refreshFriends();
+            friendsFromMongo = sh.getUsersWithRunsAndIntervalsByUsernameMongo(userNames);//My user is included here!!!
+            findMeFromMongoResults();
+            checkMyFriendsAndRequests();
+            friendsFromMongo.remove(meFromMongo);//now I am out
+            checkForNewFriendRuns();
+
+            if (friendsFromMongo.size() == 0){
+                return null;
+            }
+
+            //refreshFriends();
+
+            db.deleteAllFriends();
             db.deleteAllFriendRuns();
+            friendsWithRunsAndIntervalsFromDb.clear();
+
+
+            for (User fr : friendsFromMongo){
+                User.save(application.getContentResolver(), fr);
+                friendsWithRunsAndIntervalsFromDb.add(fr);
+            }
+
 
             for (Running run : allFriendRunsFromMongo) {
                 if (run.get_id() != null) {
                     run.setRunning_id(-1);
                     db.addRunningWithIntervals(run, ContentDescriptor.RunningFriend.CONTENT_URI, ContentDescriptor.IntervalFriend.CONTENT_URI);
                 }
+            }
 
+            if (allFriendRunsFromMongo.size() > 0){
                 Intent intent = new Intent(AppConstants.NOTIFICATION);
                 intent.putExtra(NEW_FRIEND_RUN_IN_DB, true);
                 sendBroadcast(intent);
-
-
             }
             allFriendRunsFromMongo.clear();
             return null;
